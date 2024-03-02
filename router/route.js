@@ -24,6 +24,8 @@ router.route('/createResetSession').get(controller.createResetSession) // reset 
 //-- GET Categories
 router.route('/categories').get(CategoriesController.getcategories) //get all categories
 router.route('/categories/:categoryname').get(CategoriesController.getsubcategories) //get all subcategries in a category
+//-- GET Courses
+router.route('/courses').get(CoursesController.getCourses) //get all subcategries in a category
 
 
 /** PUT Methods */
