@@ -1,7 +1,9 @@
 import slugify from "slugify";
 import CoursesModel from "../model/Courses.model.js";
 /** POST: http://localhost:8080/api/addcourse
-* @body : 
+* @body : {
+    
+}
 */
 export async function addcourse(req, res) {
 	try {

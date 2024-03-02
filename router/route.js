@@ -1,6 +1,7 @@
 import {Router} from 'express'
 const router = Router()
 import * as controller from '../controllers/appController.js'
+import * as CoursesController from '../controllers/CoursesController.js'
 import { registerMail } from '../controllers/mailer.js'
 import Auth, { localVariables } from '../middleware/auth.js'
 import * as CategoriesController from '../controllers/CategoriesController.js'
@@ -12,7 +13,8 @@ router.route('/login').post(controller.verifyUser,controller.login) // login in 
 //-- POST Categories
 router.route('/addcategory').post(CategoriesController.addcategory); // is use to add a category
 router.route('/addsubcategory').post(CategoriesController.addsubcategory); // is use to add a subcategory
-
+//-- POST Courses 
+router.route('/addcourse').post(CoursesController.addcourse)
 
 /** GET Methods */
 router.route('/user/:username').get(controller.getUser) // user with username

@@ -5,10 +5,12 @@ export const CoursesSchema = new mongoose.Schema({
     slug:{type: String},
     duration: {type: String},
     enrollments: {type: Number},
-    lever: {type: String, default: "Beginner"},
+    level: {type: String, default: "Beginner"},
     total_lessons: {type: Number},
     total_quiz: {type: Number},
     overview:{type: String},
+    base_price:{type: Number},
+    discount_percentage:{type: Number},
     curriculum:[
         {
             chapter_name: {type: String},
