@@ -33,3 +33,20 @@ export async function getCourses(req, res) {
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 }
+
+/** GET: http://localhost:8080/api/course/:coursename */
+export async function getCourseBySlug(req, res) {
+	try {
+        const { coursename } = req.params
+        const course = await CoursesModel.findOne({slug:coursename})
+
+        if (!course) {
+            return res.status(404).json({ success: false, message: 'Courses not found' });
+        }
+
+        res.status(200).json({ success: true, course });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+}
