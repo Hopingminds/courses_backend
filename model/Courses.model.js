@@ -7,10 +7,12 @@ export const CoursesSchema = new mongoose.Schema({
     enrollments: {type: Number},
     level: {type: String, default: "Beginner"},
     total_lessons: {type: Number},
+    category:{type: String},
+    subcategory:{type: String},
     total_quiz: {type: Number},
-    overview:{type: String},
     base_price:{type: Number},
     discount_percentage:{type: Number},
+    overview:{type: String},
     curriculum:[
         {
             chapter_name: {type: String},
@@ -42,7 +44,7 @@ export const CoursesSchema = new mongoose.Schema({
     }],
     reviews:[
         { 
-            userID: mongoose.Schema.Types.ObjectId,
+            userID: String,
             review: {type: String},
             reating: {type: Number}
         }
