@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 export const CoursesSchema = new mongoose.Schema({
     title:{type: String},
     slug:{type: String},
+    featured_image:{type: String},
+    featured_video:{type: String},
     duration: {type: String},
     enrollments: {type: Number},
     level: {type: String, default: "Beginner"},
@@ -12,6 +14,7 @@ export const CoursesSchema = new mongoose.Schema({
     total_quiz: {type: Number},
     base_price:{type: Number},
     discount_percentage:{type: Number},
+    rating:{type: Number},
     overview:{type: String},
     curriculum:[
         {
@@ -28,6 +31,7 @@ export const CoursesSchema = new mongoose.Schema({
         firstName:{type: String},
         lastName:{type: String},
         about:{type: String},
+        profile:{type: String},
         total_students: {type: String},
         total_lessons: {type: Number},
         experience:{type: String},
