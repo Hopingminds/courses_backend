@@ -20,6 +20,8 @@ export const UserSchema = new mongoose.Schema({
     lastName: { type: String},
     profile: { type: String},
     college: {type:String},
+    stream: {type:String},
+    yearofpass: {type:Number},
     position: {type: String},
     bio: {type: String},
 });

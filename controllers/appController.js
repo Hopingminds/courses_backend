@@ -22,11 +22,14 @@ export async function verifyUser(req, res, next) {
     "username" : "example123",
     "password" : "admin123",
     "email": "example@gmail.com",
+	"college": "IKGPTU", 
+	"stream": "B.tech ECE" , 
+	"yearofpass": 2024
 }
 */
 export async function register(req, res) {
 	try {
-		const { username, password, profile, email } = req.body
+		const { username, password, profile, email, college, stream , yearofpass } = req.body
 
 		// check the existing user
 		const existUsername = new Promise((resolve, reject) => {
@@ -71,6 +74,9 @@ export async function register(req, res) {
 								password: hashedPassword,
 								profile: profile || '',
 								email,
+								college, 
+								stream , 
+								yearofpass
 							})
 
 							// return save result as a response
