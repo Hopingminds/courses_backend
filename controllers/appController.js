@@ -22,11 +22,6 @@ export async function verifyUser(req, res, next) {
     "username" : "example123",
     "password" : "admin123",
     "email": "example@gmail.com",
-    "firstName" : "bill",
-    "lastName": "william",
-    "mobile": 8009860560,
-    "address" : "Apt. 556, Kulas Light, Gwenborough",
-    "profile": ""
 }
 */
 export async function register(req, res) {
@@ -194,9 +189,15 @@ export async function getUser(req, res) {
     "header" : "<token>"
 }
 body: {
-    firstName: '',
-    address : '',
-    profile : ''
+    "username" : "",
+    
+    "email": "",
+    "firstName": "",
+    "lastName": "",
+    "profile": "",
+    "college": "",
+    "position": "",
+    "bio": "",
 }
 */
 export async function updateUser(req, res) {
@@ -230,13 +231,21 @@ export async function updateUser(req, res) {
 	}
 }
 
-/** GET: http://localhost:8080/api/generateOTP */
+/** GET: http://localhost:8080/api/generateOTP 
+ * body:{
+	email: "email@example.com",
+ * }
+*/
 export async function generateOTP(req, res) {
 	req.app.locals.OTP = await otpGenerator.generate(6, {lowerCaseAlphabets: false, upperCaseAlphabets:false, specialChars:false})
     res.status(201).send({code:req.app.locals.OTP})
 }
 
-/** GET: http://localhost:8080/api/verifyOTP  */
+/** GET: http://localhost:8080/api/verifyOTP  
+ * body:{
+	code: 1234,
+ * }
+*/
 export async function verifyOTP(req, res) {
 	const {code} = req.query;
     if(parseInt(req.app.locals.OTP)=== parseInt(code)){
@@ -257,7 +266,12 @@ export async function createResetSession(req, res) {
 }
 
 // update the password when we have valid session
-/** PUT: http://localhost:8080/api/resetPassword */
+/** PUT: http://localhost:8080/api/resetPassword 
+ * body:{
+	email: "email@emaple.com",
+	password: "password"
+}
+*/
 export async function resetPassword(req,res){
     try {
         
