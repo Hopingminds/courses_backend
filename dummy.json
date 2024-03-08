@@ -258,5 +258,104 @@
 				"reating": 4
 			}
 		]
+	},
+	{
+		"title": "Banking & Insurance Management",
+		"featured_image": "",
+		"featured_video": "",
+		"duration": "54 hours",
+		"enrollments": 6969,
+		"level": "Beginner",
+		"total_lessons": 5,
+		"total_quiz": 3,
+		"category": "Management",
+		"subcategory": "Web Development",
+		"base_price": 1000,
+		"discount_percentage": 10,
+		"overview": "This comprehensive course in Aviation Resource Management offers a blend of theoretical knowledge and practical skills essential for managing resources in the aviation industry. Designed for students and professionals in engineering, technology, management, and science domains, the curriculum covers various aspects of resource management, including human resources, financial management, operational assets, and risk management in aviation settings. Through a mix of lectures, case studies, and hands-on sessions, students will learn to apply modern management principles to the unique challenges of the aviation industry. The course also incorporates the latest industry trends and technologies, preparing participants for successful careers in aviation management. By the end of the course, students will have a thorough understanding of how to optimize aviation operations, improve efficiency, and contribute to the safety and profitability of aviation enterprises.",
+		"whatWillILearn": [
+			"You will something",
+			"You will something",
+			"You will something"
+		],
+		"curriculum": [
+			{
+				"chapter_name": "History of Banking",
+				"lessons": [
+					{
+						"lesson_name": "History of Aviation",
+						"duration": "3:27"
+					},
+					{
+						"lesson_name": "Types of Airlines",
+						"duration": "4:27"
+					},
+					{
+						"lesson_name": "Types of Airports",
+						"duration": "5:10"
+					},
+					{
+						"lesson_name": "Airport Layout and Design",
+						"duration": "5:10"
+					},
+					{
+						"lesson_name": "Airside vs. Landside",
+						"duration": "5:10"
+					},
+					{
+						"lesson_name": "Airport Zoning and Management",
+						"duration": "5:10"
+					}
+				]
+			}
+		],
+		"instructor": {
+			"firstName": "Dr. Angela",
+			"lastName": "Yu",
+			"about": "I'm Angela, I'm a developer with a passion for teaching. I'm the lead instructor at the London App Brewery, London's leading Programming Bootcamp. I've helped hundreds of thousands of students learn to code and change their lives by becoming a developer. I've been invited by companies such as Twitter, Facebook and Google to teach their employees. My first foray into programming was when I was just 12 years old, wanting to build my own Space Invader game. Since then, I've made hundred of websites, apps and games. But most importantly, I realised that my greatest passion is teaching. I spend most of my time researching how to make learning to code fun and make hard concepts easy to understand. I apply everything I discover into my bootcamp courses. In my courses, you'll find lots of geeky humour but also lots of explanations and animations to make sure everything is easy to understand. I'll be there for you every step of the way.",
+			"total_students": 12478632,
+			"total_lessons": 289,
+			"experience": "10 years",
+			"social_links": [
+				{
+					"website_name": "Facebook",
+					"profile_url": "http://facebook.com/"
+				},
+				{
+					"website_name": "Instagram",
+					"profile_url": "https://www.instagram.com/"
+				},
+				{
+					"website_name": "LinkedIn",
+					"profile_url": "https://www.linkedin.com/"
+				}
+			]
+		},
+		"faqs": [
+			{
+				"question": "Is this going to be a helpful course.",
+				"answer": "Defenately Yes."
+			},
+			{
+				"question": "What I an going to learn from this corse?",
+				"answer": "Web developt realted suff and how to do code."
+			},
+			{
+				"question": "Can I earn money with freelancing after this?",
+				"answer": "Yes its a job ready course."
+			}
+		],
+		"reviews": [
+			{
+				"userID": "65cf02e241de165f3d8f1ce8",
+				"review": "Python being my first programming language, I was a bit apprehensive about how challenging it might be. However, Angela's teaching style and the way she structured the course made it so easy to understand and enjoyable to",
+				"reating": 5
+			},
+			{
+				"userID": "65cf02e241de165f3d8f1br9",
+				"review": "A Really good and comprehensive course. Angel explains things very well and really knows her stuff. And with a subtle but engaging sense of humour.",
+				"reating": 4
+			}
+		]
 	}
 ]
