@@ -1,67 +1,210 @@
 {
-    "title":"100 Days of Code: The Complete Python Pro Bootcamp",
+    "title":"Airline and Airport operations",
+    "featured_image":"",
+    "featured_video":"",
     "duration": "54 hours",
     "enrollments": 6969,
     "level": "Beginner",
     "total_lessons": 5,
     "total_quiz": 3,
-    "category": "Coding",
+    "category": "Management",
     "subcategory":"Web Development",
     "base_price": 1000,
     "discount_percentage":10,
-    "overview":"You will master the Python programming language by building 100 unique projects over 100 days. You will learn automation, game, app and web development, data science and machine learning all using Python. You will be able to program in Python professionally You will learn Selenium, Beautiful Soup, Request, Flask, Pandas, NumPy, Scikit Learn, Plotly, and Matplotlib. Create a portfolio of 100 Python projects to apply for developer jobs Be able to build fully fledged websites and web apps with Python Be able to use Python for data science and machine learning Build games like Blackjack, Pong and Snake using Python Build GUIs and Desktop applications with Python",
+    "overview":"This comprehensive course in Aviation Resource Management offers a blend of theoretical knowledge and practical skills essential for managing resources in the aviation industry. Designed for students and professionals in engineering, technology, management, and science domains, the curriculum covers various aspects of resource management, including human resources, financial management, operational assets, and risk management in aviation settings. Through a mix of lectures, case studies, and hands-on sessions, students will learn to apply modern management principles to the unique challenges of the aviation industry. The course also incorporates the latest industry trends and technologies, preparing participants for successful careers in aviation management. By the end of the course, students will have a thorough understanding of how to optimize aviation operations, improve efficiency, and contribute to the safety and profitability of aviation enterprises.",
     "whatWillILearn":[
-        "You will leand webs development"
+        "You will something",
+        "You will something",
+        "You will something"
     ],
     "curriculum":[
         {
-            "chapter_name": "Working with Variables in Python to Manage Data",
+            "chapter_name": "Introduction to Airline and Airport Operations",
             "lessons":[
                 {
-                    "lesson_name":"START HERE",
+                    "lesson_name":"History of Aviation",
                     "duration": "3:27"
                 },
                 {
-                    "lesson_name":"What you're going to get from this course",
+                    "lesson_name":"Types of Airlines",
                     "duration": "4:27"
                 },
                 {
-                    "lesson_name":"Day 1 Goals: what we will make by the end of the day",
+                    "lesson_name":"Types of Airports",
+                    "duration": "5:10"
+                },
+                {
+                    "lesson_name":"Airport Layout and Design",
+                    "duration": "5:10"
+                },
+                {
+                    "lesson_name":"Airside vs. Landside",
+                    "duration": "5:10"
+                },
+                {
+                    "lesson_name":"Airport Zoning and Management",
                     "duration": "5:10"
                 }
             ]
         },
         {
-            "chapter_name": "Understanding Data Types and How to Manipulate Strings",
+            "chapter_name": "Passenger Services",
             "lessons":[
                 {
-                    "lesson_name":"Goals: what we will make by the end of the day",
+                    "lesson_name":"Ticketing and Reservation Systems",
                     "duration": "3:27"
                 },
                 {
-                    "lesson_name":"Python Primitive Data Types",
+                    "lesson_name":"Check-in Procedures",
                     "duration": "4:27"
                 },
                 {
-                    "lesson_name":"Mathematical Operations in Python",
+                    "lesson_name":"Security Screening and Boarding",
+                    "duration": "5:10"
+                },
+                {
+                    "lesson_name":"Baggage Systems",
+                    "duration": "3:27"
+                },
+                {
+                    "lesson_name":"Lost and Found Operations",
+                    "duration": "4:27"
+                },
+                {
+                    "lesson_name":"Safety and Security",
                     "duration": "5:10"
                 }
             ]
         },
         {
-            "chapter_name": "Control flow and logical operations",
+            "chapter_name": "Ground Operations and Safety",
             "lessons":[
                 {
-                    "lesson_name":"Get Access to the Monthly App Brewery Newsletter",
+                    "lesson_name":"Ground Support Equipment",
                     "duration": "3:27"
                 },
                 {
-                    "lesson_name":"Multiple If Statements in Succession",
+                    "lesson_name":"Aircraft Marshalling and Parking",
                     "duration": "4:27"
                 },
                 {
-                    "lesson_name":"Project: Treasure Island",
+                    "lesson_name":"Refueling and Servicing",
                     "duration": "5:10"
+                },
+                {
+                    "lesson_name":"Airport Security Framework",
+                    "duration": "3:27"
+                },
+                {
+                    "lesson_name":"Emergency Response and Fire Safety",
+                    "duration": "4:27"
+                },
+                {
+                    "lesson_name":"Health and Environmental Safety",
+                    "duration": "5:10"
+                }
+            ]
+        },
+        {
+            "chapter_name": "Air Traffic Control and Management",
+            "lessons":[
+                {
+                    "lesson_name":"Principles of Air Traffic Control",
+                    "duration": "3:27"
+                },
+                {
+                    "lesson_name":"Flight Planning and Monitoring",
+                    "duration": "4:27"
+                },
+                {
+                    "lesson_name":"Communication Procedures",
+                    "duration": "5:10"
+                },
+                {
+                    "lesson_name":"Capacity and Delay Management",
+                    "duration": "3:27"
+                },
+                {
+                    "lesson_name":"Airport Performance Metrics",
+                    "duration": "4:27"
+                },
+                {
+                    "lesson_name":"Crisis and Contingency Planning",
+                    "duration": "5:10"
+                }
+            ]
+        },
+        {
+            "chapter_name": "Customer Service Excellence",
+            "lessons":[
+                {
+                    "lesson_name":"Principles of Customer Service",
+                    "duration": "3:27"
+                },
+                {
+                    "lesson_name":"Handling Passenger Complaints",
+                    "duration": "4:27"
+                },
+                {
+                    "lesson_name":"Special Assistance Services",
+                    "duration": "5:10"
+                },
+                {
+                    "lesson_name":"Information Technology in Airports",
+                    "duration": "3:27"
+                },
+                {
+                    "lesson_name":"Emerging Technologies",
+                    "duration": "4:27"
+                },
+                {
+                    "lesson_name":"Cybersecurity in Aviation",
+                    "duration": "5:10"
+                }
+            ]
+        },
+        {
+            "chapter_name": "Airline Operations Management",
+            "lessons":[
+                {
+                    "lesson_name":"Introduction to Airline Management",
+                    "duration": "3:27"
+                },
+                {
+                    "lesson_name":"Airline Strategy and Planning",
+                    "duration": "4:27"
+                },
+                {
+                    "lesson_name":"Airport Layout and Operations",
+                    "duration": "5:10"
+                },
+                {
+                    "lesson_name":"Passenger Processing and Security",
+                    "duration": "3:27"
+                },
+                {
+                    "lesson_name":"Aviation Safety Standards",
+                    "duration": "4:27"
+                },
+                {
+                    "lesson_name":"Security Measures and Compliance",
+                    "duration": "5:10"
+                },
+                {
+                    "lesson_name":"Principles of Customer Service",
+                    "duration": "4:27"
+                },
+                {
+                    "lesson_name":"Handling Passenger Feedback",
+                    "duration": "5:10"
+                },
+                {
+                    "lesson_name":"Impact of Technology on Aviation",
+                    "duration": "3:27"
+                },
+                {
+                    "lesson_name":"Implementing Technology Solutions",
+                    "duration": "4:27"
                 }
             ]
         }
