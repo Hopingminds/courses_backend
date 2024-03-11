@@ -1874,5 +1874,313 @@
 				"reating": 4
 			}
 		]
+	},
+	{
+		"title": "Retail Marketing",
+		"featured_image": "https://www.gynprog.com.br/wp-content/uploads/2017/06/wood-blog-placeholder.jpg",
+		"featured_video": "https://www.youtube.com/watch?v=D0UnqGm_miA",
+		"duration": "54 hours",
+		"enrollments": 6969,
+		"level": "Beginner",
+		"total_lessons": 5,
+		"total_quiz": 3,
+		"category": "Management",
+		"subcategory": "",
+		"base_price": 1000,
+		"discount_percentage": 10,
+		"overview": "This course is designed to provide a comprehensive understanding of retail marketing, focusing on the integration of technology and management strategies to drive sales and enhance customer experiences. It encompasses a range of topics from the basics of retail marketing to advanced digital strategies, including data analysis, customer relationship management (CRM), supply chain management, and e-commerce trends. The curriculum is structured to offer a balanced mix of theoretical knowledge and practical skills, ensuring students can apply what they learn in real-world scenarios. Through hands-on sessions, case studies, and capstone projects, students will gain the tools needed to excel in the dynamic and competitive retail industry. The course also covers the impact of emerging technologies on retail marketing, preparing students for future trends and innovations.",
+		"whatWillILearn": [
+			"Analyze and interpret market trends to make informed retail marketing decisions.",
+			"Design and implement effective retail strategies that enhance customer engagement and loyalty.",
+			"Utilize digital marketing tools to boost online presence and sales."
+		],
+		"curriculum": [
+			{
+				"chapter_name": "Introduction to Retail Marketing",
+				"lessons": [
+					{
+						"lesson_name": "History and Evolution of Retail",
+						"duration": "3:27"
+					},
+					{
+						"lesson_name": "Types of Retail Formats",
+						"duration": "4:27"
+					},
+					{
+						"lesson_name": "Role of Retail in the Economy",
+						"duration": "5:10"
+					},
+					{
+						"lesson_name": "Marketing Mix - 4 Ps",
+						"duration": "5:10"
+					},
+					{
+						"lesson_name": "Applying Marketing Principles in Retail",
+						"duration": "5:10"
+					}
+				]
+			}
+		],
+		"instructor": {
+			"firstName": "Dr. Angela",
+			"lastName": "Yu",
+			"about": "I'm Angela, I'm a developer with a passion for teaching. I'm the lead instructor at the London App Brewery, London's leading Programming Bootcamp. I've helped hundreds of thousands of students learn to code and change their lives by becoming a developer. I've been invited by companies such as Twitter, Facebook and Google to teach their employees. My first foray into programming was when I was just 12 years old, wanting to build my own Space Invader game. Since then, I've made hundred of websites, apps and games. But most importantly, I realised that my greatest passion is teaching. I spend most of my time researching how to make learning to code fun and make hard concepts easy to understand. I apply everything I discover into my bootcamp courses. In my courses, you'll find lots of geeky humour but also lots of explanations and animations to make sure everything is easy to understand. I'll be there for you every step of the way.",
+			"total_students": 12478632,
+			"total_lessons": 289,
+			"experience": "10 years",
+			"social_links": [
+				{
+					"website_name": "Facebook",
+					"profile_url": "http://facebook.com/"
+				},
+				{
+					"website_name": "Instagram",
+					"profile_url": "https://www.instagram.com/"
+				},
+				{
+					"website_name": "LinkedIn",
+					"profile_url": "https://www.linkedin.com/"
+				}
+			]
+		},
+		"faqs": [
+			{
+				"question": "Is this going to be a helpful course.",
+				"answer": "Defenately Yes."
+			},
+			{
+				"question": "What I an going to learn from this corse?",
+				"answer": "Web developt realted suff and how to do code."
+			},
+			{
+				"question": "Can I earn money with freelancing after this?",
+				"answer": "Yes its a job ready course."
+			}
+		],
+		"reviews": [
+			{
+				"userID": "65cf02e241de165f3d8f1ce8",
+				"review": "Python being my first programming language, I was a bit apprehensive about how challenging it might be. However, Angela's teaching style and the way she structured the course made it so easy to understand and enjoyable to",
+				"reating": 5
+			},
+			{
+				"userID": "65cf02e241de165f3d8f1br9",
+				"review": "A Really good and comprehensive course. Angel explains things very well and really knows her stuff. And with a subtle but engaging sense of humour.",
+				"reating": 4
+			}
+		]
+	},
+	{
+		"title": "Retail Marketing",
+		"featured_image": "https://www.gynprog.com.br/wp-content/uploads/2017/06/wood-blog-placeholder.jpg",
+		"featured_video": "https://www.youtube.com/watch?v=D0UnqGm_miA",
+		"duration": "54 hours",
+		"enrollments": 6969,
+		"level": "Beginner",
+		"total_lessons": 5,
+		"total_quiz": 3,
+		"category": "Marketing",
+		"subcategory": "Retail Marketing",
+		"base_price": 1000,
+		"discount_percentage": 10,
+		"overview": "This course is designed to provide a comprehensive understanding of retail marketing, integrating technology and management strategies to enhance customer experiences and drive sales. Covering a range from basic to advanced digital strategies, the curriculum includes data analysis, CRM, supply chain management, and e-commerce trends. It offers a blend of theoretical knowledge and practical skills, with hands-on sessions, case studies, and capstone projects aimed at preparing students for the dynamic retail industry.",
+		"whatWillILearn": [
+			"Design and implement effective retail strategies enhancing customer engagement and loyalty.",
+			"Utilize digital marketing tools to boost online presence and sales.",
+			"Analyze and interpret market trends to make informed retail marketing decisions."
+		],
+		"curriculum": [
+			{
+				"chapter_name": "Introduction to Retail Marketing",
+				"lessons": [
+					{
+						"lesson_name": "History and Evolution of Retail",
+						"duration": "Variable"
+					}
+				]
+			},
+			{
+				"chapter_name": "Understanding the Retail Environment",
+				"lessons": [
+					{
+						"lesson_name": "Role of Retail in the Economy",
+						"duration": "Variable"
+					},
+					{
+						"lesson_name": "Types of Retail Formats",
+						"duration": "Variable"
+					}
+				]
+			},
+			{
+				"chapter_name": "Consumer Behavior in Retail",
+				"lessons": [
+					{
+						"lesson_name": "Consumer Needs and Motivations",
+						"duration": "Variable"
+					},
+					{
+						"lesson_name": "Buying Process and Decision Making",
+						"duration": "Variable"
+					},
+					{
+						"lesson_name": "Criteria for Segmenting Consumer Markets",
+						"duration": "Variable"
+					},
+					{
+						"lesson_name": "Targeting Strategies in Retail",
+						"duration": "Variable"
+					}
+				]
+			},
+			{
+				"chapter_name": "Creating Effective Retail Strategies",
+				"lessons": [
+					{
+						"lesson_name": "Retail Strategy Formulation",
+						"duration": "Variable"
+					},
+					{
+						"lesson_name": "Strategic Planning Process",
+						"duration": "Variable"
+					},
+					{
+						"lesson_name": "Competitive Strategy in Retail",
+						"duration": "Variable"
+					}
+				]
+			},
+			{
+				"chapter_name": "Retail Operations Management",
+				"lessons": [
+					{
+						"lesson_name": "Inventory Management",
+						"duration": "Variable"
+					},
+					{
+						"lesson_name": "Supply Chain and Logistics",
+						"duration": "Variable"
+					}
+				]
+			},
+			{
+				"chapter_name": "Marketing Mix and Retail Marketing",
+				"lessons": [
+					{
+						"lesson_name": "Marketing Mix - 4 Ps",
+						"duration": "Variable"
+					},
+					{
+						"lesson_name": "Applying Marketing Principles in Retail",
+						"duration": "Variable"
+					}
+				]
+			},
+			{
+				"chapter_name": "Digital Marketing in Retail",
+				"lessons": [
+					{
+						"lesson_name": "E-Commerce Platforms",
+						"duration": "Variable"
+					},
+					{
+						"lesson_name": "Omni-channel Retailing",
+						"duration": "Variable"
+					},
+					{
+						"lesson_name": "SEO and Content Marketing",
+						"duration": "Variable"
+					},
+					{
+						"lesson_name": "Social Media and Email Marketing",
+						"duration": "Variable"
+					}
+				]
+			},
+			{
+				"chapter_name": "Enhancing Sales and Customer Loyalty",
+				"lessons": [
+					{
+						"lesson_name": "Visual Merchandising and Store Design",
+						"duration": "Variable"
+					},
+					{
+						"lesson_name": "Effective Sales Communication",
+						"duration": "Variable"
+					},
+					{
+						"lesson_name": "Building Customer Loyalty",
+						"duration": "Variable"
+					},
+					{
+						"lesson_name": "CRM Tools and Technologies",
+						"duration": "Variable"
+					}
+				]
+			}
+		],
+		"instructor": {
+			"firstName": "Dr. Angela",
+			"lastName": "Yu",
+			"about": "I'm Angela, I'm a developer with a passion for teaching. I'm the lead instructor at the London App Brewery, London's leading Programming Bootcamp. I've helped hundreds of thousands of students learn to code and change their lives by becoming a developer. I've been invited by companies such as Twitter, Facebook and Google to teach their employees. My first foray into programming was when I was just 12 years old, wanting to build my own Space Invader game. Since then, I've made hundred of websites, apps and games. But most importantly, I realised that my greatest passion is teaching. I spend most of my time researching how to make learning to code fun and make hard concepts easy to understand. I apply everything I discover into my bootcamp courses. In my courses, you'll find lots of geeky humour but also lots of explanations and animations to make sure everything is easy to understand. I'll be there for you every step of the way.",
+			"total_students": 12478632,
+			"total_lessons": 289,
+			"experience": "10 years",
+			"social_links": [
+				{
+					"website_name": "Facebook",
+					"profile_url": "http://facebook.com/"
+				},
+				{
+					"website_name": "Instagram",
+					"profile_url": "https://www.instagram.com/"
+				},
+				{
+					"website_name": "LinkedIn",
+					"profile_url": "https://www.linkedin.com/"
+				}
+			]
+		},
+		"faqs": [
+			{
+				"question": "Is this going to be a helpful course.",
+				"answer": "Definitely Yes."
+			},
+			{
+				"question": "What am I going to learn from this course?",
+				"answer": "You will learn retail marketing strategies, customer engagement, digital tools, market analysis, and much more, tailored for the dynamic retail industry."
+			},
+			{
+				"question": "Can I improve my business with the strategies learned in this course?",
+				"answer": "Yes, this course is designed to equip you with the knowledge and skills to enhance your retail business."
+			}
+		],
+		"reviews": [
+			{
+				"userID": "65cf02e241de165f3d8f1ce8",
+				"review": "This course helped me grasp the fundamentals of retail marketing and how to apply them in a real-world setting. The assignments were challenging but rewarding, and the feedback from instructors was constructive.",
+				"rating": 5
+			},
+			{
+				"userID": "65cf02e241de165f3d8f1br9",
+				"review": "The Retail Marketing course was enlightening and covered a wide range of topics from branding to customer engagement strategies. The real-life examples and case studies were particularly helpful in understanding the material.",
+				"rating": 4
+			},
+			{
+				"userID": "newUser1",
+				"review": "I found the Retail Marketing course to be extremely beneficial. It was well-organized, and the content was current with today's market trends. The interactive sessions were great for clarifying doubts and exchanging ideas.",
+				"rating": 5
+			},
+			{
+				"userID": "newUser2",
+				"review": "As someone new to the retail industry, this course was a perfect introduction. It covered all the basics and more, providing me with a solid foundation to build upon. I especially appreciated the practical tips and tools provided.",
+				"rating": 5
+			},
+			{
+				"userID": "newUser3",
+				"review": "The Retail Marketing course exceeded my expectations. The lessons were clear, engaging, and packed with useful information. I now feel more confident in creating effective marketing strategies for my retail business.",
+				"rating": 5
+			}
+		]
 	}
 ]
