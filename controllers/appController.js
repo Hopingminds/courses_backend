@@ -162,7 +162,7 @@ export async function getUser(req, res) {
 			return res.status(501).send({ error: 'Invalid Username' })
 
 		const checkUser = new Promise((resolve, reject) => {
-			UserModel.findOne({ username })
+			UserModel.findOne({ username }).populate('purchased_courses')
 				.exec()
 				.then((user) => {
 					if (!user) {
