@@ -87,9 +87,8 @@ body: {
 }
 */
 export async function purchasedCourse(req, res) {
-	try {
-		const {userID} = req.user
-
+    try {
+        const { userID } = req.user;
         const { courseId } = req.body;
 
         if (!userID || !courseId) {
@@ -100,6 +99,11 @@ export async function purchasedCourse(req, res) {
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Check if the course is already purchased
+        if (user.purchased_courses.includes(courseId)) {
+            return res.status(400).json({ message: 'Course already purchased' });
         }
 
         const course = await CoursesModel.findById(courseId);
