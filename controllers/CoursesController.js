@@ -1,5 +1,6 @@
 import slugify from "slugify";
 import CoursesModel from "../model/Courses.model.js";
+import UserModel from "../model/User.model.js";
 /** POST: http://localhost:8080/api/addcourse
 * @body : {
     dummy.json
@@ -74,5 +75,46 @@ export async function getCourseBySlug(req, res) {
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+}
+
+/** PUT: http://localhost:8080/api/purchasecourse 
+ * @param: {
+    "header" : "Bearer <token>"
+}
+body: {
+    "courseId": "65eee9fa38d32c2479937d44"
+}
+*/
+export async function purchasedCourse(req, res) {
+	try {
+		const {userID} = req.user
+
+        const { courseId } = req.body;
+
+        if (!userID || !courseId) {
+            return res.status(400).json({ message: 'Both user ID and course ID are required' });
+        }
+
+        const user = await UserModel.findById(userID);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const course = await CoursesModel.findById(courseId);
+
+        if (!course) {
+            return res.status(404).json({ message: 'Course not found' });
+        }
+
+        user.purchased_courses.push(courseId);
+
+        await user.save();
+
+        return res.status(200).json({ message: 'Course purchased successfully' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 }

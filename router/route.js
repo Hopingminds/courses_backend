@@ -32,5 +32,6 @@ router.route('/course/:coursename').get(CoursesController.getCourseBySlug) //get
 /** PUT Methods */
 router.route('/updateuser').put(Auth, controller.updateUser); // is use to update the user profile
 router.route('/resetPassword').put(controller.verifyUser, controller.resetPassword) // used to reset password
+router.route('/purchasecourse').put( Auth,CoursesController.purchasedCourse)
 
 export default router

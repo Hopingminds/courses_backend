@@ -24,6 +24,12 @@ export const UserSchema = new mongoose.Schema({
     yearofpass: {type:Number},
     position: {type: String},
     bio: {type: String},
+    purchased_courses:[
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Courses'
+        }
+    ]
 });
 
 export default mongoose.model.Users || mongoose.model('User', UserSchema);
