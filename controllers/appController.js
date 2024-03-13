@@ -112,9 +112,9 @@ export async function register(req, res) {
 }
 */
 export async function login(req, res) {
-	const { username, password } = req.body
+	const { email, password } = req.body
 	try {
-		UserModel.findOne({ username })
+		UserModel.findOne({ email })
 			.then((user) => {
 				bcrypt
 					.compare(password, user.password)
@@ -128,14 +128,14 @@ export async function login(req, res) {
 						const token = jwt.sign(
 							{
 								userID: user._id,
-								username: user.username,
+								email: user.email,
 							},
 							ENV.JWT_SECRET,
 							{ expiresIn: '24h' }
 						)
 						return res.status(200).send({
 							msg: 'Login Successful',
-							username: user.username,
+							email: user.email,
 							token,
 						})
 					})
@@ -146,7 +146,7 @@ export async function login(req, res) {
 					})
 			})
 			.catch((error) => {
-				return res.status(404).send({ error: 'Username not Found' })
+				return res.status(404).send({ error: 'email not Found' })
 			})
 	} catch (error) {
 		return res.status(500).send(error)
@@ -155,14 +155,14 @@ export async function login(req, res) {
 
 /** GET: http://localhost:8080/api/user/example123 */
 export async function getUser(req, res) {
-	const { username } = req.params
+	const { email } = req.params
 
 	try {
-		if (!username)
-			return res.status(501).send({ error: 'Invalid Username' })
+		if (!email)
+			return res.status(501).send({ error: 'Invalid Email' })
 
 		const checkUser = new Promise((resolve, reject) => {
-			UserModel.findOne({ username }).populate('purchased_courses')
+			UserModel.findOne({ email }).populate('purchased_courses')
 				.exec()
 				.then((user) => {
 					if (!user) {
