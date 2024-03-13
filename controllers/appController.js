@@ -7,9 +7,9 @@ import otpGenerator from 'otp-generator'
 // middleware for verify user
 export async function verifyUser(req, res, next) {
 	try {
-		const { username } = req.method == 'GET' ? req.query : req.body
+		const { email } = req.method == 'GET' ? req.query : req.body
 		// check the user existance
-		let exit = await UserModel.findOne({ username })
+		let exit = await UserModel.findOne({ email })
 		if (!exit) return res.status(404).send({ error: "Can't find user!" })
 		next()
 	} catch (error) {
