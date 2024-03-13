@@ -17,7 +17,7 @@ router.route('/addsubcategory').post(CategoriesController.addsubcategory); // is
 router.route('/addcourse').post(CoursesController.addcourse)
 
 /** GET Methods */
-router.route('/user/:username').get(controller.getUser) // user with username
+router.route('/user/:email').get(controller.getUser) // user with username
 router.route('/generateOTP').get(controller.verifyUser, localVariables, controller.generateOTP) //generate random OTP
 router.route('/verifyOTP').get(controller.verifyOTP) // verify generated OTP
 router.route('/createResetSession').get(controller.createResetSession) // reset all variables
