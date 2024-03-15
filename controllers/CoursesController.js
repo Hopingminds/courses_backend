@@ -167,7 +167,6 @@ export async function addToCart(req, res) {
 body: {
     "email": "example@gmail.com",
     "courseid": "65c4ba60866d0d5a6fc4a82b",
-    "operation": "removeOne" || "removeAll" || "deleteCart"
 }
 */
 export async function removeFromCart(req, res) {
