@@ -15,6 +15,10 @@ router.route('/addcategory').post(CategoriesController.addcategory); // is use t
 router.route('/addsubcategory').post(CategoriesController.addsubcategory); // is use to add a subcategory
 //-- POST Courses 
 router.route('/addcourse').post(CoursesController.addcourse)
+router.route('/addtocart').post(controller.verifyUser, CoursesController.addToCart); // is use to add to wishlist
+router.route('/removefromcart').post(controller.verifyUser, CoursesController.removeFromCart); // is use to add to wishlist
+router.route('/addtowishlist').post(controller.verifyUser, CoursesController.addtowishlist); // is use to add to wishlist
+router.route('/removefromwishlist').post(controller.verifyUser, CoursesController.removeFromWishlist); // is use to remove from wishlist
 
 /** GET Methods */
 router.route('/user/:email').get(controller.getUser) // user with username
@@ -27,6 +31,8 @@ router.route('/categories/:categoryname').get(CategoriesController.getsubcategor
 //-- GET Courses
 router.route('/courses').get(CoursesController.getCourses) //get all subcategries in a category
 router.route('/course/:coursename').get(CoursesController.getCourseBySlug) //get all subcategries in a category
+router.route('/getcart').get(controller.verifyUser, CoursesController.getcart) //get a cart
+router.route('/getwishlist').get(controller.verifyUser, CoursesController.getwishlist) //get a wishlist
 
 
 /** PUT Methods */
