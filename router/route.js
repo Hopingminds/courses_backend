@@ -5,6 +5,8 @@ import * as CoursesController from '../controllers/CoursesController.js'
 import { registerMail } from '../controllers/mailer.js'
 import Auth, { localVariables } from '../middleware/auth.js'
 import * as CategoriesController from '../controllers/CategoriesController.js'
+import * as adminController from '../controllers/AdminController.js'
+import AdminAuth, { adminlocalVariables } from '../middleware/adminauth.js'
 /** POST Methods */
 router.route('/register').post(controller.register)
 router.route('/registerMail').post(registerMail) // register mail
@@ -41,5 +43,15 @@ router.route('/getwishlist').get(controller.verifyUser, CoursesController.getwis
 router.route('/updateuser').put(Auth, controller.updateUser); // is use to update the user profile
 router.route('/resetPassword').put(controller.verifyUser, controller.resetPassword) // used to reset password
 router.route('/purchasecourse').put( Auth,CoursesController.purchasedCourse)
+
+// admin routs
+router.route('/registeradmin').post(adminController.register)
+router.route('/authenticateadmin').post(adminController.verifyAdmin,(req,res)=>res.end()) // authenticate user
+router.route('/loginAdminWithEmail').post(adminController.verifyAdmin,adminController.loginWithEmail) // login in app with email
+router.route('/loginAdminWithMobile').post(adminController.verifyAdmin,adminController.loginWithMobile) // login in app with mobile
+router.route('/admin').get(adminController.verifyAdmin, adminController.getAdmin) // user with username
+router.route('/admins').get(adminController.getallAdmins) // user with username
+router.route('/updateadmin').put(AdminAuth, adminController.updateAdmin); // is use to update the user profile
+router.route('/resetadminPassword').put(adminController.verifyAdmin, adminController.resetPassword) // used to reset password
 
 export default router
