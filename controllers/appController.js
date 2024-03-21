@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import ENV from '../config.js'
 import otpGenerator from 'otp-generator'
+import CoursesModel from '../model/Courses.model.js'
 
 // middleware for verify user
 export async function verifyUser(req, res, next) {
@@ -320,4 +321,85 @@ export async function resetPassword(req,res){
     } catch (error) {
         return res.status(401).send({ error })
     }
+}
+
+/** POST: http://localhost:8080/api/giveassignement
+body: {
+    "email": "example@gmail.com",
+    "courseid": "65c4ba60866d0d5a6fc4a82b",
+	"deadline" : "2024-05-10"
+}
+*/
+export async function giveAssignement(req, res) {
+	let userID = req.userID
+	try {
+        const { courseid, deadline } = req.body;
+		
+		// Fetch the course data
+		const course = await CoursesModel.findById(courseid);
+        if (!course) {
+            return res.status(404).json({ success: false, message: 'course not found' });
+        }
+
+        // Find the user for the user
+        let user = await UserModel.findOne({ _id:userID });
+
+        // If the user has no user, create a new one
+        if (!user) {
+            user = new UserModel({ _id:userID, assignments: [] });
+        }
+		
+		user.assignments.push(
+			{
+				date: new Date(),
+				subject: course._id,
+				deadline: deadline,
+			}
+		);
+
+        await user.save();
+        res.status(201).json({success: true, msg: 'Assignement assigned to user successfully' });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({success: false, msg: 'Internal server error' });
+    }
+}
+
+
+/** GET: http://localhost:8080/api/getUserassignements/example@gmail.com */
+export async function getUserAssignements(req, res) {
+	const { email } = req.params
+	
+	try {
+		if (!email)
+			return res.status(501).send({ error: 'Invalid Email' })
+
+		const checkUser = new Promise((resolve, reject) => {
+			UserModel.findOne({ email }).populate('assignments.subject')
+				.exec()
+				.then((user) => {
+					if (!user) {
+						reject({ error: "Couldn't Find the User" })
+					} else {
+						// Remove sensitive information (e.g., password) before resolving the promise
+						const { password, ...rest } = user.toObject()
+						resolve(rest.assignments)
+					}
+				})
+				.catch((err) => {
+					reject(new Error(err))
+				})
+		})
+
+		Promise.all([checkUser])
+			.then((userDetails) => {
+				return res.status(200).send(userDetails)
+			})
+			.catch((error) => {
+				return res.status(500).send({ error: error.message })
+			})
+	} catch (error) {
+		return res.status(404).send({ error: 'Cannot Find User Data' })
+	}
 }

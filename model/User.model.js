@@ -29,7 +29,18 @@ export const UserSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Courses'
         }
-    ]
+    ],
+    assignments: [
+        {
+            date: {type: Date},
+            subject: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Courses'
+            },
+            deadline: {type: Date},
+            submitted: {type:  Boolean, default: false}
+        }
+    ],
 });
 
 export default mongoose.model.Users || mongoose.model('User', UserSchema);

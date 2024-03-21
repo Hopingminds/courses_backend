@@ -7,8 +7,8 @@ export const CategoriesSchema = new mongoose.Schema({
 	profile: { type: String },
     email: {type: String},
     password: {type: String},
-	total_students: { type: String },
-	total_lessons: { type: Number },
+	total_students: { type: String, default: 0 },
+	total_lessons: { type: Number, default: 0 },
 	experience: { type: String },
 	social_links: [
 		{
