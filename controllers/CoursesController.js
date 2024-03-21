@@ -3,6 +3,13 @@ import cartModel from '../model/Cart.model.js'
 import wishlistModel from '../model/Wishlist.model.js'
 import CoursesModel from "../model/Courses.model.js";
 import UserModel from "../model/User.model.js";
+
+// helper function
+function getRandomSubset(arr, size) {
+    const shuffled = arr.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, size);
+}
+
 /** POST: http://localhost:8080/api/addcourse
 * @body : {
     dummy.json
@@ -55,10 +62,11 @@ export async function getCourses(req, res) {
 		} else if (sort === 'price_desc') {
 			sortObj.base_price = -1;
 		}
-		
 		const courses = await CoursesModel.find(query).sort(sortObj).populate(populate)
-		res.status(200).json(courses)
+        const recommendedCourses = getRandomSubset(courses, 4);
+		res.status(200).send({courses, recommendedCourses})
 	} catch (err) {
+        console.log(err);
 		res.status(500).send('Internal Server Error')
 	}
 }
