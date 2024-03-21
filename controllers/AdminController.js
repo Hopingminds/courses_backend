@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import ENV from '../config.js'
 import otpGenerator from 'otp-generator'
+import UserModel from '../model/User.model.js'
 
 // middleware for verify admin
 export async function verifyAdmin(req, res, next) {
@@ -394,4 +395,21 @@ export async function resetPassword(req,res){
     } catch (error) {
         return res.status(401).send({ error })
     }
+}
+
+export async function getDashboardData(req, res) {
+	try {
+		let enrolled_students = 0
+		let enrolled_courses = 0
+		let users = await UserModel.find({})
+		users.forEach(user => {
+			if (user.purchased_courses.length > 0) {
+				enrolled_students+=1
+				enrolled_courses+= user.purchased_courses.length
+			}
+		});
+		return res.status(201).send({enrolled_students, enrolled_courses})
+	} catch (error) {
+		return res.status(401).send({ error })
+	}
 }
