@@ -34,6 +34,7 @@ router.route('/categories').get(CategoriesController.getcategories) //get all ca
 router.route('/categories/:categoryname').get(CategoriesController.getsubcategories) //get all subcategries in a category
 //-- GET Courses
 router.route('/courses').get(CoursesController.getCourses) //get all subcategries in a category
+router.route('/recommendedcourses').get(CoursesController.getRecommendedCourses) //get all subcategries in a category
 router.route('/course/:coursename').get(CoursesController.getCourseBySlug) //get all subcategries in a category
 router.route('/getcart').get(controller.verifyUser, CoursesController.getcart) //get a cart
 router.route('/getwishlist').get(controller.verifyUser, CoursesController.getwishlist) //get a wishlist

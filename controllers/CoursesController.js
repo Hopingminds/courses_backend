@@ -63,8 +63,19 @@ export async function getCourses(req, res) {
 			sortObj.base_price = -1;
 		}
 		const courses = await CoursesModel.find(query).sort(sortObj).populate(populate)
+		res.status(200).send({courses})
+	} catch (err) {
+        console.log(err);
+		res.status(500).send('Internal Server Error')
+	}
+}
+
+/** GET: http://localhost:8080/api/recommendedcourses */
+export async function getRecommendedCourses(req, res) {
+	try {
+		const courses = await CoursesModel.find({})
         const recommendedCourses = getRandomSubset(courses, 4);
-		res.status(200).send({courses, recommendedCourses})
+		res.status(200).send({recommendedCourses})
 	} catch (err) {
         console.log(err);
 		res.status(500).send('Internal Server Error')
