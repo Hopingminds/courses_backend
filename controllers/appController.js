@@ -182,7 +182,7 @@ export async function getUser(req, res) {
 
 		Promise.all([checkUser])
 			.then((userDetails) => {
-				return res.status(200).send(userDetails)
+				return res.status(200).send({userDetails:userDetails[0]})
 			})
 			.catch((error) => {
 				return res.status(500).send({ error: error.message })
@@ -394,7 +394,7 @@ export async function getUserAssignements(req, res) {
 
 		Promise.all([checkUser])
 			.then((userDetails) => {
-				return res.status(200).send({userDetails})
+				return res.status(200).send({userDetails: userDetails[0]})
 			})
 			.catch((error) => {
 				return res.status(500).send({ error: error.message })
