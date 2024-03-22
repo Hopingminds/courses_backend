@@ -44,6 +44,11 @@ export const UserSchema = new mongoose.Schema({
             submitted: {type:  Boolean, default: false}
         }
     ],
+    role: {
+        type: String,
+        enum: ['user' , 'subadmin'],
+        default: 'user'
+    }
 });
 
 export default mongoose.model.Users || mongoose.model('User', UserSchema);
