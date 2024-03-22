@@ -131,6 +131,7 @@ export async function login(req, res) {
 							{
 								userID: user._id,
 								email: user.email,
+								role: user.role,
 							},
 							ENV.JWT_SECRET,
 							{ expiresIn: '24h' }
@@ -138,6 +139,7 @@ export async function login(req, res) {
 						return res.status(200).send({
 							msg: 'Login Successful',
 							email: user.email,
+							role: user.role,
 							token,
 						})
 					})
