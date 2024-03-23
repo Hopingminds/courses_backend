@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken'
 import ENV from '../config.js'
 import otpGenerator from 'otp-generator'
 import CoursesModel from '../model/Courses.model.js'
+import { registerMail } from './mailer.js'
 
 // middleware for verify user
 export async function verifyUser(req, res, next) {
@@ -248,7 +249,34 @@ export async function updateUser(req, res) {
 */
 export async function generateOTP(req, res) {
 	req.app.locals.OTP = await otpGenerator.generate(6, {lowerCaseAlphabets: false, upperCaseAlphabets:false, specialChars:false})
-    res.status(201).send({code:req.app.locals.OTP})
+    let userID = req.userID
+	let data = await UserModel.findOne({ _id: userID })
+	registerMail(
+		{
+			body: {
+				username: data.username ,
+				userEmail: data.email,
+				subject: 'Forgot Password - OTP',
+				text: `You one time OTP is ${req.app.locals.OTP}`,
+			},
+		},
+		{
+			status(status) {
+				if (status === 200) {
+					return res.status(200).json({
+						success: true,
+						msg: 'OTP mail sent',
+					})
+				} else {
+					return res.status(500).json({
+						success: false,
+						msg: 'OTP mail not sent',
+						mail:  data.email,
+					})
+				}
+			},
+		}
+	)
 }
 
 /** GET: http://localhost:8080/api/verifyOTP  
@@ -258,6 +286,7 @@ export async function generateOTP(req, res) {
 */
 export async function verifyOTP(req, res) {
 	const {code} = req.query;
+	console.log(code, req.app.locals.OTP);
     if(parseInt(req.app.locals.OTP)=== parseInt(code)){
         req.app.locals.OTP = null //reset OTP value
         req.app.locals.resetSession = true // start session for reset password
