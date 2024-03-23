@@ -287,15 +287,15 @@ export async function resetPassword(req,res){
         
         if(!req.app.locals.resetSession) return res.status(440).send({error : "Session expired!"});
 
-        const { username, password } = req.body;
+        const { email, password } = req.body;
 
         try {
             
-            UserModel.findOne({ username})
+            UserModel.findOne({ email})
                 .then(user => {
                     bcrypt.hash(password, 10)
                         .then(hashedPassword => {
-                            UserModel.updateOne({ username : user.username },
+                            UserModel.updateOne({ email : user.email },
                             { password: hashedPassword})
                             .exec()
                             .then(()=>{
@@ -313,7 +313,7 @@ export async function resetPassword(req,res){
                         })
                 })
                 .catch(error => {
-                    return res.status(404).send({ error : "Username not Found"});
+                    return res.status(404).send({ error : "Email not Found"});
                 })
 
         } catch (error) {
