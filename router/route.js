@@ -55,6 +55,7 @@ router.route('/getwishlist').get(controller.verifyUser, CoursesController.getwis
 router.route('/updateuser').put(Auth, controller.updateUser); // is use to update the user profile
 router.route('/resetPassword').put(controller.verifyUser, controller.resetPassword) // used to reset password
 router.route('/purchasecourse').put( Auth,CoursesController.purchasedCourse)
+router.route('/lessoncompleted').put( Auth,CoursesController.lessonCompleted)
 
 // admin routs
 router.route('/registeradmin').post(adminController.register)

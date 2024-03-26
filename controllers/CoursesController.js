@@ -123,7 +123,8 @@ export async function purchasedCourse(req, res) {
         }
 
         // Check if the course is already purchased
-        if (user.purchased_courses.includes(courseId)) {
+        const alreadyPurchased = user.purchased_courses.some(course => course.course.equals(courseId));
+        if (alreadyPurchased) {
             return res.status(400).json({ message: 'Course already purchased' });
         }
 
@@ -133,7 +134,7 @@ export async function purchasedCourse(req, res) {
             return res.status(404).json({ message: 'Course not found' });
         }
 
-        user.purchased_courses.push(courseId);
+        user.purchased_courses.push({ course: courseId });
 
         await user.save();
 
@@ -343,5 +344,58 @@ export async function getwishlist(req, res) {
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+}
+
+
+/** PUT: http://localhost:8080/api/lessoncompleted 
+ * @param: {
+    "header" : "Bearer <token>"
+}
+body: {
+    "lessonId": "65eee9fa38d32c2479937d44"
+    "courseId": "65eee9fa38d32c2479937d44"
+}
+*/
+export async function lessonCompleted(req, res) {
+    try {
+        const { userID } = req.user;
+        const { lessonId, courseId } = req.body;
+
+        if (!userID || !lessonId || !courseId) {
+            return res.status(400).json({ message: 'User ID, lesson ID, and course ID are required' });
+        }
+
+        const user = await UserModel.findById(userID);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        let completed = false;
+        for (const course of user.purchased_courses) {
+            if (course.course.toString() === courseId && course.completed_lessons.includes(lessonId)) {
+                completed = true;
+                break;
+            }
+        }
+
+        if (completed) {
+            return res.status(400).json({ message: 'Lesson already completed for this course' });
+        }
+
+        for (const course of user.purchased_courses) {
+            if (course.course.toString() === courseId && !course.completed_lessons.includes(lessonId)) {
+                course.completed_lessons.push(lessonId);
+                break;
+            }
+        }
+
+        await user.save();
+
+        return res.status(200).json({ message: 'Lesson completed successfully for the specified course' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 }

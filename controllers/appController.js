@@ -167,7 +167,7 @@ export async function getUser(req, res) {
 			return res.status(501).send({ error: 'Invalid Email' })
 
 		const checkUser = new Promise((resolve, reject) => {
-			UserModel.findOne({ email }).populate('purchased_courses')
+			UserModel.findOne({ email }).populate('purchased_courses.course')
 				.exec()
 				.then((user) => {
 					if (!user) {

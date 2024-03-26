@@ -163,7 +163,7 @@ export async function getInstructor(req, res) {
 			return res.status(501).send({ error: 'Invalid Email' })
 
 		const checkInstructor = new Promise((resolve, reject) => {
-			InstructorModel.findOne({ email }).populate('purchased_courses')
+			InstructorModel.findOne({ email }).populate('purchased_courses.course')
 				.exec()
 				.then((instructor) => {
 					if (!instructor) {
