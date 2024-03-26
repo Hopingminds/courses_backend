@@ -29,8 +29,11 @@ export const UserSchema = new mongoose.Schema({
     bio: {type: String},
     purchased_courses:[
         {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Courses'
+            course: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Courses'
+            },
+            completed_lessons: [{type: mongoose.Schema.Types.ObjectId, default: null}]
         }
     ],
     assignments: [
