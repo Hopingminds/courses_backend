@@ -1,5 +1,9 @@
 import {Router} from 'express'
+import multer from 'multer';
 const router = Router()
+const storage = multer.memoryStorage()
+const upload = multer({ storage: storage })
+
 import * as controller from '../controllers/appController.js'
 import * as CoursesController from '../controllers/CoursesController.js'
 import { registerMail } from '../controllers/mailer.js'
@@ -7,8 +11,12 @@ import Auth, { localVariables } from '../middleware/auth.js'
 import * as CategoriesController from '../controllers/CategoriesController.js'
 import * as adminController from '../controllers/AdminController.js'
 import AdminAuth, { adminlocalVariables } from '../middleware/adminauth.js'
+import { uploadVideo, getVideo } from '../controllers/VideoController.js';
 /** POST Methods */
 router.route('/register').post(controller.register)
+// Upload video route
+router.post('/videos/upload', upload.single('video'), uploadVideo);
+
 router.route('/registerMail').post(registerMail) // register mail
 router.route('/authenticate').post(controller.verifyUser,(req,res)=>res.end()) // authenticate user
 router.route('/login').post(controller.verifyUser,controller.login) // login in app
@@ -24,6 +32,9 @@ router.route('/addtowishlist').post(controller.verifyUser, CoursesController.add
 router.route('/removefromwishlist').post(controller.verifyUser, CoursesController.removeFromWishlist); // is use to remove from wishlist
 
 /** GET Methods */
+// Get video route
+router.get('/videos/:filename', getVideo);
+
 router.route('/user/:email').get(controller.getUser) // user with username
 router.route('/getuserassignements/:email').get(controller.getUserAssignements) // user with username
 router.route('/generateOTP').get(controller.verifyUser, localVariables, controller.generateOTP) //generate random OTP
