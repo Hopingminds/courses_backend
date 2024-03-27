@@ -30,7 +30,7 @@ function uploadVideo(req, res) {
 }
 
 function getVideo(req, res) {
-	console.log(req.params.filename)
+	// console.log(req.params.filename)
 	if (!req.params.filename) {
 		return res
 			.status(400)
