@@ -36,7 +36,7 @@ router.route('/removefromwishlist').post(controller.verifyUser, CoursesControlle
 router.get('/videos/:filename', getVideo);
 
 router.route('/user/:email').get(controller.getUser) // user with username
-router.route('/user/:email/:coursename').get(CoursesController.getCourseBySlug) // user with username
+router.route('/user/:email/:coursename').get(CoursesController.getUserCourseBySlug) // user with username
 router.route('/getuserassignements/:email').get(controller.getUserAssignements) // user with username
 router.route('/generateOTP').get(controller.verifyUser, localVariables, controller.generateOTP) //generate random OTP
 router.route('/verifyOTP').get(controller.verifyOTP) // verify generated OTP
