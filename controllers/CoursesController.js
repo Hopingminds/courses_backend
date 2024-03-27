@@ -82,9 +82,42 @@ export async function getRecommendedCourses(req, res) {
 	}
 }
 
-/** GET: http://localhost:8080/api/course/:coursename */
+/** GET: http://localhost:8080/api/user/:email/:coursename */
 export async function getCourseBySlug(req, res) {
+
+    function getCourseDataBySlug(data, slug) {
+        // Loop through the purchased_courses array
+        for (let course of data.purchased_courses) {
+            // Check if the course slug matches the one we're looking for
+            if (course.course.slug === slug) {
+                // Return the matching course data
+                return {course: course.course, completed_lessons: course.completed_lessons};
+            }
+        }
+        // If no course matches, return null or an appropriate message
+        return null;
+    }
+
 	try {
+        const { email } = req.params
+        const { coursename } = req.params
+        const user = await UserModel.findOne({email}).populate('purchased_courses.course')
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        const courseData = getCourseDataBySlug(user, coursename);
+
+        res.status(200).json({ success: true, data: courseData });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+}
+
+export async function getUserCourseBySlug(params) {
+    try {
         const { coursename } = req.params
         const course = await CoursesModel.findOne({slug:coursename})
 
