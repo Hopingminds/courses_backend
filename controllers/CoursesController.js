@@ -84,7 +84,22 @@ export async function getRecommendedCourses(req, res) {
 
 /** GET: http://localhost:8080/api/user/:email/:coursename */
 export async function getCourseBySlug(req, res) {
+    try {
+        const { coursename } = req.params
+        const course = await CoursesModel.findOne({slug:coursename})
 
+        if (!course) {
+            return res.status(404).json({ success: false, message: 'Courses not found' });
+        }
+
+        res.status(200).json({ success: true, course });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+}
+
+export async function getUserCourseBySlug(req, res) {
     function getCourseDataBySlug(data, slug) {
         // Loop through the purchased_courses array
         for (let course of data.purchased_courses) {
@@ -110,22 +125,6 @@ export async function getCourseBySlug(req, res) {
         const courseData = getCourseDataBySlug(user, coursename);
 
         res.status(200).json({ success: true, data: courseData });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Internal server error' });
-    }
-}
-
-export async function getUserCourseBySlug(params) {
-    try {
-        const { coursename } = req.params
-        const course = await CoursesModel.findOne({slug:coursename})
-
-        if (!course) {
-            return res.status(404).json({ success: false, message: 'Courses not found' });
-        }
-
-        res.status(200).json({ success: true, course });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Internal server error' });
