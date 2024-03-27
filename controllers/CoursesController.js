@@ -390,6 +390,19 @@ body: {
 }
 */
 export async function lessonCompleted(req, res) {
+    function getCourseDataBySlug(data, courseid) {
+        // Loop through the purchased_courses array
+        for (let course of data.purchased_courses) {
+            // Check if the course slug matches the one we're looking for
+            if (course.course._id.toString() === courseid) {
+                // Return the matching course data
+                return {course: course.course, completed_lessons: course.completed_lessons};
+            }
+        }
+        // If no course matches, return null or an appropriate message
+        return null;
+    }
+
     try {
         const { userID } = req.user;
         const { lessonId, courseId } = req.body;
@@ -398,12 +411,13 @@ export async function lessonCompleted(req, res) {
             return res.status(400).json({ message: 'User ID, lesson ID, and course ID are required' });
         }
 
-        const user = await UserModel.findById(userID);
+        const user = await UserModel.findById(userID).populate('purchased_courses.course');
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
+        let data = getCourseDataBySlug(user, courseId)
         let completed = false;
         for (const course of user.purchased_courses) {
             if (course.course.toString() === courseId && course.completed_lessons.includes(lessonId)) {
@@ -413,7 +427,8 @@ export async function lessonCompleted(req, res) {
         }
 
         if (completed) {
-            return res.status(400).json({ message: 'Lesson already completed for this course' });
+            await user.save();
+            return res.status(400).json({ message: 'Lesson already completed for this course',data });
         }
 
         for (const course of user.purchased_courses) {
@@ -424,8 +439,7 @@ export async function lessonCompleted(req, res) {
         }
 
         await user.save();
-
-        return res.status(200).json({ message: 'Lesson completed successfully for the specified course' });
+        return res.status(200).json({ message: 'Lesson completed successfully for the specified course', data: data});
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Internal server error' });
