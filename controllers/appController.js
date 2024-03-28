@@ -35,20 +35,20 @@ export async function register(req, res) {
 		const { username, password, profile, email, college, stream , yearofpass } = req.body
 
 		// check the existing user
-		const existUsername = new Promise((resolve, reject) => {
-			UserModel.findOne({ username })
-				.exec()
-				.then((user) => {
-					if (user) {
-						reject({ error: 'Please use a unique username' })
-					} else {
-						resolve()
-					}
-				})
-				.catch((err) => {
-					reject(new Error(err))
-				})
-		})
+		// const existUsername = new Promise((resolve, reject) => {
+		// 	UserModel.findOne({ username })
+		// 		.exec()
+		// 		.then((user) => {
+		// 			if (user) {
+		// 				reject({ error: 'Please use a unique username' })
+		// 			} else {
+		// 				resolve()
+		// 			}
+		// 		})
+		// 		.catch((err) => {
+		// 			reject(new Error(err))
+		// 		})
+		// })
 
 		// check for existing email
 		const existEmail = new Promise((resolve, reject) => {
@@ -66,14 +66,14 @@ export async function register(req, res) {
 				})
 		})
 
-		Promise.all([existUsername, existEmail])
+		Promise.all([existEmail])
 			.then(() => {
 				if (password) {
 					bcrypt
 						.hash(password, 10)
 						.then((hashedPassword) => {
 							const user = new UserModel({
-								username,
+								// username,
 								password: hashedPassword,
 								profile: profile || '',
 								email,
