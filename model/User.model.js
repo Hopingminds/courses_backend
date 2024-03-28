@@ -31,18 +31,8 @@ export const UserSchema = new mongoose.Schema({
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'Courses'
             },
-            completed_lessons: [{type: mongoose.Schema.Types.ObjectId, default: null}]
-        }
-    ],
-    assignments: [
-        {
-            date: {type: Date},
-            subject: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Courses'
-            },
-            deadline: {type: Date},
-            submitted: {type:  Boolean, default: false}
+            completed_lessons: [{type: mongoose.Schema.Types.ObjectId, default: null}],
+            completed_assignments: [{type: mongoose.Schema.Types.ObjectId, default: null}]
         }
     ],
     role: {
