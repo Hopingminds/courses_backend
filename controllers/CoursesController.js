@@ -136,16 +136,20 @@ export async function getUserCourseBySlug(req, res) {
     "header" : "Bearer <token>"
 }
 body: {
-    "courseId": "65eee9fa38d32c2479937d44"
+    "courses": [
+        "65eee9fa38d32c2479937d44"
+        "65eee9fa38d32c2479937d45"
+        "65eee9fa38d32c2479937d46"
+    ]
 }
 */
 export async function purchasedCourse(req, res) {
     try {
         const { userID } = req.user;
-        const { courseId } = req.body;
+        const { courses } = req.body;
 
-        if (!userID || !courseId) {
-            return res.status(400).json({ message: 'Both user ID and course ID are required' });
+        if (!userID || !courses || !Array.isArray(courses) || courses.length === 0) {
+            return res.status(400).json({ message: 'User ID and an array of course IDs are required' });
         }
 
         const user = await UserModel.findById(userID);
@@ -154,23 +158,36 @@ export async function purchasedCourse(req, res) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Check if the course is already purchased
-        const alreadyPurchased = user.purchased_courses.some(course => course.course.equals(courseId));
-        if (alreadyPurchased) {
-            return res.status(400).json({ message: 'Course already purchased' });
+        const coursesNotFound = [];
+        const coursesAlreadyPurchased = [];
+
+        for (const courseId of courses) {
+            // Check if the course is already purchased
+            const alreadyPurchased = user.purchased_courses.some(course => course.course.equals(courseId));
+            if (alreadyPurchased) {
+                coursesAlreadyPurchased.push(courseId);
+            } else {
+                const course = await CoursesModel.findById(courseId);
+
+                if (!course) {
+                    coursesNotFound.push(courseId);
+                } else {
+                    user.purchased_courses.push({ course: courseId });
+                }
+            }
         }
 
-        const course = await CoursesModel.findById(courseId);
-
-        if (!course) {
-            return res.status(404).json({ message: 'Course not found' });
+        if (coursesNotFound.length > 0) {
+            return res.status(404).json({ message: 'Some courses not found', coursesNotFound });
         }
 
-        user.purchased_courses.push({ course: courseId });
+        if (coursesAlreadyPurchased.length > 0) {
+            return res.status(400).json({ message: 'Some courses already purchased', coursesAlreadyPurchased });
+        }
 
         await user.save();
 
-        return res.status(200).json({ message: 'Course purchased successfully' });
+        return res.status(200).json({ message: 'Courses purchased successfully' });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Internal server error' });
