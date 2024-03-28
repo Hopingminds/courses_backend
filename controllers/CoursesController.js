@@ -182,15 +182,15 @@ export async function purchasedCourse(req, res) {
         }
 
         if (coursesAlreadyPurchased.length > 0) {
-            return res.status(400).json({ message: 'Some courses already purchased', coursesAlreadyPurchased });
+            return res.status(400).json({ message: 'Some courses already purchased', coursesAlreadyPurchased, success: true });
         }
 
         await user.save();
 
-        return res.status(200).json({ message: 'Courses purchased successfully' });
+        return res.status(200).json({ message: 'Courses purchased successfully', success: true });
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: 'Internal server error' });
+        return res.status(500).json({ message: 'Internal server error', success: false });
     }
 }
 
