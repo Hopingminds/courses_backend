@@ -463,7 +463,7 @@ export async function lessonCompleted(req, res) {
     }
 }
 
-/** PUT: http://localhost:8080/api/assignmenucompleted
+/** PUT: http://localhost:8080/api/assignmentcompleted
  * @param: {
     "header" : "Bearer <token>"
 }
@@ -472,7 +472,7 @@ body: {
     "courseId": "65eee9fa38d32c2479937d44"
 }
 */
-export async function assignmenuCompleted(req, res) {
+export async function assignmentCompleted(req, res) {
     function getCourseDataBySlug(data, courseid) {
         // Loop through the purchased_courses array
         for (let course of data.purchased_courses) {
