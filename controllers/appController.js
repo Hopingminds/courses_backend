@@ -73,7 +73,7 @@ export async function register(req, res) {
 						.hash(password, 10)
 						.then((hashedPassword) => {
 							const user = new UserModel({
-								username,
+								// username,
 								password: hashedPassword,
 								profile: profile || '',
 								email,
