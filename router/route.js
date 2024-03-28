@@ -20,7 +20,6 @@ router.post('/videos/upload', upload.single('video'), uploadVideo);
 router.route('/registerMail').post(registerMail) // register mail
 router.route('/authenticate').post(controller.verifyUser,(req,res)=>res.end()) // authenticate user
 router.route('/login').post(controller.verifyUser,controller.login) // login in app
-router.route('/giveassignement').post(controller.verifyUser,controller.giveAssignement) // giveAssignement
 //-- POST Categories
 router.route('/addcategory').post(CategoriesController.addcategory); // is use to add a category
 router.route('/addsubcategory').post(CategoriesController.addsubcategory); // is use to add a subcategory
@@ -37,7 +36,6 @@ router.get('/videos/:filename', getVideo);
 
 router.route('/user/:email').get(controller.getUser) // user with username
 router.route('/user/:email/:coursename').get(CoursesController.getUserCourseBySlug) // user with username
-router.route('/getuserassignements/:email').get(controller.getUserAssignements) // user with username
 router.route('/generateOTP').get(controller.verifyUser, localVariables, controller.generateOTP) //generate random OTP
 router.route('/verifyOTP').get(controller.verifyOTP) // verify generated OTP
 router.route('/createResetSession').get(controller.createResetSession) // reset all variables

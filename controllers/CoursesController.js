@@ -437,7 +437,7 @@ export async function lessonCompleted(req, res) {
         let data = getCourseDataBySlug(user, courseId)
         let completed = false;
         for (const course of user.purchased_courses) {
-            if (course.course.toString() === courseId && course.completed_lessons.includes(lessonId)) {
+            if (course.course._id.toString() === courseId && course.completed_lessons.includes(lessonId)) {
                 completed = true;
                 break;
             }
@@ -449,7 +449,7 @@ export async function lessonCompleted(req, res) {
         }
 
         for (const course of user.purchased_courses) {
-            if (course.course.toString() === courseId && !course.completed_lessons.includes(lessonId)) {
+            if (course.course._id.toString() === courseId && !course.completed_lessons.includes(lessonId)) {
                 course.completed_lessons.push(lessonId);
                 break;
             }
@@ -503,7 +503,7 @@ export async function assignmentCompleted(req, res) {
         let data = getCourseDataBySlug(user, courseId)
         let completed = false;
         for (const course of user.purchased_courses) {
-            if (course.course.toString() === courseId && course.completed_assignments.includes(lessonId)) {
+            if (course.course._id.toString() === courseId && course.completed_assignments.includes(lessonId)) {
                 completed = true;
                 break;
             }
@@ -511,18 +511,18 @@ export async function assignmentCompleted(req, res) {
 
         if (completed) {
             await user.save();
-            return res.status(400).json({ message: 'Lesson already completed for this course',data });
+            return res.status(400).json({ message: 'Assignemnt already completed for this course',data });
         }
 
         for (const course of user.purchased_courses) {
-            if (course.course.toString() === courseId && !course.completed_assignments.includes(lessonId)) {
+            if (course.course._id.toString() === courseId && !course.completed_assignments.includes(lessonId)) {
                 course.completed_assignments.push(lessonId);
                 break;
             }
         }
 
         await user.save();
-        return res.status(200).json({ message: 'Lesson completed successfully for the specified course', data: data});
+        return res.status(200).json({ message: 'Assignemnt completed successfully for the specified course', data: data});
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Internal server error' });
