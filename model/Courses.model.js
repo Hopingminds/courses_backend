@@ -30,6 +30,7 @@ export const CoursesSchema = new mongoose.Schema({
                     duration: {type: String},
                     video: {type: String},
                     notes: {type:  String},
+                    assignment: {type:  String},
                 }
             ]
         }
