@@ -1,7 +1,7 @@
 import InstructorModel from '../model/Instructor.model.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import ENV from '../config.js'
+import 'dotenv/config'
 import otpGenerator from 'otp-generator'
 
 // middleware for verify instructor
@@ -131,7 +131,7 @@ export async function login(req, res) {
 								instructorID: instructor._id,
 								email: instructor.email,
 							},
-							ENV.JWT_SECRET,
+							process.env.JWT_SECRET,
 							{ expiresIn: '24h' }
 						)
 						return res.status(200).send({

@@ -1,10 +1,9 @@
 import AdminModel from '../model/Admin.model.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import ENV from '../config.js'
+import 'dotenv/config'
 import otpGenerator from 'otp-generator'
 import UserModel from '../model/User.model.js'
-
 // middleware for verify admin
 export async function verifyAdmin(req, res, next) {
 	try {
@@ -78,7 +77,7 @@ export async function register(req, res) {
 					email: savedAdmin.email,
 					mobile: savedAdmin.mobile
 				},
-				ENV.JWT_SECRET,
+				process.env.JWT_SECRET,
 				{ expiresIn: '24h' }
 			)
 			// Send response with _id and email
@@ -118,7 +117,7 @@ export async function loginWithEmail(req, res) {
 								email: admin.email,
 								mobile: admin.mobile
 							},
-							ENV.JWT_SECRET,
+							process.env.JWT_SECRET,
 							{ expiresIn: '24h' }
 						)
 						return res.status(200).send({
@@ -168,7 +167,7 @@ export async function loginWithMobile(req, res) {
 								email: admin.email,
 								mobile: admin.mobile
 							},
-							ENV.JWT_SECRET,
+							process.env.JWT_SECRET,
 							{ expiresIn: '24h' }
 						)
 						return res.status(200).send({

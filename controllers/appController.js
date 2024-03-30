@@ -1,7 +1,7 @@
 import UserModel from '../model/User.model.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import ENV from '../config.js'
+import 'dotenv/config'
 import otpGenerator from 'otp-generator'
 import CoursesModel from '../model/Courses.model.js'
 import { registerMail } from './mailer.js'
@@ -56,7 +56,7 @@ export async function register(req, res) {
 				.exec()
 				.then((email) => {
 					if (email) {
-						reject({ error: 'Please use a unique email' })
+						reject({ error: 'Email already exsists!' })
 					} else {
 						resolve()
 					}
@@ -104,7 +104,7 @@ export async function register(req, res) {
 				return res.status(500).send({ error })
 			})
 	} catch (error) {
-		return res.status(500).send(error)
+		return res.status(500).json({ success: false, message: 'Internal server error' });
 	}
 }
 
@@ -125,7 +125,7 @@ export async function login(req, res) {
 						if (!passwordCheck)
 							return res
 								.status(400)
-								.send({ error: "Don't password" })
+								.send({ error: "Password does not match" })
 
 						// create jwt token
 						const token = jwt.sign(
@@ -134,7 +134,7 @@ export async function login(req, res) {
 								email: user.email,
 								role: user.role,
 							},
-							ENV.JWT_SECRET,
+							process.env.JWT_SECRET,
 							{ expiresIn: '24h' }
 						)
 						return res.status(200).send({
@@ -151,7 +151,7 @@ export async function login(req, res) {
 					})
 			})
 			.catch((error) => {
-				return res.status(404).send({ error: 'email not Found' })
+				return res.status(404).send({ error: 'Email not Found' })
 			})
 	} catch (error) {
 		return res.status(500).send(error)
