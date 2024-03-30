@@ -56,7 +56,7 @@ export async function register(req, res) {
 				.exec()
 				.then((email) => {
 					if (email) {
-						reject({ error: 'Please use a unique email' })
+						reject({ error: 'Email already exsists!' })
 					} else {
 						resolve()
 					}
@@ -104,7 +104,7 @@ export async function register(req, res) {
 				return res.status(500).send({ error })
 			})
 	} catch (error) {
-		return res.status(500).send(error)
+		return res.status(500).json({ success: false, message: 'Internal server error' });
 	}
 }
 
@@ -125,7 +125,7 @@ export async function login(req, res) {
 						if (!passwordCheck)
 							return res
 								.status(400)
-								.send({ error: "Don't password" })
+								.send({ error: "Password does not match" })
 
 						// create jwt token
 						const token = jwt.sign(
@@ -151,7 +151,7 @@ export async function login(req, res) {
 					})
 			})
 			.catch((error) => {
-				return res.status(404).send({ error: 'email not Found' })
+				return res.status(404).send({ error: 'Email not Found' })
 			})
 	} catch (error) {
 		return res.status(500).send(error)
