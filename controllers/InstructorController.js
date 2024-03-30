@@ -2,7 +2,6 @@ import InstructorModel from '../model/Instructor.model.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import 'dotenv/config'
-import otpGenerator from 'otp-generator'
 
 // middleware for verify instructor
 export async function verifyInstructor(req, res, next) {
