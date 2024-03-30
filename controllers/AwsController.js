@@ -29,7 +29,7 @@ export async function uploadFile(req, res) {
 
 export async function getfilesfromaws(req, res) {
     let r = await s3.listObjectsV2({ Bucket: BUCKET }).promise();
-    let data = r.Contents.map(item => item.Key);
+    let data = r.Contents.map(item =>  `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${item.Key}`);
     return res.status(200).json({success: true, data})
 }
 
@@ -39,9 +39,12 @@ export async function getfilefromaws(req, res) {
     if (!filename) {
         return res.status(500).json({success: false, message: "File name is required"})
     }
-
-    let data = await s3.getObject({ Bucket: BUCKET, Key: filename }).promise();
-    return res.send(data.Body)
+    try {
+        let data = await s3.getObject({ Bucket: BUCKET, Key: filename }).promise();
+        return res.send(data.Body)
+    } catch (error) {
+        return res.status(500).json({success: false, message: "File Not Found"})
+    }
 }
 
 export async function deleteFileFromAWS(req, res) {
@@ -51,6 +54,10 @@ export async function deleteFileFromAWS(req, res) {
         return res.status(500).json({success: false, message: "File name is required"})
     }
 
-    await s3.deleteObject({ Bucket: BUCKET, Key: filename }).promise();
-    return res.status(200).json({success: true, message: "File Deleted Successfully"})
+    try {
+        await s3.deleteObject({ Bucket: BUCKET, Key: filename }).promise();
+        return res.status(200).json({success: true, message: "File Deleted Successfully"})
+    } catch (error) {
+        return res.status(500).json({success: false, message: "File Not Found"})
+    }
 }
