@@ -18,15 +18,10 @@ export const upload = multer({
         s3: s3,
         acl: "public-read",
         bucket: BUCKET,
-        metadata: function (req, file, cb) {
-            cb(null, {
-                fieldName: file.fieldname,
-                'Content-Type': file.mimetype,
-            });
-        },
         key: function (req, file, cb) {
             cb(null, Date.now().toString()+ '-' +file.originalname)
-        }
+        },
+        contentType: multerS3.AUTO_CONTENT_TYPE
     })
 })
 
