@@ -1,22 +1,17 @@
 import {Router} from 'express'
-import multer from 'multer';
 const router = Router()
-const storage = multer.memoryStorage()
-const upload = multer({ storage: storage })
 
 import * as controller from '../controllers/appController.js'
 import * as CoursesController from '../controllers/CoursesController.js'
-import { registerMail } from '../controllers/mailer.js'
-import Auth, { localVariables } from '../middleware/auth.js'
 import * as CategoriesController from '../controllers/CategoriesController.js'
 import * as adminController from '../controllers/AdminController.js'
+import * as awsController from '../controllers/AwsController.js'
+import { registerMail } from '../controllers/mailer.js'
+import {upload} from '../controllers/AwsController.js'
+import Auth, { localVariables } from '../middleware/auth.js'
 import AdminAuth, { adminlocalVariables } from '../middleware/adminauth.js'
-import { uploadVideo, getVideo } from '../controllers/VideoController.js';
 /** POST Methods */
 router.route('/register').post(controller.register)
-// Upload video route
-router.post('/videos/upload', upload.single('video'), uploadVideo);
-
 router.route('/registerMail').post(registerMail) // register mail
 router.route('/authenticate').post(controller.verifyUser,(req,res)=>res.end()) // authenticate user
 router.route('/login').post(controller.verifyUser,controller.login) // login in app
@@ -29,11 +24,10 @@ router.route('/addtocart').post(controller.verifyUser, CoursesController.addToCa
 router.route('/removefromcart').post(controller.verifyUser, CoursesController.removeFromCart); // is use to add to wishlist
 router.route('/addtowishlist').post(controller.verifyUser, CoursesController.addtowishlist); // is use to add to wishlist
 router.route('/removefromwishlist').post(controller.verifyUser, CoursesController.removeFromWishlist); // is use to remove from wishlist
+//-- POST AWS
+router.route('/uploadfiletoaws').post(upload.single('file'), awsController.uploadFile)
 
 /** GET Methods */
-// Get video route
-router.get('/videos/:filename', getVideo);
-
 router.route('/user/:email').get(controller.getUser) // user with username
 router.route('/user/:email/:coursename').get(CoursesController.getUserCourseBySlug) // user with username
 router.route('/generateOTP').get(controller.verifyUser, localVariables, controller.generateOTP) //generate random OTP
@@ -49,6 +43,9 @@ router.route('/course/:coursename').get(CoursesController.getCourseBySlug) //get
 router.route('/getusercompletedassignemnts/:email').get(CoursesController.getUserCompletedAssignments) //get all subcategries in a category
 router.route('/getcart').get(controller.verifyUser, CoursesController.getcart) //get a cart
 router.route('/getwishlist').get(controller.verifyUser, CoursesController.getwishlist) //get a wishlist
+//-- GET AWS
+router.route('/getfilesfromaws').get(awsController.getfilesfromaws) //get a wishlist
+router.route('/getfilefromaws/:filename').get(awsController.getfilefromaws) //get a wishlist
 
 
 /** PUT Methods */
@@ -57,6 +54,9 @@ router.route('/resetPassword').put(controller.verifyUser, controller.resetPasswo
 router.route('/purchasecourse').put( Auth,CoursesController.purchasedCourse)
 router.route('/lessoncompleted').put( Auth,CoursesController.lessonCompleted)
 router.route('/assignmentcompleted').put( Auth,CoursesController.assignmentCompleted)
+
+/** DELETE Methods */
+router.route('/deletefilefromaws/:filename').delete(awsController.deleteFileFromAWS)
 
 // admin routs
 router.route('/registeradmin').post(adminController.register)
