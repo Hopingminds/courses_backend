@@ -1,7 +1,7 @@
 import UserModel from '../model/User.model.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import ENV from '../config.js'
+import 'dotenv/config'
 import otpGenerator from 'otp-generator'
 import CoursesModel from '../model/Courses.model.js'
 import { registerMail } from './mailer.js'
@@ -134,7 +134,7 @@ export async function login(req, res) {
 								email: user.email,
 								role: user.role,
 							},
-							ENV.JWT_SECRET,
+							process.env.JWT_SECRET,
 							{ expiresIn: '24h' }
 						)
 						return res.status(200).send({
