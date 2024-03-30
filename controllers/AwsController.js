@@ -19,14 +19,13 @@ export const upload = multer({
         acl: "public-read",
         bucket: BUCKET,
         metadata: function (req, file, cb) {
-            console.log(file);
             cb(null, {
                 fieldName: file.fieldname,
                 'Content-Type': file.mimetype,
             });
         },
         key: function (req, file, cb) {
-            cb(null, Date.now().toString()+file.originalname)
+            cb(null, Date.now().toString()+ '-' +file.originalname)
         }
     })
 })
