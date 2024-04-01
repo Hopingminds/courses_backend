@@ -20,7 +20,9 @@ export const upload = multer({
         acl: "public-read",
         bucket: BUCKET,
         key: function (req, file, cb) {
-            cb(null, Date.now() + "-" + file.originalname)
+            var newFileName = Date.now() + "-" + file.originalname;
+            var fullPath = 'assets/'+ newFileName;
+            cb(null, Date.now() + "-" + fullPath)
         },
         contentType: multerS3.AUTO_CONTENT_TYPE
     })
@@ -76,10 +78,12 @@ export async function getfilesfromaws(req, res) {
     let r = await s3.listObjectsV2({ Bucket: BUCKET }).promise();
     let data = []
     r.Contents.map(item => {
-        data.push({
-            key: item.Key,
-            url:  `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${item.Key}`
-        })
+        if (!item.Key.includes("images/profile/")) {
+            data.push({
+                key: item.Key,
+                url:  `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${item.Key}`
+            })
+        }
     })
     return res.status(200).json({success: true, data})
 }
