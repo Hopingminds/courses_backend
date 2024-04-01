@@ -50,6 +50,7 @@ export async function uploadFile(req, res) {
 }
 
 /** POST: http://localhost:8080/api/uploaduserprofiletoaws
+    header: Bearer <Token>
     body:{
         file: file.mp4
     }
