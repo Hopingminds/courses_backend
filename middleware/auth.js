@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import 'dotenv/config'
+import UserModel from '../model/User.model.js';
 
 export default async function Auth(req,res,next) {
     try {
@@ -10,9 +11,14 @@ export default async function Auth(req,res,next) {
         const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
 
         // res.json(decodedToken)
-        req.user = decodedToken;
-        
-        next()
+        let {userID} = decodedToken
+        let user = await UserModel.findById(userID)
+        if (user.token === token) {
+            req.user = decodedToken;
+            next()
+        } else{
+            throw new Error("Invalid user or token");
+        }
     } catch (error) {
         res.status(401).json({ error : "Authentication Failed!"})
     }

@@ -13,7 +13,7 @@ import AdminAuth, { adminlocalVariables } from '../middleware/adminauth.js'
 /** POST Methods */
 router.route('/register').post(controller.register)
 router.route('/registerMail').post(registerMail) // register mail
-router.route('/authenticate').post(controller.verifyUser,(req,res)=>res.end()) // authenticate user
+router.route('/authenticate').post(Auth,(req,res)=>res.end()) // authenticate user
 router.route('/login').post(controller.verifyUser,controller.login) // login in app
 //-- POST Categories
 router.route('/addcategory').post(CategoriesController.addcategory); // is use to add a category
