@@ -7,7 +7,7 @@ import * as CategoriesController from '../controllers/CategoriesController.js'
 import * as adminController from '../controllers/AdminController.js'
 import * as awsController from '../controllers/AwsController.js'
 import { registerMail } from '../controllers/mailer.js'
-import {upload} from '../controllers/AwsController.js'
+import {upload, uploadUserProfile} from '../controllers/AwsController.js'
 import Auth, { localVariables } from '../middleware/auth.js'
 import AdminAuth, { adminlocalVariables } from '../middleware/adminauth.js'
 /** POST Methods */
@@ -26,6 +26,7 @@ router.route('/addtowishlist').post(controller.verifyUser, CoursesController.add
 router.route('/removefromwishlist').post(controller.verifyUser, CoursesController.removeFromWishlist); // is use to remove from wishlist
 //-- POST AWS
 router.route('/uploadfiletoaws').post(upload.single('file'), awsController.uploadFile)
+router.route('/uploaduserprofiletoaws').post(Auth,uploadUserProfile.single('file'), awsController.uploaduserprofiletoaws)
 
 /** GET Methods */
 router.route('/user/:email').get(controller.getUser) // user with username
@@ -56,7 +57,7 @@ router.route('/lessoncompleted').put( Auth,CoursesController.lessonCompleted)
 router.route('/assignmentcompleted').put( Auth,CoursesController.assignmentCompleted)
 
 /** DELETE Methods */
-router.route('/deletefilefromaws/:filename').delete(awsController.deleteFileFromAWS)
+router.route('/deletefilefromaws').delete(awsController.deleteFileFromAWS)
 
 // admin routs
 router.route('/registeradmin').post(adminController.register)
