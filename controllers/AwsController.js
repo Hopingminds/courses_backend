@@ -22,7 +22,7 @@ export const upload = multer({
         key: function (req, file, cb) {
             var newFileName = Date.now() + "-" + file.originalname;
             var fullPath = 'assets/'+ newFileName;
-            cb(null, Date.now() + "-" + fullPath)
+            cb(null, fullPath)
         },
         contentType: multerS3.AUTO_CONTENT_TYPE
     })
