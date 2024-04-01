@@ -39,7 +39,8 @@ export const UserSchema = new mongoose.Schema({
         type: String,
         enum: ['user' , 'subadmin'],
         default: 'user'
-    }
+    },
+    token: {type: String, default: null}
 });
 
 export default mongoose.model.Users || mongoose.model('User', UserSchema);

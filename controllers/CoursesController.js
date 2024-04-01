@@ -725,7 +725,5 @@ export async function getUserCompletedAssignments(req, res) {
 			})
 		})
 	})
-
-	console.log(completedAssignmentsLessonNames)
 	return res.status(200).json({ data: completedAssignmentsLessonNames })
 }

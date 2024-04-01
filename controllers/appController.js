@@ -137,11 +137,19 @@ export async function login(req, res) {
 							process.env.JWT_SECRET,
 							{ expiresIn: '24h' }
 						)
-						return res.status(200).send({
-							msg: 'Login Successful',
-							email: user.email,
-							role: user.role,
-							token,
+						
+						UserModel.updateOne({ email }, { token })
+						.exec()
+						.then(()=>{
+							return res.status(200).send({
+								msg: 'Login Successful',
+								email: user.email,
+								role: user.role,
+								token,
+							})
+						})
+						.catch((error)=>{
+							return res.status(200).json({ success: false, message: 'Internal Server Error - Error Saving Token', error});
 						})
 					})
 					.catch((error) => {
@@ -174,7 +182,7 @@ export async function getUser(req, res) {
 						reject({ error: "Couldn't Find the User" })
 					} else {
 						// Remove sensitive information (e.g., password) before resolving the promise
-						const { password, ...rest } = user.toObject()
+						const { password, token, ...rest } = user.toObject()
 						resolve(rest)
 					}
 				})
