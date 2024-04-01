@@ -59,7 +59,7 @@ export async function uploadFile(req, res) {
 **/
 export async function uploaduserprofiletoaws(req, res) {
     const { userID } = req.user;
-    if (req.file.location) {
+    if (req.file?.location) {
         UserModel.updateOne({ _id: userID }, {profile: req.file.location})
         .exec()
         .then(()=>{
