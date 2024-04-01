@@ -1,6 +1,7 @@
 import aws from 'aws-sdk'
 import multer from 'multer'
 import multerS3 from 'multer-s3'
+import UserModel from '../model/User.model.js';
 
 // upading AWS config
 aws.config.update({
@@ -19,7 +20,23 @@ export const upload = multer({
         acl: "public-read",
         bucket: BUCKET,
         key: function (req, file, cb) {
-            cb(null, Date.now().toString()+ '-' +file.originalname)
+            var newFileName = Date.now() + "-" + file.originalname;
+            var fullPath = 'assets/'+ newFileName;
+            cb(null, fullPath)
+        },
+        contentType: multerS3.AUTO_CONTENT_TYPE
+    })
+})
+
+export const uploadUserProfile = multer({
+    storage: multerS3({
+        s3: s3,
+        acl: "public-read",
+        bucket: BUCKET,
+        key: function (req, file, cb) {
+            var newFileName = Date.now() + "-" + file.originalname;
+            var fullPath = 'images/profile/'+ newFileName;
+            cb(null, fullPath)
         },
         contentType: multerS3.AUTO_CONTENT_TYPE
     })
@@ -34,15 +51,39 @@ export async function uploadFile(req, res) {
     return res.status(200).json({ success: true, message: 'Successfully Uploaded', url: req.file.location });
 }
 
+/** POST: http://localhost:8080/api/uploaduserprofiletoaws
+    header: Bearer <Token>
+    body:{
+        file: file.mp4
+    }
+**/
+export async function uploaduserprofiletoaws(req, res) {
+    const { userID } = req.user;
+    if (req.file.location) {
+        UserModel.updateOne({ _id: userID }, {profile: req.file.location})
+        .exec()
+        .then(()=>{
+            return res.status(200).json({ success: true, message: 'User profile updated successfully.', url: req.file.location });
+        })
+        .catch((error)=>{
+            return res.status(200).json({ success: false, message: 'Internal Server Error', error});
+        })
+    } else {
+        return res.status(200).json({ success: false, message: 'Internal Server Error -  AWS'});
+    }
+}
+
 /** GET: http://localhost:8080/api/getfilesfromaws */
 export async function getfilesfromaws(req, res) {
     let r = await s3.listObjectsV2({ Bucket: BUCKET }).promise();
     let data = []
     r.Contents.map(item => {
-        data.push({
-            key: item.Key,
-            url:  `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${item.Key}`
-        })
+        if (!item.Key.includes("images/profile/")) {
+            data.push({
+                key: item.Key,
+                url:  `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${item.Key}`
+            })
+        }
     })
     return res.status(200).json({success: true, data})
 }
@@ -62,9 +103,13 @@ export async function getfilefromaws(req, res) {
     }
 }
 
-/** DELETE: http://localhost:8080/api/deletefilefromaws/:filename */
+/** DELETE: http://localhost:8080/api/deletefilefromaws
+    body {
+        "filename": "images/profile/1711953235667-mrsahil.png"
+    }
+*/
 export async function deleteFileFromAWS(req, res) {
-    const filename = req.params.filename
+    const {filename} = req.body
     
     if (!filename) {
         return res.status(500).json({success: false, message: "File name is required"})
