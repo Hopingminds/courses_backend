@@ -3,10 +3,19 @@ import cors from 'cors'
 import morgan from 'morgan'
 import connect from './database/conn.js'
 import router from './router/route.js'
+import authRouter from './router/authroutes.js'
+import session from 'express-session'
 import 'dotenv/config'
 const app = express()
-
+import './middleware/passport.js'
 // middlewares
+app.use(
+	session({
+		secret: process.env.SESSION_SECRET_KEY,
+		resave: false,
+		saveUninitialized: true,
+	})
+)
 app.use(express.json())
 app.use(cors())
 app.use(morgan('tiny'))
@@ -21,6 +30,7 @@ app.get('/',(req,res)=>{
 
 // api routes
 app.use('/api',router)
+app.use('/auth', authRouter)
 
 // start server only when we have valid connection
 connect().then(()=>{
