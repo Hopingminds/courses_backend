@@ -3,7 +3,6 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import 'dotenv/config'
 import otpGenerator from 'otp-generator'
-import CoursesModel from '../model/Courses.model.js'
 import { registerMail } from './mailer.js'
 
 // middleware for verify user
@@ -22,9 +21,9 @@ export async function verifyUser(req, res, next) {
 
 /** POST: http://localhost:8080/api/register 
 * @param : {
-    "username" : "example123",
-    "password" : "admin123",
+	"password" : "admin123",
     "email": "example@gmail.com",
+    "phone" : 9814740275,
 	"college": "IKGPTU", 
 	"stream": "B.tech ECE" , 
 	"yearofpass": 2024
@@ -32,7 +31,7 @@ export async function verifyUser(req, res, next) {
 */
 export async function register(req, res) {
 	try {
-		const { username, password, profile, email, college, stream , yearofpass } = req.body
+		const { username, password, profile, email, college, stream , yearofpass, phone } = req.body
 
 		// check the existing user
 		// const existUsername = new Promise((resolve, reject) => {
@@ -77,6 +76,7 @@ export async function register(req, res) {
 								password: hashedPassword,
 								profile: profile || '',
 								email,
+								phone,
 								college, 
 								stream , 
 								yearofpass
@@ -84,10 +84,31 @@ export async function register(req, res) {
 
 							// return save result as a response
 							user.save()
-								.then((result) =>
-									res.status(201).send({
-										msg: 'User Register Successfully',
+								.then((user) =>{
+									const token = jwt.sign(
+										{
+											userID: user._id,
+											email: user.email,
+											role: user.role,
+										},
+										process.env.JWT_SECRET,
+										{ expiresIn: '24h' }
+									)
+									
+									UserModel.updateOne({ email:user.email }, { token })
+									.exec()
+									.then(()=>{
+										return res.status(201).send({
+											msg: 'User Register Successfully',
+											email: user.email,
+											role: user.role,
+											token,
+										})
 									})
+									.catch((error)=>{
+										return res.status(200).json({ success: false, message: 'Internal Server Error - Error Saving Token', error});
+									})
+								}
 								)
 								.catch((error) =>
 									res.status(500).send({ error })
