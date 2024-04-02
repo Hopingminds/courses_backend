@@ -3,7 +3,7 @@ import cors from 'cors'
 import morgan from 'morgan'
 import connect from './database/conn.js'
 import router from './router/route.js'
-import authRouter from './router/authroutes.js'
+import authRouter from './router/authRoutes.js'
 import session from 'express-session'
 import 'dotenv/config'
 const app = express()
