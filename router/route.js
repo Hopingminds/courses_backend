@@ -53,6 +53,7 @@ router.route('/getfilefromaws/:filename').get(awsController.getfilefromaws) //ge
 router.route('/updateuser').put(Auth, controller.updateUser); // is use to update the user profile
 router.route('/resetPassword').put(controller.verifyUser, controller.resetPassword) // used to reset password
 router.route('/purchasecourse').put( Auth,CoursesController.purchasedCourse)
+router.route('/blockcourses').put(CoursesController.blockCourses)
 router.route('/lessoncompleted').put( Auth,CoursesController.lessonCompleted)
 router.route('/assignmentcompleted').put( Auth,CoursesController.assignmentCompleted)
 

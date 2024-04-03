@@ -32,6 +32,12 @@ export const UserSchema = new mongoose.Schema({
             completed_assignments: [{type: mongoose.Schema.Types.ObjectId, default: null}]
         }
     ],
+    blocked_courses:[
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Courses'
+        }
+    ],
     role: {
         type: String,
         enum: ['user' , 'subadmin'],
