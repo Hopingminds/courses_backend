@@ -1,9 +1,6 @@
 import mongoose from "mongoose";
 
 export const UserSchema = new mongoose.Schema({
-    username : {
-        type: String
-    },
     password: {
         type: String,
         required: [true, "Please provide a password"],
@@ -17,10 +14,10 @@ export const UserSchema = new mongoose.Schema({
     phone: {
         type: Number,
     },
-    firstName: { type: String},
-    lastName: { type: String},
+    name: { type: String},
     profile: { type: String},
     college: {type:String},
+    degree: {type:String},
     stream: {type:String},
     yearofpass: {type:Number},
     position: {type: String},

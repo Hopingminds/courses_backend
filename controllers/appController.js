@@ -21,6 +21,7 @@ export async function verifyUser(req, res, next) {
 
 /** POST: http://localhost:8080/api/register 
 * @param : {
+	"name": "Sahil Kumar"
 	"password" : "admin123",
     "email": "example@gmail.com",
     "phone" : 9814740275,
@@ -31,23 +32,7 @@ export async function verifyUser(req, res, next) {
 */
 export async function register(req, res) {
 	try {
-		const { username, password, profile, email, college, stream , yearofpass, phone } = req.body
-
-		// check the existing user
-		// const existUsername = new Promise((resolve, reject) => {
-		// 	UserModel.findOne({ username })
-		// 		.exec()
-		// 		.then((user) => {
-		// 			if (user) {
-		// 				reject({ error: 'Please use a unique username' })
-		// 			} else {
-		// 				resolve()
-		// 			}
-		// 		})
-		// 		.catch((err) => {
-		// 			reject(new Error(err))
-		// 		})
-		// })
+		const {password, name, profile, email, college, stream , yearofpass, phone, degree } = req.body
 
 		// check for existing email
 		const existEmail = new Promise((resolve, reject) => {
@@ -79,6 +64,8 @@ export async function register(req, res) {
 								phone,
 								college, 
 								stream , 
+								degree,
+								name,
 								yearofpass
 							})
 
@@ -232,8 +219,7 @@ body: {
     "username" : "",
     
     "email": "",
-    "firstName": "",
-    "lastName": "",
+    "name": "",
     "profile": "",
     "college": "",
     "position": "",
