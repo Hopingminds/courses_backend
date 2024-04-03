@@ -457,6 +457,40 @@ export async function removeFromCart(req, res) {
 	}
 }
 
+/** DELETE: http://localhost:8080/api/deletecart */
+export async function deleteCart(req, res) {
+    let userID = req.userID;
+    try {
+        // Find the cart for the user
+        let cart = await cartModel.findOne({ _id: userID });
+
+        // If the user has no cart, return with a message
+        if (!cart) {
+            return res.status(404).json({
+                success: false,
+                message: 'Cart not found for the user',
+            });
+        }
+
+        // Empty the cart by setting the courses array to an empty array
+        cart.courses = [];
+
+        await cart.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Cart emptied successfully',
+            data: cart.courses,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+        });
+    }
+}
+
 /** GET: http://localhost:8080/api/getcart
 query: {
     "email": "example@gmail.com",
