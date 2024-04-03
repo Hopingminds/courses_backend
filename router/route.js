@@ -22,6 +22,7 @@ router.route('/addsubcategory').post(CategoriesController.addsubcategory); // is
 router.route('/addcourse').post(CoursesController.addcourse)
 router.route('/addtocart').post(controller.verifyUser, CoursesController.addToCart); // is use to add to wishlist
 router.route('/removefromcart').post(controller.verifyUser, CoursesController.removeFromCart); // is use to add to wishlist
+router.route('/deleteCart').post(controller.verifyUser, CoursesController.deleteCart); // is use to add to wishlist
 router.route('/addtowishlist').post(controller.verifyUser, CoursesController.addtowishlist); // is use to add to wishlist
 router.route('/removefromwishlist').post(controller.verifyUser, CoursesController.removeFromWishlist); // is use to remove from wishlist
 //-- POST AWS
