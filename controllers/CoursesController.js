@@ -3,7 +3,7 @@ import cartModel from '../model/Cart.model.js'
 import wishlistModel from '../model/Wishlist.model.js'
 import CoursesModel from '../model/Courses.model.js'
 import UserModel from '../model/User.model.js'
-
+import OrdersModel from '../model/Orders.model.js'
 // helper function
 function getRandomSubset(arr, size) {
 	const shuffled = arr.sort(() => 0.5 - Math.random())
@@ -169,23 +169,32 @@ body: {
         "65eee9fa38d32c2479937d45"
         "65eee9fa38d32c2479937d46"
     ]
+	"orderDetails": {
+		"name": "Sahil Kumar",
+		"address": "475-B",
+		"zip": 1442002,
+		"country": "India",
+		"state": "Punjab",
+		"gstNumber": "1234PKLKUP",
+	}
 }
 */
 export async function purchasedCourse(req, res) {
 	try {
 		const { userID } = req.user
-		const { courses } = req.body
+		const { courses, orderDetails } = req.body
 
 		if (
 			!userID ||
 			!courses ||
+			!orderDetails ||
 			!Array.isArray(courses) ||
 			courses.length === 0
 		) {
 			return res
 				.status(400)
 				.json({
-					message: 'User ID and an array of course IDs are required',
+					message: 'User ID, orderDetails and an array of course IDs are required',
 				})
 		}
 
@@ -232,6 +241,10 @@ export async function purchasedCourse(req, res) {
 				})
 		}
 
+		let orderData = {...orderDetails, purchasedBy: userID}
+		const order = new OrdersModel(orderData)
+		
+		await order.save()
 		await user.save()
 
 		return res
