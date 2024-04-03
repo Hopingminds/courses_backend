@@ -258,6 +258,92 @@ export async function purchasedCourse(req, res) {
 	}
 }
 
+/** PUT: http://localhost:8080/api/blockcourses 
+ * @param: {
+    "header" : "Bearer <token>"
+}
+body: {
+    {
+	"email": "sahilkumar142002@gmail.com",
+	"courses": [
+			"65eee9fa38d32c2479937d44",
+			"65eeea1438d32c2479937e28"
+		]
+	}
+}
+*/
+export async function blockCourses(req, res) {
+	try {
+		const { email, courses } = req.body
+
+		if (
+			!email ||
+			!courses ||
+			!Array.isArray(courses) ||
+			courses.length === 0
+		) {
+			return res
+				.status(400)
+				.json({
+					message: 'User ID and an array of course IDs are required',
+				})
+		}
+
+		const user = await UserModel.findOne({email})
+
+		if (!user) {
+			return res.status(404).json({ message: 'User not found' })
+		}
+
+		const coursesNotFound = []
+		const coursesAlreadyPurchased = []
+
+		for (const courseId of courses) {
+			// Check if the course is already purchased
+			const alreadyPurchased = user.blocked_courses.some((course) =>
+				course.equals(courseId)
+			)
+			if (alreadyPurchased) {
+				coursesAlreadyPurchased.push(courseId)
+			} else {
+				const course = await CoursesModel.findById(courseId)
+
+				if (!course) {
+					coursesNotFound.push(courseId)
+				} else {
+					user.blocked_courses.push(courseId)
+				}
+			}
+		}
+
+		if (coursesNotFound.length > 0) {
+			return res
+				.status(404)
+				.json({ message: 'Some courses not found', coursesNotFound })
+		}
+
+		if (coursesAlreadyPurchased.length > 0) {
+			return res
+				.status(400)
+				.json({
+					message: 'Some courses already blocked',
+					coursesAlreadyPurchased,
+					success: true,
+				})
+		}
+		await user.save()
+
+		return res
+			.status(200)
+			.json({ message: 'Courses blocked successfully', success: true })
+	} catch (error) {
+		console.error(error)
+		return res
+			.status(500)
+			.json({ message: 'Internal server error', success: false })
+	}
+}
+
 /** POST: http://localhost:8080/api/addtocart
 body: {
     "email": "example@gmail.com",
