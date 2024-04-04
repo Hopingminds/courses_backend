@@ -11,7 +11,6 @@ passport.use(
 			callbackURL: `${process.env.SERVER_BASE_URL}/auth/google/callback`,
 		},
 		async function (accessToken, refreshToken, profile, done) {
-			console.log(profile);
 			try {
 				const user = await UserModel.findOne({
 					email: profile.emails[0].value,
