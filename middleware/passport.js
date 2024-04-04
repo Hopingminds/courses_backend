@@ -2,6 +2,7 @@ import passport from 'passport'
 import jwt from 'jsonwebtoken'
 import UserModel from '../model/User.model.js'
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
+import { Strategy as LinkedInStrategy } from 'passport-linkedin-oauth2'
 
 passport.use(
 	new GoogleStrategy(
@@ -9,6 +10,7 @@ passport.use(
 			clientID: process.env.GOOGLE_CLIENT_ID,
 			clientSecret: process.env.GOOGLE_CLIENT_SECRET,
 			callbackURL: `${process.env.SERVER_BASE_URL}/auth/google/callback`,
+			scope: ['profile', 'email']
 		},
 		async function (accessToken, refreshToken, profile, done) {
 			try {
@@ -40,6 +42,52 @@ passport.use(
 				} else {
 					return done(null, { email: profile.emails[0].value, name: profile.displayName })
 				}
+			} catch (err) {
+				return done(err)
+			}
+		}
+	)
+)
+
+passport.use(
+	new LinkedInStrategy(
+		{
+			clientID: process.env.LINKEDIN_CLIENT_ID,
+			clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
+			callbackURL: `${process.env.SERVER_BASE_URL}/auth/linkedin/callback`,
+			scope: ['profile', 'email']
+		},
+		async function (accessToken, refreshToken, profile, done) {
+			try {
+				// const user = await UserModel.findOne({
+				// 	email: profile.emails[0].value,
+				// })
+
+				// if (user) {
+				// 	const token = jwt.sign(
+				// 			{
+				// 				userID: user._id,
+				// 				email: user.email,
+				// 				role: user.role,
+				// 			},
+				// 			process.env.JWT_SECRET,
+				// 			{ expiresIn: '24h' }
+				// 		)
+						
+				// 		UserModel.updateOne({ email: user.email }, { token })
+				// 		.exec()
+				// 		.then(()=>{
+							console.log(profile);
+							return done(null, profile);
+				// 		})
+				// 		.catch((error)=>{
+				// 			return done(null, false, {
+				// 				message: 'Internal Server Error - Error Saving Token',
+				// 			})
+				// 		})
+				// } else {
+				// 	return done(null, { email: profile.emails[0].value, name: profile.displayName })
+				// }
 			} catch (err) {
 				return done(err)
 			}
