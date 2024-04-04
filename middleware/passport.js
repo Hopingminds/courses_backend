@@ -38,9 +38,7 @@ passport.use(
 							})
 						})
 				} else {
-					return done(null, false, {
-						message: 'User not found in the database',
-					})
+					return done(null, { email: profile.emails[0].value, name: profile.displayName })
 				}
 			} catch (err) {
 				return done(err)
