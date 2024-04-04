@@ -11,6 +11,7 @@ passport.use(
 			callbackURL: `${process.env.SERVER_BASE_URL}/auth/google/callback`,
 		},
 		async function (accessToken, refreshToken, profile, done) {
+			console.log(profile);
 			try {
 				const user = await UserModel.findOne({
 					email: profile.emails[0].value,
@@ -38,9 +39,7 @@ passport.use(
 							})
 						})
 				} else {
-					return done(null, false, {
-						message: 'User not found in the database',
-					})
+					return done(null, { email: profile.emails[0].value, name: profile.displayName })
 				}
 			} catch (err) {
 				return done(err)
