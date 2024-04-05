@@ -8,6 +8,7 @@ import session from 'express-session'
 import 'dotenv/config'
 const app = express()
 import './middleware/passport.js'
+import passport from 'passport'
 // middlewares
 app.use(
 	session({
@@ -16,6 +17,8 @@ app.use(
 		saveUninitialized: true,
 	})
 )
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(express.json())
 app.use(cors())
 app.use(morgan('tiny'))

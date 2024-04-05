@@ -70,6 +70,6 @@ router.route('/admin').get(adminController.verifyAdmin, adminController.getAdmin
 router.route('/admins').get(adminController.getallAdmins) // user with username
 router.route('/updateadmin').put(AdminAuth, adminController.updateAdmin); // is use to update the user profile
 router.route('/resetadminPassword').put(adminController.verifyAdmin, adminController.resetPassword) // used to reset password
-router.route('/getadmindashdata').get(adminController.verifyAdmin, adminController.getDashboardData) // used to reset password
+router.route('/getadmindashdata').get(adminController.getDashboardData) // used to reset password
 
 export default router
