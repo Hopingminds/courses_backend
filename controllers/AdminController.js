@@ -400,15 +400,21 @@ export async function getDashboardData(req, res) {
 	try {
 		let enrolled_students = 0
 		let enrolled_courses = 0
-		let users = await UserModel.find({})
+		let users = await UserModel.find({role: "user"})
 		users.forEach(user => {
 			if (user.purchased_courses.length > 0) {
 				enrolled_students+=1
 				enrolled_courses+= user.purchased_courses.length
 			}
 		});
-		return res.status(201).send({enrolled_students, enrolled_courses})
+
+		let userData = users.map(user => {
+			const { token, password, role, ...rest } = user.toObject();
+			return rest;
+		});
+
+		return res.status(201).send({ success: true, data:{enrolled_students, enrolled_courses, users: userData}})
 	} catch (error) {
-		return res.status(401).send({ error })
+		return res.status(401).send({ success: false, msg:'Internal Server Error', error })
 	}
 }
