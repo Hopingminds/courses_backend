@@ -55,39 +55,38 @@ passport.use(
 			clientID: process.env.LINKEDIN_CLIENT_ID,
 			clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
 			callbackURL: `${process.env.SERVER_BASE_URL}/auth/linkedin/callback`,
-			scope: ['profile', 'email']
+			scope: ['openid', 'profile', 'email',]
 		},
 		async function (accessToken, refreshToken, profile, done) {
 			try {
-				// const user = await UserModel.findOne({
-				// 	email: profile.emails[0].value,
-				// })
+				const user = await UserModel.findOne({
+					email: profile.email,
+				})
 
-				// if (user) {
-				// 	const token = jwt.sign(
-				// 			{
-				// 				userID: user._id,
-				// 				email: user.email,
-				// 				role: user.role,
-				// 			},
-				// 			process.env.JWT_SECRET,
-				// 			{ expiresIn: '24h' }
-				// 		)
+				if (user) {
+					const token = jwt.sign(
+							{
+								userID: user._id,
+								email: user.email,
+								role: user.role,
+							},
+							process.env.JWT_SECRET,
+							{ expiresIn: '24h' }
+						)
 						
-				// 		UserModel.updateOne({ email: user.email }, { token })
-				// 		.exec()
-				// 		.then(()=>{
-							console.log(profile);
-							return done(null, profile);
-				// 		})
-				// 		.catch((error)=>{
-				// 			return done(null, false, {
-				// 				message: 'Internal Server Error - Error Saving Token',
-				// 			})
-				// 		})
-				// } else {
-				// 	return done(null, { email: profile.emails[0].value, name: profile.displayName })
-				// }
+						UserModel.updateOne({ email: user.email }, { token })
+						.exec()
+						.then(()=>{
+							return done(null,{token});
+						})
+						.catch((error)=>{
+							return done(null, false, {
+								message: 'Internal Server Error - Error Saving Token',
+							})
+						})
+				} else {
+					return done(null, { email: profile.email, name: profile.displayName })
+				}
 			} catch (err) {
 				return done(err)
 			}
