@@ -398,9 +398,16 @@ export async function resetPassword(req,res){
 
 export async function getDashboardData(req, res) {
 	try {
+		let query = {role: "user"}
+		let {university} = req.query
 		let enrolled_students = 0
 		let enrolled_courses = 0
-		let users = await UserModel.find({role: "user"})
+
+		if (university) {
+			query.college = university
+		}
+
+		let users = await UserModel.find(query)
 		users.forEach(user => {
 			if (user.purchased_courses.length > 0) {
 				enrolled_students+=1
