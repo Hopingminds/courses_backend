@@ -17,16 +17,26 @@ export async function verifyInstructor(req, res, next) {
 	}
 }
 
-/** POST: http://localhost:8080/api/register 
+/** POST: http://localhost:8080/api/instregister 
 * @param : {
-	"name": "Sahil Kumar"
-	"password" : "admin123",
-    "email": "example@gmail.com",
-    "phone" : 9814740275,
-	"college": "IKGPTU", 
-	"stream": "B.tech ECE" , 
-	"yearofpass": 2024
-}
+		"password":"Sahil@123", 
+		"name": "Sahil Kumar", 
+		"profile": "https://dunb17ur4ymx4.cloudfront.net/webstore/logos/badc87621293f70727079411fcd552fae001b939.png", 
+		"email": "sahilkumar142002@gmail.com", 
+		"experience": "3 Years", 
+		"social_links": [
+			{
+			"website_name": "LinkedIn",
+			"profile_url": "https://www.linkedin.com/in/secret-sahil/"
+			},
+			{
+			"website_name": "Website",
+			"profile_url": "https://mrsahil.in"
+			}
+			], 
+		"phone": 9814740275, 
+		"bio" : "A developer with innovative ideas 💡"
+	}
 */
 export async function register(req, res) {
 	try {
@@ -108,10 +118,10 @@ export async function register(req, res) {
 	}
 }
 
-/** POST: http://localhost:8080/api/login 
+/** POST: http://localhost:8080/api/instlogin 
 * @param : {
-    "instructorname" : "example123",
-    "password" : "admin123",
+    "email" : "sahilkumar142002@gmail.com",
+    "password" : "Sahil@123"
 }
 */
 export async function login(req, res) {
@@ -175,7 +185,7 @@ export async function getInstructor(req, res) {
 			return res.status(501).send({ error: 'Invalid Email' })
 
 		const checkInstructor = new Promise((resolve, reject) => {
-			InstructorModel.findOne({ email }).populate('purchased_courses.course')
+			InstructorModel.findOne({ email })
 				.exec()
 				.then((instructor) => {
 					if (!instructor) {
