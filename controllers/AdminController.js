@@ -274,42 +274,6 @@ export async function updateAdmin(req, res) {
 	}
 }
 
-/** GET: http://localhost:8080/api/generateAdminRestPwdOTP 
-body: {
-	--pass only one email or mobile according to reset with mobile or reset with email
-    "email": "example@gmail.com",
-    "mobile": 8009860560,
-}
-*/
-export async function generateRestPwdOTP(req, res) {
-	req.app.locals.OTP = await otpGenerator.generate(4, {lowerCaseAlphabets: false, upperCaseAlphabets:false, specialChars:false})
-    res.status(201).send({OTP:req.app.locals.OTP})
-}
-
-/** GET: http://localhost:8080/api/verifyRestPwdOTP  
-	body: {
-		"OTP":1234
-}
-*/
-export async function verifyRestPwdOTP(req, res) {
-	const {otp} = req.query;
-    if(parseInt(req.app.locals.OTP)=== parseInt(otp)){
-        req.app.locals.OTP = null //reset OTP value
-        req.app.locals.resetSession = true // start session for reset password
-        return res.status(201).send({ msg: 'Verify Successsfully!'})
-    }
-    return res.status(400).send({ error: "Invalid OTP"});
-}
-
-// successfully redirect admin when OTP is valid
-/** GET: http://localhost:8080/api/createResetSession */
-export async function createResetSession(req, res) {
-	if(req.app.locals.resetSession){
-        return res.status(201).send({ flag : req.app.locals.resetSession})
-    }
-    return res.status(440).send({error : "Session expired!"})
-}
-
 // update the password when we have valid session
 /** PUT: http://localhost:8080/api/resetPassword 
 body: { 

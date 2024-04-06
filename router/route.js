@@ -6,15 +6,19 @@ import * as CoursesController from '../controllers/CoursesController.js'
 import * as CategoriesController from '../controllers/CategoriesController.js'
 import * as adminController from '../controllers/AdminController.js'
 import * as awsController from '../controllers/AwsController.js'
+import * as instructorController from '../controllers/InstructorController.js'
 import { registerMail } from '../controllers/mailer.js'
 import {upload, uploadUserProfile} from '../controllers/AwsController.js'
 import Auth, { localVariables } from '../middleware/auth.js'
-import AdminAuth, { adminlocalVariables } from '../middleware/adminauth.js'
+import AdminAuth from '../middleware/adminauth.js'
+import instAuth from '../middleware/instAuth.js'
 /** POST Methods */
 router.route('/register').post(controller.register)
+router.route('/instregister').post(instructorController.register)
 router.route('/registerMail').post(registerMail) // register mail
 router.route('/authenticate').post(Auth,(req,res)=>res.end()) // authenticate user
 router.route('/login').post(controller.verifyUser,controller.login) // login in app
+router.route('/instlogin').post(instructorController.verifyInstructor,instructorController.login) // login in app
 //-- POST Categories
 router.route('/addcategory').post(CategoriesController.addcategory); // is use to add a category
 router.route('/addsubcategory').post(CategoriesController.addsubcategory); // is use to add a subcategory
@@ -31,6 +35,7 @@ router.route('/uploaduserprofiletoaws').post(Auth,uploadUserProfile.single('file
 
 /** GET Methods */
 router.route('/user/:email').get(controller.getUser) // user with username
+router.route('/inst/:email').get(instructorController.getInstructor) // user with username
 router.route('/user/:email/:coursename').get(CoursesController.getUserCourseBySlug) // user with username
 router.route('/generateOTP').get(controller.verifyUser, localVariables, controller.generateOTP) //generate random OTP
 router.route('/verifyOTP').get(controller.verifyOTP) // verify generated OTP
@@ -52,6 +57,7 @@ router.route('/getfilefromaws/:filename').get(awsController.getfilefromaws) //ge
 
 /** PUT Methods */
 router.route('/updateuser').put(Auth, controller.updateUser); // is use to update the user profile
+router.route('/updateinst').put(instAuth, instructorController.updateInstructor); // is use to update the user profile
 router.route('/resetPassword').put(controller.verifyUser, controller.resetPassword) // used to reset password
 router.route('/purchasecourse').put( Auth,CoursesController.purchasedCourse)
 router.route('/blockcourses').put(CoursesController.blockCourses)
