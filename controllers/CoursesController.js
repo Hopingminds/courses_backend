@@ -159,6 +159,53 @@ export async function getUserCourseBySlug(req, res) {
 	}
 }
 
+/** PUT: https://localhost:8080/api/updatecourse */
+export async function updateCourse(req, res) {
+	const body = req.body
+	try {
+		AdminModel.updateOne({ _id: body._id }, body)
+			.exec()
+			.then(()=>{
+				return res
+					.status(200)
+					.json({ message: 'Course Updated Successfully!', success: true })
+			})
+			.catch((error)=>{
+				return res
+					.status(500)
+					.json({ message: 'Internal server error', success: false, error })
+			})
+	} catch (error) {
+		
+	}
+}
+
+/** DELETE: https://localhost:8080/api/deletecourse 
+	@body {
+		_id: 13132cxn237678c53667
+	}
+*/
+export async function deleteCourse(req, res) {
+	try {
+		const {_id} = req.body
+		Model.findByIdAndDelete(_id).exec()
+		.then(()=>{
+			return res
+			.status(200)
+			.json({ message: 'Course Deleted Successfully!', success: true })
+		})
+		.catch((error)=>{
+			return res
+			.status(500)
+			.json({ message: 'Internal server error', success: false, error })
+		})
+	} catch (error) {
+		return res
+			.status(500)
+			.json({ message: 'Internal server error', success: false, error })
+	}
+}
+
 /** PUT: http://localhost:8080/api/purchasecourse 
  * @param: {
     "header" : "Bearer <token>"
@@ -251,7 +298,6 @@ export async function purchasedCourse(req, res) {
 			.status(200)
 			.json({ message: 'Courses purchased successfully', success: true })
 	} catch (error) {
-		console.error(error)
 		return res
 			.status(500)
 			.json({ message: 'Internal server error', success: false })

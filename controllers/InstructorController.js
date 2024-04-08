@@ -213,6 +213,26 @@ export async function getInstructor(req, res) {
 	}
 }
 
+/** GET: http://localhost:8080/api/instructors */
+export async function getAllInstructors(req, res) {
+	try {
+		InstructorModel.find({ })
+			.exec()
+			.then((instructor) => {
+				let data  = instructor.map((ins)=>{
+					const { password, token, ...rest } = ins.toObject()
+					return rest
+				})
+					return res.status(404).send({ success: true, data: data })
+			})
+			.catch((err) => {
+				return res.status(404).send({ error: 'Cannot Find Instructor Data', err })
+			})
+	} catch (error) {
+		return res.status(404).send({ error: 'Internal Server Error', error })
+	}
+}
+
 /** PUT: http://localhost:8080/api/updateinstructor 
  * @param: {
     "header" : "<token>"
