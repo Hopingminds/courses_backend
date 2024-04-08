@@ -23,7 +23,7 @@ router.route('/instlogin').post(instructorController.verifyInstructor,instructor
 router.route('/addcategory').post(CategoriesController.addcategory); // is use to add a category
 router.route('/addsubcategory').post(CategoriesController.addsubcategory); // is use to add a subcategory
 //-- POST Courses 
-router.route('/addcourse').post(CoursesController.addcourse)
+router.route('/addcourse').post(AdminAuth, CoursesController.addcourse)
 router.route('/addtocart').post(controller.verifyUser, CoursesController.addToCart); // is use to add to wishlist
 router.route('/removefromcart').post(controller.verifyUser, CoursesController.removeFromCart); // is use to add to wishlist
 router.route('/deleteCart').post(controller.verifyUser, CoursesController.deleteCart); // is use to add to wishlist
@@ -36,6 +36,7 @@ router.route('/uploaduserprofiletoaws').post(Auth,uploadUserProfile.single('file
 /** GET Methods */
 router.route('/user/:email').get(controller.getUser) // user with username
 router.route('/inst/:email').get(instructorController.getInstructor) // user with username
+router.route('/instructors').get(instructorController.getAllInstructors) // user with username
 router.route('/user/:email/:coursename').get(CoursesController.getUserCourseBySlug) // user with username
 router.route('/generateOTP').get(controller.verifyUser, localVariables, controller.generateOTP) //generate random OTP
 router.route('/verifyOTP').get(controller.verifyOTP) // verify generated OTP
@@ -63,9 +64,11 @@ router.route('/purchasecourse').put( Auth,CoursesController.purchasedCourse)
 router.route('/blockcourses').put(CoursesController.blockCourses)
 router.route('/lessoncompleted').put( Auth,CoursesController.lessonCompleted)
 router.route('/assignmentcompleted').put( Auth,CoursesController.assignmentCompleted)
+router.route('/updatecourse').put(AdminAuth, CoursesController.updateCourse)
 
 /** DELETE Methods */
 router.route('/deletefilefromaws').delete(awsController.deleteFileFromAWS)
+router.route('/deletecourse').delete(AdminAuth, CoursesController.deleteCourse)
 
 // admin routs
 router.route('/registeradmin').post(adminController.register)
