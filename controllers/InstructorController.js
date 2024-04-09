@@ -280,7 +280,7 @@ export async function updateInstructor(req, res) {
 }
 
 // update the password when we have valid session
-/** PUT: http://localhost:8080/api/resetPassword 
+/** PUT: http://localhost:8080/api/resetinsPassword 
  * body:{
 	email: "email@emaple.com",
 	password: "password"
