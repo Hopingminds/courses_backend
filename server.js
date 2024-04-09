@@ -2,10 +2,17 @@ import express from 'express'
 import cors from 'cors'
 import morgan from 'morgan'
 import connect from './database/conn.js'
-import router from './router/route.js'
-import authRouter from './router/authRoutes.js'
 import session from 'express-session'
 import 'dotenv/config'
+
+import userRouter from './router/userRoutes.js'
+import insRouter from './router/insRoutes.js'
+import adminRouter from './router/adminRoutes.js'
+import cartWishlistRouter from './router/cartWishlistRoutes.js'
+import helpersRouter from './router/helpersRoutes.js'
+import coursesRouter from './router/coursesRoutes.js'
+import authRouter from './router/authRoutes.js'
+
 const app = express()
 import './middleware/passport.js'
 import passport from 'passport'
@@ -32,7 +39,12 @@ app.get('/',(req,res)=>{
 })
 
 // api routes
-app.use('/api',router)
+app.use('/api', adminRouter)
+app.use('/api', cartWishlistRouter)
+app.use('/api', coursesRouter)
+app.use('/api', helpersRouter)
+app.use('/api', insRouter)
+app.use('/api', userRouter)
 app.use('/auth', authRouter)
 
 // start server only when we have valid connection
