@@ -163,7 +163,7 @@ export async function getUserCourseBySlug(req, res) {
 export async function updateCourse(req, res) {
 	const body = req.body
 	try {
-		AdminModel.updateOne({ _id: body._id }, body)
+		CoursesModel.updateOne({ _id: body._id }, body)
 			.exec()
 			.then(()=>{
 				return res
