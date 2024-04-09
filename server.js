@@ -11,6 +11,7 @@ import adminRouter from './router/adminRoutes.js'
 import cartWishlistRouter from './router/cartWishlistRoutes.js'
 import helpersRouter from './router/helpersRoutes.js'
 import coursesRouter from './router/coursesRoutes.js'
+import careerRouter from './router/careerRoute.js'
 import authRouter from './router/authRoutes.js'
 
 const app = express()
@@ -45,6 +46,7 @@ app.use('/api', coursesRouter)
 app.use('/api', helpersRouter)
 app.use('/api', insRouter)
 app.use('/api', userRouter)
+app.use('/api', careerRouter)
 app.use('/auth', authRouter)
 
 // start server only when we have valid connection

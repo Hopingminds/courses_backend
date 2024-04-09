@@ -188,7 +188,7 @@ export async function updateCourse(req, res) {
 export async function deleteCourse(req, res) {
 	try {
 		const {_id} = req.body
-		Model.findByIdAndDelete(_id).exec()
+		CoursesModel.findByIdAndDelete(_id).exec()
 		.then(()=>{
 			return res
 			.status(200)
