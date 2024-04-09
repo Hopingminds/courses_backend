@@ -157,7 +157,7 @@ export async function login(req, res) {
 							})
 						})
 						.catch((error)=>{
-							return res.status(200).json({ success: false, message: 'Internal Server Error - Error Saving Token', error});
+							return res.status(500).json({ success: false, message: 'Internal Server Error - Error Saving Token', error});
 						})
 					})
 					.catch((error) => {
