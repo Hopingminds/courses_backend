@@ -2,6 +2,7 @@ import {Router} from 'express'
 const router = Router()
 
 import * as controller from '../controllers/appController.js'
+import * as helperController from '../controllers/HelpersController.js'
 import * as awsController from '../controllers/AwsController.js'
 import { registerMail } from '../controllers/mailer.js'
 import {upload, uploadUserProfile} from '../controllers/AwsController.js'
@@ -21,6 +22,8 @@ router.route('/createResetSession').get(controller.createResetSession)
 
 router.route('/getfilesfromaws').get(awsController.getfilesfromaws)
 router.route('/getfilefromaws/:filename').get(awsController.getfilefromaws)
+
+router.route('/getcolleges').get(helperController.getColleges)
 
 // PUT ROUTES
 
