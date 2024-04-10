@@ -80,6 +80,7 @@ export async function getfilesfromaws(req, res) {
     r.Contents.map(item => {
         if (!item.Key.includes("images/profile/")) {
             data.push({
+                title: item.Key.replace(/^assets\/\d+-/, ''),
                 key: item.Key,
                 url:  `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${item.Key}`
             })
