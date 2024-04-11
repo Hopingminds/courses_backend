@@ -60,7 +60,8 @@ export const CoursesSchema = new mongoose.Schema({
             review: {type: String},
             reating: {type: Number}
         }
-    ]
+    ],
+    display: {type: Boolean, default: false}
 });
 
 export default mongoose.model.Courses || mongoose.model('Courses', CoursesSchema);
