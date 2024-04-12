@@ -68,6 +68,7 @@ export async function getCourses(req, res) {
 
 		// Build the sort object based on the 'sort' parameter
 		let sortObj = {}
+		sortObj.display = -1
 		if (sort === 'price_asc') {
 			sortObj.base_price = 1
 		} else if (sort === 'price_desc') {
@@ -264,7 +265,7 @@ export async function purchasedCourse(req, res) {
 			} else {
 				const course = await CoursesModel.findById(courseId)
 
-				if (!course) {
+				if (!course || !course.display) {
 					coursesNotFound.push(courseId)
 				} else {
 					user.purchased_courses.push({ course: courseId })
