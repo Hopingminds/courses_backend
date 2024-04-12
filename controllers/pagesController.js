@@ -1,7 +1,7 @@
 import CareerModel from '../model/Career.model.js'
 import HirefromusModel from '../model/Hirefromus.model.js';
 
-/** POST: https://localhost:8080/api/addcareerfrom
+/** POST: https://localhost:8080/api/addcareerform
     body: {
         "name": ""
         "email": ""
