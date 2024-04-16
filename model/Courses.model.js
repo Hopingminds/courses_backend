@@ -61,6 +61,9 @@ export const CoursesSchema = new mongoose.Schema({
             reating: {type: Number}
         }
     ],
+    IsMinorDegreeCourse:{
+        type: Boolean, default: false
+    },
     display: {type: Boolean, default: false}
 });
 

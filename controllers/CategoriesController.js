@@ -8,7 +8,7 @@ body: {
 */
 export async function addcategory(req, res) {
 	try {
-		const { Category_Name, Category_image } = req.body
+		const { Category_Name, Category_image, IsMinorDegreeCategory } = req.body
 
 		const existingCategory = await categoriesModel.findOne({
 			Category_Name,
@@ -23,6 +23,7 @@ export async function addcategory(req, res) {
 		const newCategory = new categoriesModel({
 			Category_Name,
 			Category_image,
+			IsMinorDegreeCategory
 		})
 
 		await newCategory.save()

@@ -11,6 +11,9 @@ export const CategoriesSchema = new mongoose.Schema({
     Category_image:{
         type: String
     },
+    IsMinorDegreeCategory:{
+        type: Boolean, default: false
+    },
     Subcategories:[
         {
             _id :{ type: mongoose.Schema.Types.ObjectId, 
