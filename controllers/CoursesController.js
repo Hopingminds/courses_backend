@@ -40,6 +40,7 @@ export async function getCourses(req, res) {
 		price_min,
 		price_max,
 		search,
+		minordegree,
 		populate,
 	} = req.query
 	try {
@@ -51,6 +52,10 @@ export async function getCourses(req, res) {
 		}
 		if (subcategory) {
 			query.subcategory = subcategory
+		}
+
+		if (minordegree) {
+			query.IsMinorDegreeCourse = minordegree
 		}
 
 		// Add price range to the query if provided
