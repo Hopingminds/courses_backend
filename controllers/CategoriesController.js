@@ -96,6 +96,21 @@ export async function getcategories(req, res) {
     }
 }
 
+/** GET: http://localhost:8080/api/getminordegreecategories */
+export async function getMinordegreeCategories(req, res) {
+	try {
+        const categories = await categoriesModel.find({IsMinorDegreeCategory: true})
+
+        if (!categories) {
+            return res.status(404).json({ success: false, message: 'Categories not found' });
+        }
+
+        res.status(200).json({ success: true, categories });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+}
+
 /** GET: http://localhost:8080/api/categories/:categoryname */
 export async function getsubcategories(req, res) {
 	try {

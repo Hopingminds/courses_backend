@@ -16,6 +16,7 @@ router.route('/courses').get(CoursesController.getCourses)
 router.route('/recommendedcourses').get(CoursesController.getRecommendedCourses)
 router.route('/course/:coursename').get(CoursesController.getCourseBySlug)
 router.route('/categories').get(CategoriesController.getcategories)
+router.route('/getminordegreecategories').get(CategoriesController.getMinordegreeCategories)
 router.route('/categories/:categoryname').get(CategoriesController.getsubcategories)
 
 // PUT ROUTES
