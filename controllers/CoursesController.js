@@ -42,6 +42,7 @@ export async function getCourses(req, res) {
 		search,
 		minordegree,
 		populate,
+		credits
 	} = req.query
 	try {
 		let query = {}
@@ -56,6 +57,10 @@ export async function getCourses(req, res) {
 
 		if (minordegree) {
 			query.IsMinorDegreeCourse = minordegree
+		}
+		
+		if (credits) {
+			query.credits = credits
 		}
 
 		// Add price range to the query if provided
