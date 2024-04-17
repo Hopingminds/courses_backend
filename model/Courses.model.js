@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 export const CoursesSchema = new mongoose.Schema({
+    courseID: { type: String },
     title:{type: String},
     slug:{type: String},
     featured_image:{type: String},
@@ -64,7 +65,8 @@ export const CoursesSchema = new mongoose.Schema({
     IsMinorDegreeCourse:{
         type: Boolean, default: false
     },
-    display: {type: Boolean, default: false}
+    display: {type: Boolean, default: false},
+    credits: { type: Number }
 });
 
 export default mongoose.model.Courses || mongoose.model('Courses', CoursesSchema);
