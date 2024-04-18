@@ -5,14 +5,11 @@ export const QnaSchema = new mongoose.Schema({
         type: String
     },
     options:{
-        1: {type: String},    
-        2: {type: String},
-        3: {type: String},
-        4: {type: String},
+        type: Array,
     },
     answer: {
-        type: Number
+        type: String
     }
 });
 
-export default mongoose.model.Qna || mongoose.model('Qna', QnaSchema);
+export default mongoose.model.Qnas || mongoose.model('Qna', QnaSchema);
