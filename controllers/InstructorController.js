@@ -280,6 +280,51 @@ export async function updateInstructor(req, res) {
 	}
 }
 
+/** PUT: http://localhost:8080/api/updateinstructoradmin 
+ * @param: {
+    "header" : "Bearer <Admintoken>"
+}
+body: {
+    "instructorID": "cw76276c8761cv6278"
+    "instructorname" : "",
+    "email": "",
+    "name": "",
+    "profile": "",
+    "college": "",
+    "position": "",
+    "bio": "",
+}
+*/
+export async function updateInstructorAdmin(req, res) {
+	try {
+		const body = req.body
+		if (!body.instructorID) return res.status(401).send({ error: 'Instructor Not Found...!' })
+
+		const updateInstructor = new Promise((resolve, reject) => {
+			// update the data
+			InstructorModel.updateOne({ _id: body.instructorID }, body)
+            .exec()
+            .then(()=>{
+                resolve()
+            })
+            .catch((error)=>{
+                throw error
+            })
+		})
+        
+        Promise.all([updateInstructor])
+        .then(()=>{
+            return res.status(201).send({ msg : "Record Updated"});
+        })
+        .catch((error) => {
+            return res.status(500).send({ error: error.message })
+        })
+
+	} catch (error) {
+		return res.status(401).send({ error })
+	}
+}
+
 // update the password when we have valid session
 /** PUT: http://localhost:8080/api/resetinsPassword 
  * body:{

@@ -15,6 +15,7 @@ router.route('/instructors').get(AdminAuth, instructorController.getAllInstructo
 
 // PUT ROUTES
 router.route('/updateinst').put(instAuth, instructorController.updateInstructor);
+router.route('/updateinstructoradmin').put(AdminAuth, instructorController.updateInstructorAdmin);
 router.route('/resetinsPassword').put(instAuth, instructorController.updateInstructor);
 
 // DELETE ROUTES
