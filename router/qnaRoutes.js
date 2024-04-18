@@ -9,6 +9,7 @@ router.route('/createtestmodule').post(AdminAuth,TestModuleControllers.createTes
 router.route('/addquestiontomodule').post(AdminAuth,QnaControllers.addQuestionToModule);
 // GET ROUTES
 router.route('/gettestquestions').get(TestModuleControllers.getTestQuestions);
+router.route('/getallmodules').get(TestModuleControllers.getAllModules);
 
 // PUT ROUTES
 
