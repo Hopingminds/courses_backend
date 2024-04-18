@@ -34,27 +34,6 @@ export async function createTestModule(req, res) {
 	}
 }
 
-/** GET: http://localhost:8080/api/gettestquestions */
-export async function getTestQuestions(req, res) {
-	try {
-		TestModuleModel.find({ }).populate('questions')
-			.exec()
-			.then((questions) => {
-				let extractedData = questions.map(questionSet => {
-					let { _id, module_name, module_description, questions } = questionSet;
-					let processedQuestions = questions.map(({ _id, question, options, __v }) => ({ _id, question, options, __v }));
-					return { _id, module_name, module_description, questions: processedQuestions };
-				})
-				return res.status(200).send({ success: true, data: extractedData })
-			})
-			.catch((err) => {
-				return res.status(404).send({ error: 'Cannot Find questions Data', err })
-			})
-	} catch (error) {
-		return res.status(500).send({ error: 'Internal Server Error', error })
-	}
-}
-
 // GET: http://localhost:8080/api/getallmodules
 export async function getAllModules(req, res) {
 	try {
