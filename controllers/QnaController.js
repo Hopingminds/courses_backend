@@ -68,7 +68,17 @@ export async function getTestQuestions(req, res) {
 
 /** GET: http://localhost:8080/api/getmodulequestions?module_id=6620c1a48cb4bcb50f84748f&index=1 */ 
 export async function getModuleQuestions(req, res) {
+	
+	function shuffleArray(array) {
+		for (let i = array.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[array[i], array[j]] = [array[j], array[i]];
+		}
+		return array;
+	}
+
 	try {
+		const { userID } = req.user
 		const { module_id, index } = req.query
 		if (!module_id) {
 			return res.status(500).send({ success:false, message: 'module_id required.' })
@@ -76,10 +86,16 @@ export async function getModuleQuestions(req, res) {
 		TestModuleModel.findOne({ _id:module_id }).populate('questions')
 			.exec()
 			.then((questions) => {
-				let data  = questions.questions.map((question)=>{
+				let QuestionsData  = questions.questions.map((question)=>{
 					const { answer, ...rest } = question.toObject()
 					return rest
 				})
+				
+				if (!req.session.reandomQuestions[userID]) {
+					req.session.reandomQuestions[userID] =  shuffleArray(QuestionsData);
+				}
+
+				const data = req.session.reandomQuestions[userID]
 				if (index) {
 					return res.status(200).send({ success: data[index-1]? true : false, length: data.length, data: data[index-1] ? data[index-1] : `Max index = ${data.length}` })
 				} else{
@@ -87,6 +103,7 @@ export async function getModuleQuestions(req, res) {
 				}
 			})
 			.catch((err) => {
+				console.log(err);
 				return res.status(404).send({ error: 'Cannot Find questions Data', err })
 			})
 	} catch (error) {

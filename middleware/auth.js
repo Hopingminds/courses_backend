@@ -29,5 +29,11 @@ export function localVariables(req, res, next){
         OTP : null,
         resetSession : false
     }
+
+    console.log(req.session.reandomQuestions);
+    if (!req.session.reandomQuestions) {
+        req.session.reandomQuestions = {}
+    }
+
     next()
 }
