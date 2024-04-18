@@ -17,7 +17,8 @@ export async function verifyInstructor(req, res, next) {
 	}
 }
 
-/** POST: http://localhost:8080/api/instregister 
+/** POST: http://localhost:8080/api/instregister
+* @header : Bearer <token>
 * @param : {
 		"password":"Sahil@123", 
 		"name": "Sahil Kumar", 
