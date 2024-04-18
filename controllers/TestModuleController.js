@@ -1,4 +1,4 @@
-import TestModuleModel from "../model/TestModule.model.js";
+import TestModuleModel from "../model/Testmodule.model.js";
 
 /** POST: http://localhost:8080/api/createtestmodule
 body: {
