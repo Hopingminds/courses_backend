@@ -13,6 +13,7 @@ import helpersRouter from './router/helpersRoutes.js'
 import coursesRouter from './router/coursesRoutes.js'
 import pagesRouter from './router/pagesRoute.js'
 import authRouter from './router/authRoutes.js'
+import qnaRouter from './router/qnaRoutes.js'
 
 const app = express()
 import './middleware/passport.js'
@@ -47,6 +48,7 @@ app.use('/api', helpersRouter)
 app.use('/api', insRouter)
 app.use('/api', userRouter)
 app.use('/api', pagesRouter)
+app.use('/api', qnaRouter)
 app.use('/auth', authRouter)
 
 // start server only when we have valid connection
