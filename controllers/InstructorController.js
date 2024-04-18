@@ -224,13 +224,13 @@ export async function getAllInstructors(req, res) {
 					const { password, token, ...rest } = ins.toObject()
 					return rest
 				})
-					return res.status(404).send({ success: true, data: data })
+					return res.status(200).send({ success: true, data: data })
 			})
 			.catch((err) => {
 				return res.status(404).send({ error: 'Cannot Find Instructor Data', err })
 			})
 	} catch (error) {
-		return res.status(404).send({ error: 'Internal Server Error', error })
+		return res.status(500).send({ error: 'Internal Server Error', error })
 	}
 }
 
