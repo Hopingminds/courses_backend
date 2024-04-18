@@ -66,14 +66,13 @@ export async function getTestQuestions(req, res) {
 	}
 }
 
-/** GET: http://localhost:8080/api/getmodulequestions
-	@body :{
-		module_id: "6620c1a48cb4bcb50f84748f"
-	}
- */ 
+/** GET: http://localhost:8080/api/getmodulequestions?module_id=6620c1a48cb4bcb50f84748f&index=1 */ 
 export async function getModuleQuestions(req, res) {
 	try {
-		const { module_id } = req.body
+		const { module_id, index } = req.query
+		if (!module_id) {
+			return res.status(500).send({ success:false, message: 'module_id required.' })
+		}
 		TestModuleModel.findOne({ _id:module_id }).populate('questions')
 			.exec()
 			.then((questions) => {
@@ -81,7 +80,11 @@ export async function getModuleQuestions(req, res) {
 					const { answer, ...rest } = question.toObject()
 					return rest
 				})
-				return res.status(200).send({ success: true, data: data })
+				if (index) {
+					return res.status(200).send({ success: data[index-1]? true : false, length: data.length, data: data[index-1] ? data[index-1] : `Max index = ${data.length}` })
+				} else{
+					return res.status(200).send({ success: true, data: data })
+				}
 			})
 			.catch((err) => {
 				return res.status(404).send({ error: 'Cannot Find questions Data', err })
