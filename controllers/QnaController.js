@@ -3,6 +3,9 @@ import TestModuleModel from "../model/Testmodule.model.js"
 import UsertestreportModel from "../model/Usertestreport.model.js";
 
 /** POST: http://localhost:8080/api/addquestiontomodule
+* @param: {
+    "header" : "Admin <token>"
+}
 body: {
     "module_id":"6620b6b7a3340a8de1a70bc0",
     "question": "This is a question",
@@ -67,7 +70,11 @@ export async function getTestQuestions(req, res) {
 	}
 }
 
-/** GET: http://localhost:8080/api/getmodulequestions?module_id=6620c1a48cb4bcb50f84748f&index=1 */ 
+/** GET: http://localhost:8080/api/getmodulequestions?module_id=6620c1a48cb4bcb50f84748f&index=1 
+* @param: {
+    "header" : "User <token>"
+}
+*/ 
 export async function getModuleQuestions(req, res) {
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -114,8 +121,12 @@ export async function getModuleQuestions(req, res) {
 }
 
 /** PUT: http://localhost:8080/api/submittestanswer
-body: {
-    "question": { type: mongoose.Schema.Types.ObjectId, ref: 'Qnas' },
+ * @param: {
+    "header" : "User <token>"
+}
+ * @body : {
+    "moduleID": { type: mongoose.Schema.Types.ObjectId, ref: 'Qnas' }
+    "questionID": { type: mongoose.Schema.Types.ObjectId, ref: 'Qnas' },
     "answer": { type: String }
 }
 */

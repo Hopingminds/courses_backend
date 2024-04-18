@@ -12,7 +12,7 @@ router.route('/addquestiontomodule').post(AdminAuth,QnaControllers.addQuestionTo
 // GET ROUTES
 router.route('/gettestquestions').get(Abort, QnaControllers.getTestQuestions);
 router.route('/getmodulequestions').get(Auth, QnaControllers.getModuleQuestions);
-router.route('/getallmodules').get(TestModuleControllers.getAllModules);
+router.route('/getallmodules').get(AdminAuth || Auth,TestModuleControllers.getAllModules);
 
 // PUT ROUTES
 router.route('/submittestanswer').put(Auth, QnaControllers.submitAnswer);

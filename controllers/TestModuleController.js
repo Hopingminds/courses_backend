@@ -1,6 +1,9 @@
 import TestModuleModel from "../model/Testmodule.model.js";
 
 /** POST: http://localhost:8080/api/createtestmodule
+* @param: {
+    "header" : "Admin <token>"
+}
 body: {
     "module_name": "React Js"
 }
@@ -34,7 +37,11 @@ export async function createTestModule(req, res) {
 	}
 }
 
-// GET: http://localhost:8080/api/getallmodules
+/** GET: http://localhost:8080/api/getallmodules 
+* @param: {
+    "header" : "User/Admin <token>"
+}
+*/
 export async function getAllModules(req, res) {
 	try {
 		TestModuleModel.find({ })
