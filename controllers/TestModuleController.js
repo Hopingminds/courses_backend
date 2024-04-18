@@ -1,4 +1,5 @@
 import TestModuleModel from "../model/Testmodule.model.js";
+import UsertestreportModel from "../model/Usertestreport.model.js";
 
 /** POST: http://localhost:8080/api/createtestmodule
 * @param: {
@@ -54,6 +55,30 @@ export async function getAllModules(req, res) {
 				return res.status(200).send({ success: true, data: data })
 			})
 			.catch((err) => {
+				return res.status(404).send({ error: 'Cannot Find Modules Data', err })
+			})
+	} catch (error) {
+		return res.status(500).send({ error: 'Internal Server Error', error })
+	}
+}
+
+/** GET: http://localhost:8080/api/getmoduleprogress
+* @param: {
+    "header" : "User <token>"
+}
+*/
+export async function getModuleProgress(req, res) {
+	try {
+		const { userID } = req.user
+		const { module } = req.query
+		UsertestreportModel.findOne({ user: userID, module})
+			.exec()
+			.then((Module) => {
+				const percentage = (Module.QnaData.length/Module.generatedQustionSet.length)*100
+				return res.status(200).send({ success: true, percentage })
+			})
+			.catch((err) => {
+				console.log(err);
 				return res.status(404).send({ error: 'Cannot Find Modules Data', err })
 			})
 	} catch (error) {
