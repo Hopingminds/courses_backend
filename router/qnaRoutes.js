@@ -12,7 +12,8 @@ router.route('/addquestiontomodule').post(AdminAuth,QnaControllers.addQuestionTo
 // GET ROUTES
 router.route('/gettestquestions').get(Abort, QnaControllers.getTestQuestions);
 router.route('/getmodulequestions').get(Auth, QnaControllers.getModuleQuestions);
-router.route('/getallmodules').get(AdminAuth || Auth,TestModuleControllers.getAllModules);
+router.route('/getallmodules').get(Auth,TestModuleControllers.getAllModules);
+router.route('/getallmodulesadmin').get(AdminAuth,TestModuleControllers.getAllModulesAdmin);
 router.route('/getmoduleprogress').get(Auth,TestModuleControllers.getModuleProgress);
 
 // PUT ROUTES
