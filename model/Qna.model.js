@@ -5,7 +5,7 @@ export const QnaSchema = new mongoose.Schema({
         type: String
     },
     options:{
-        type: Array,
+        type: Object,
     },
     answer: {
         type: String
