@@ -21,7 +21,7 @@ body: {
 export async function addQuestionToModule(req, res) {
 	try {
 		const question = req.body
-        console.log(question);
+        // console.log(question);
         const TestModule = await TestModuleModel.findOne({
 			_id:question.module_id
 		})
@@ -109,7 +109,7 @@ export async function getModuleQuestions(req, res) {
         });
 
         if (!Usertestreport.generatedQustionSet.length) { // Check for array length instead of existence
-            console.log(shuffleArray(QuestionsData));
+            // console.log(shuffleArray(QuestionsData));
             Usertestreport.generatedQustionSet = shuffleArray(QuestionsData);
             await Usertestreport.save(); // Save the document after setting the generatedQustionSet
         }
