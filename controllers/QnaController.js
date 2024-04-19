@@ -77,13 +77,13 @@ export async function getTestQuestions(req, res) {
 */ 
 export async function getModuleQuestions(req, res) {
     function shuffleArray(array) {
-        const ids = array.map(item => item._id); // Extracting _id from each object
-        for (let i = ids.length - 1; i > 0; i--) {
+        const shuffledIds = array.map(item => item._id);
+        for (let i = shuffledIds.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [ids[i], ids[j]] = [ids[j], ids[i]];
+            [shuffledIds[i], shuffledIds[j]] = [shuffledIds[j], shuffledIds[i]];
         }
-        return ids;
-    }
+        return shuffledIds.map(id => ({ "question": id }));
+    }    
 
     try {
         const { userID } = req.user;
@@ -97,7 +97,7 @@ export async function getModuleQuestions(req, res) {
             return res.status(500).send({ success: false, message: 'index required.' });
         }
 
-        let Usertestreport = await UsertestreportModel.findOne({ user: userID, module: module_id }).populate('generatedQustionSet');
+        let Usertestreport = await UsertestreportModel.findOne({ user: userID, module: module_id }).populate('generatedQustionSet.question');
         if (!Usertestreport) {
             Usertestreport = new UsertestreportModel({ user: userID, module: module_id, generatedQustionSet: [] }); // Change {} to []
         }
@@ -109,20 +109,22 @@ export async function getModuleQuestions(req, res) {
         });
 
         if (!Usertestreport.generatedQustionSet.length) { // Check for array length instead of existence
+            console.log(shuffleArray(QuestionsData));
             Usertestreport.generatedQustionSet = shuffleArray(QuestionsData);
             await Usertestreport.save(); // Save the document after setting the generatedQustionSet
         }
 
-        const fetchAgain = await UsertestreportModel.findOne({ user: userID, module: module_id }).populate('generatedQustionSet');
+        const fetchAgain = await UsertestreportModel.findOne({ user: userID, module: module_id }).populate('generatedQustionSet.question');
         const data = fetchAgain.generatedQustionSet.map((data)=> {
-            const {answer, ...rest} = data.toObject()
-            return rest
+            const {question, ...rest} = data.toObject()
+            const {answer, ...restdata} = question
+            return({...rest, question:restdata});
         })
 
         // if (index) {
         return res.status(200).send({ success: data[index - 1] ? true : false, length: data.length, data: data[index - 1] ? data[index - 1] : `Max index = ${data.length}` });
         // } else {
-            return res.status(200).send({ success: true, data: data });
+        //     return res.status(200).send({ success: true, data: data });
         // }
     } catch (error) {
         return res.status(500).send({ error: 'Internal Server Error', error });
