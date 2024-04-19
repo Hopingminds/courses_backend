@@ -12,7 +12,7 @@ export const UsertestreportSchema = new mongoose.Schema({
         {
             question: { type: mongoose.Schema.Types.ObjectId, ref: 'Qna' },
             isSubmitted: { type: Boolean, default: false },
-            summittedAnswer: { type: String }
+            submittedAnswer: { type: String }
         }
     ],
 }, {_id: false});

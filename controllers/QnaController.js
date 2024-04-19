@@ -145,33 +145,33 @@ export async function submitAnswer(req, res) {
     try {
         const { userID } = req.user;
         const { questionID, moduleID, answer } = req.body;
+        // Find the user's test report based on userID and moduleID
+        const testReport = await UsertestreportModel.findOne({ user: userID, module: moduleID });
 
-        if (!questionID || !answer || !moduleID) {
-            return res.status(501).send({ success: false, message: "Question ID, Module ID, and Answer are required!" });
+        if (!testReport) {
+            return res.status(404).send({ success: false, message: 'Test report not found' })
         }
 
-        let Usertestreport = await UsertestreportModel.findOne({ user: userID, module: moduleID });
+        // Find the index of the question in the generatedQustionSet array
+        const questionIndex = testReport.generatedQustionSet.findIndex(item => item.question.toString() === questionID);
 
-        if (!Usertestreport) {
-            Usertestreport = new UsertestreportModel({ user: userID, module: moduleID, QnaData: [] });
+        if (questionIndex === -1) {
+            return res.status(404).send({ success: false, message: 'Question not found in the generated question set' })
         }
 
-        let Question = await QnaModel.findOne({ _id: questionID });
-        if (!Question) {
-            return res.status(501).send({ success: false, message: "Invalid question ID passed!" });
+        // Check if the answer for this question is already submitted
+        if (testReport.generatedQustionSet[questionIndex].isSubmitted) {
+            return res.status(500).send({ success: false, message: 'Answer for this question is already submitted' })
         }
 
-        const isQuestionSaved = Usertestreport.QnaData.some(item => item.question.equals(questionID));
+        // Update the submitted answer for the question
+        testReport.generatedQustionSet[questionIndex].submittedAnswer = answer;
+        testReport.generatedQustionSet[questionIndex].isSubmitted = true; // Optionally, mark the question as submitted
 
-        if (isQuestionSaved) {
-            return res.status(200).send({ success: true, message: 'Question already saved!' });
-        }
-
-        Usertestreport.QnaData.push({ question: questionID, answer });
-        await Usertestreport.save();
-
-        return res.status(200).send({ success: true, message: 'Question saved successfully!' });
+        // Save the updated test report
+        await testReport.save();
+        return res.status(200).send({ success: true, message: 'Answer submitted successfully' })
     } catch (error) {
-        return res.status(500).send({ error: 'Internal Server Error', error });
+        return res.status(501).send({ success: false, message: 'Error submitting answer' + error.message })
     }
 }
