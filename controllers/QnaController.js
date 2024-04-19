@@ -114,11 +114,11 @@ export async function getModuleQuestions(req, res) {
             await Usertestreport.save(); // Save the document after setting the generatedQustionSet
         }
 
-        const fetchAgain = await UsertestreportModel.findOne({ user: userID, module: module_id }).populate('generatedQustionSet.question');
+        const fetchAgain = await UsertestreportModel.findOne({ user: userID, module: module_id }).populate('generatedQustionSet.question').populate('module')
         const data = fetchAgain.generatedQustionSet.map((data)=> {
             const {question, ...rest} = data.toObject()
             const {answer, ...restdata} = question
-            return({...rest, question:restdata});
+            return({module: fetchAgain.module.module_name, ...rest, question:restdata,});
         })
 
         // if (index) {
