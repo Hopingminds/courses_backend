@@ -44,37 +44,43 @@ export async function createTestModule(req, res) {
 }
 */
 export async function getAllModules(req, res) {
-	function calculateProgress(module) {
-		const submittedCount = module.generatedQustionSet.filter(question => question.isSubmitted).length;
-		const totalQuestions = module.generatedQustionSet.length;
-		return (submittedCount / totalQuestions) * 100;
-	}
-
 	try {
-		const {userID} = req.user
+		const { userID } = req.user;
 		if (!userID) {
-			return res.status(500).send({ error: 'User Not Found!' })
+			return res.status(500).send({ error: 'User Not Found!' });
 		}
-		let Module = await TestModuleModel.find({ })
-		let data  = Module.map((module)=>{
-			const { questions, ...rest } = module.toObject()
-			return rest
-		})
-		let UserModelProgress = await UsertestreportModel.find({ user: userID})
-		UserModelProgress.forEach(module => {
+
+		// Fetch all modules and user progress in parallel
+		const [modules, userProgress] = await Promise.all([
+			TestModuleModel.find({}),
+			UsertestreportModel.find({ user: userID })
+		]);
+
+		// Create a map to store module progress for constant time lookup
+		const progressMap = new Map();
+
+		userProgress.forEach(module => {
 			const progress = calculateProgress(module);
-			for (let i = 0; i < data.length; i++) {
-				const Module = data[i];
-				if (Module._id.toString() === module.module.toString()) {
-					console.log(data[i]['progress'] = progress)
-				}
-			}
+			progressMap.set(module.module.toString(), progress);
 		});
 
-		return res.status(200).send({ success: true, data: data })
+		// Update progress for each module
+		const data = modules.map(module => {
+			const { questions, ...rest } = module.toObject();
+			const progress = progressMap.get(module._id.toString()) || 0; // Default to 0 if progress not found
+			return { ...rest, progress };
+		});
+
+		return res.status(200).send({ success: true, data });
 	} catch (error) {
-		return res.status(500).send({ error: 'Internal Server Error', error })
+		return res.status(500).send({ error: 'Internal Server Error', error });
 	}
+}
+
+function calculateProgress(module) {
+	const submittedCount = module.generatedQustionSet.filter(question => question.isSubmitted).length;
+	const totalQuestions = module.generatedQustionSet.length;
+	return (submittedCount / totalQuestions) * 100;
 }
 
 /** GET: http://localhost:8080/api/getallmodulesadmin 

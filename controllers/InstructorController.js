@@ -298,7 +298,7 @@ body: {
 export async function updateInstructorAdmin(req, res) {
 	try {
 		const body = req.body
-		if (!body.instructorID) return res.status(401).send({ error: 'Instructor Not Found...!' })
+		if (!body.instructorID) return res.status(401).send({ error: 'instructorID is required!' })
 
 		const updateInstructor = new Promise((resolve, reject) => {
 			// update the data
