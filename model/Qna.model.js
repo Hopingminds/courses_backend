@@ -9,6 +9,10 @@ export const QnaSchema = new mongoose.Schema({
     },
     answer: {
         type: String
+    },
+    maxMarks: {
+        type: Number,
+        default: 5
     }
 });
 

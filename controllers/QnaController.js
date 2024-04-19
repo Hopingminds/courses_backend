@@ -57,7 +57,7 @@ export async function getTestQuestions(req, res) {
 			.then((questions) => {
 				let extractedData = questions.map(questionSet => {
 					let { _id, module_name, module_description, questions } = questionSet;
-					let processedQuestions = questions.map(({ _id, question, options, __v }) => ({ _id, question, options, __v }));
+					let processedQuestions = questions.map(({ _id, question, options, __v, maxMarks }) => ({ _id, question, options, __v, maxMarks }));
 					return { _id, module_name, module_description, questions: processedQuestions };
 				})
 				return res.status(200).send({ success: true, data: extractedData })
@@ -77,11 +77,12 @@ export async function getTestQuestions(req, res) {
 */ 
 export async function getModuleQuestions(req, res) {
     function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
+        const ids = array.map(item => item._id); // Extracting _id from each object
+        for (let i = ids.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
+            [ids[i], ids[j]] = [ids[j], ids[i]];
         }
-        return array;
+        return ids;
     }
 
     try {
@@ -91,8 +92,12 @@ export async function getModuleQuestions(req, res) {
         if (!module_id) {
             return res.status(500).send({ success: false, message: 'module_id required.' });
         }
+        
+        if (!index) {
+            return res.status(500).send({ success: false, message: 'index required.' });
+        }
 
-        let Usertestreport = await UsertestreportModel.findOne({ user: userID, module: module_id });
+        let Usertestreport = await UsertestreportModel.findOne({ user: userID, module: module_id }).populate('generatedQustionSet');
         if (!Usertestreport) {
             Usertestreport = new UsertestreportModel({ user: userID, module: module_id, generatedQustionSet: [] }); // Change {} to []
         }
@@ -108,13 +113,17 @@ export async function getModuleQuestions(req, res) {
             await Usertestreport.save(); // Save the document after setting the generatedQustionSet
         }
 
-        const data = Usertestreport.generatedQustionSet;
+        const fetchAgain = await UsertestreportModel.findOne({ user: userID, module: module_id }).populate('generatedQustionSet');
+        const data = fetchAgain.generatedQustionSet.map((data)=> {
+            const {answer, ...rest} = data.toObject()
+            return rest
+        })
 
-        if (index) {
-            return res.status(200).send({ success: data[index - 1] ? true : false, length: data.length, data: data[index - 1] ? data[index - 1] : `Max index = ${data.length}` });
-        } else {
+        // if (index) {
+        return res.status(200).send({ success: data[index - 1] ? true : false, length: data.length, data: data[index - 1] ? data[index - 1] : `Max index = ${data.length}` });
+        // } else {
             return res.status(200).send({ success: true, data: data });
-        }
+        // }
     } catch (error) {
         return res.status(500).send({ error: 'Internal Server Error', error });
     }
