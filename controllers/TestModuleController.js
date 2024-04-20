@@ -90,13 +90,87 @@ function calculateProgress(module) {
 */
 export async function getAllModulesAdmin(req, res) {
 	try {
-		let Module = await TestModuleModel.find({ })
+		let Module = await TestModuleModel.find({ }).lean();
 		let data  = Module.map((module)=>{
-			const { questions, ...rest } = module.toObject()
+			const { questions, ...rest } = module
 			return rest
 		})
 		return res.status(200).send({ success: true, data: data })
 	} catch (error) {
 		return res.status(500).send({ error: 'Internal Server Error', error })
 	}
+}
+
+/** GET: http://localhost:8080/api/gettestreport 
+* @param: {
+    "header" : "User <token>"
+}
+*/
+export async function getTestReport(req, res) {
+    try {
+        const { userID } = req.user;
+        let isTestCompleted = true;
+		let testReport = {
+            totalQuestion: 0,
+            attemptedQuestions: 0,
+            unAttemptedQuestions: 0,
+            correctAnswers: 0,
+            incorrectAnswers: 0,
+            totalMarks: 0,
+            obtainedMarks: 0,
+            scorePercentage: 0
+        };
+		
+        if (!userID) {
+            return res.status(500).send({ error: 'User Not Found!' });
+        }
+
+        let Report = await UsertestreportModel.find({ user: userID }).populate('module').populate('generatedQustionSet.question').lean();
+        Report.forEach((report) => {
+            if (report.isModuleCompleted === false) {
+                isTestCompleted = false;
+                return;
+            }
+        });
+
+        if (!isTestCompleted) {
+            return res.status(501).send({ success: false, message: "Test Not Submitted Yet!", isTestCompleted });
+        }
+
+        let newData = Report.map((data) => {
+            const { module, ...restData } = data;
+            const { questions, __v, ...restModule } = module;
+            const updatedQuestions = data.generatedQustionSet.map(question => {
+                const isCorrect = question.isSubmitted ? question.submittedAnswer === question.question.answer : null;
+                return {
+                    ...question,
+                    isCorrect
+                };
+            });
+            return { ...restData, module: { ...restModule }, generatedQustionSet: updatedQuestions };
+        });
+
+		Report.forEach(data => {
+            data.generatedQustionSet.forEach(question => {
+                testReport.totalQuestion++;
+                if (question.isSubmitted) {
+                    testReport.attemptedQuestions++;
+                    if (question.submittedAnswer === question.question.answer) {
+                        testReport.correctAnswers++;
+                        testReport.obtainedMarks += question.question.maxMarks;
+                    } else {
+                        testReport.incorrectAnswers++;
+                    }
+                } else {
+                    testReport.unAttemptedQuestions++;
+                }
+                testReport.totalMarks += question.question.maxMarks;
+            });
+        });
+		testReport.scorePercentage = ((testReport.obtainedMarks / testReport.totalMarks) * 100).toFixed(2);
+
+        return res.status(200).send({ success: true, isTestCompleted, testReport, data: newData,  });
+    } catch (error) {
+        return res.status(500).send({ error: 'Internal Server Error', error });
+    }
 }
