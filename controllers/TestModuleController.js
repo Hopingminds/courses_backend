@@ -38,6 +38,35 @@ export async function createTestModule(req, res) {
 	}
 }
 
+/** POST: http://localhost:8080/api/submitmodule
+* @param: {
+    "header" : "User <token>"
+}
+body: {
+    "moduleID": ""
+}
+*/
+export async function submitModule(req, res) {
+    const { userID } = req.user;
+    const { moduleID } = req.body;
+
+    try {
+        const result = await UsertestreportModel.findOneAndUpdate(
+            { user: userID, module: moduleID },
+            { $set: { isModuleCompleted: true } },
+            { new: true }
+        );
+
+        if (!result) {
+            return res.status(404).send({ error: 'User Test Report not found or already completed.' });
+        }
+
+        return res.status(200).send({ success: true, message: "Module submitted successfully." });
+    } catch (error) {
+        return res.status(500).send({ error: 'Internal Server Error', error });
+    }
+}
+
 /** GET: http://localhost:8080/api/getallmodules 
 * @param: {
     "header" : "User/Admin <token>"
