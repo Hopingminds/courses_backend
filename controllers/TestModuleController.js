@@ -58,12 +58,12 @@ export async function submitModule(req, res) {
         );
 
         if (!result) {
-            return res.status(404).send({ error: 'User Test Report not found or already completed.' });
+            return res.status(404).send({success: false, message: 'User Test Report not found or already completed.' });
         }
 
         return res.status(200).send({ success: true, message: "Module submitted successfully." });
     } catch (error) {
-        return res.status(500).send({ error: 'Internal Server Error', error });
+        return res.status(500).send({ success: false, message: 'Internal Server Error', error });
     }
 }
 
