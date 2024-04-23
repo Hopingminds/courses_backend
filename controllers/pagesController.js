@@ -1,6 +1,8 @@
 import CareerModel from '../model/Career.model.js'
 import HirefromusModel from '../model/Hirefromus.model.js';
-
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
+import 'dotenv/config'
 /** POST: https://localhost:8080/api/addcareerform
     body: {
         "name": ""
@@ -41,4 +43,49 @@ export async function hideFromUsForm(req, res) {
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal Server Error', error});
     }
+}
+
+export async function loginRecWithEmail(req, res) {
+	const { email, password } = req.body
+	try {
+		HirefromusModel.findOne({ email })
+			.then((rec) => {
+				bcrypt
+					.compare(password, rec.password)
+					.then((passwordCheck) => {
+						if (!passwordCheck)
+							return res
+								.status(400)
+								.send({ error: "Wrong password" })
+
+						// create jwt token
+						const token = jwt.sign(
+							{
+								recID: rec._id,
+								email: rec.email,
+								mobile: rec.mobile
+							},
+							process.env.JWT_SECRET,
+							{ expiresIn: '24h' }
+						)
+						return res.status(200).send({
+							msg: 'Login Successful',
+							email: rec.email,
+							token,
+						})
+					})
+					.catch((error) => {
+						return res
+							.status(400)
+							.send({ error: 'Password does not match' })
+					})
+			})
+			.catch((error) => {
+
+                console.log(error);
+				return res.status(404).send({ error: 'Email not Found' })
+			})
+	} catch (error) {
+		return res.status(500).send(error)
+	}
 }
