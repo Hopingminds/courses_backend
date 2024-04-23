@@ -62,7 +62,6 @@ passport.use(
 		async function (accessToken, refreshToken, profile, done) {
 			try {
 				let user = await UserModel.findOne({ email: profile.email });
-				console.log(user);
 				if (user) {
 					const token = generateToken(user);
 					await UserModel.updateOne({ email: user.email }, { token });
