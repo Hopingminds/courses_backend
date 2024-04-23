@@ -176,6 +176,52 @@ export async function submitAnswer(req, res) {
     }
 }
 
+/** GET http://localhost:8080/api/testsubmitteduserslist  */
+function hidePhone(phone) {
+    phone = phone.toString()
+    if (phone && phone.length >= 10) {
+        return phone.substring(0, 3) + '****' + phone.substring(phone.length - 3);
+    }
+    return phone;
+}
+export async function testSubmittedUsersList(req, res) {
+    try {
+        const completedReports = await UsertestreportModel.find({}).populate('user', 'name phone').exec();
+        
+        // Create an object to store user data temporarily
+        const userData = {};
+
+        // Iterate through completedReports to gather user data
+        completedReports.forEach(report => {
+            const userId = report.user._id.toString();
+
+            // Initialize user object if not already initialized
+            if (!userData[userId]) {
+                userData[userId] = {
+                    name: report.user.name,
+                    phone: hidePhone(report.user.phone),
+                    allModulesCompleted: true // Assume all modules are completed until proven otherwise
+                };
+            }
+
+            // Check if the report is completed for the user
+            if (!report.isModuleCompleted) {
+                // If any report is not completed, mark allModulesCompleted as false
+                userData[userId].allModulesCompleted = false;
+            }
+        });
+
+        // Filter out users whose allModulesCompleted is true
+        const uniqueUsers = Object.values(userData).filter(user => user.allModulesCompleted);
+
+        return res.status(200).send({ success: true, data: uniqueUsers });
+    } catch (error) {
+        return res.status(501).send({ success: false, message: 'Error fetching completed users: ' + error.message });
+    }
+}
+
+
+
 /** PUT: http://localhost:8080/api/updatedQuestionViaCSV
  * @param: {
     "header" : "User <token>"

@@ -5,7 +5,7 @@ export const UsertestreportSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         auto: true
     },
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     module: { type: mongoose.Schema.Types.ObjectId, ref: 'Test' },
     isModuleCompleted: { type: Boolean, default: false },
     generatedQustionSet: [
