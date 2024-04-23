@@ -43,7 +43,7 @@ export const UserSchema = new mongoose.Schema({
         enum: ['user' , 'subadmin'],
         default: 'user'
     },
-    isProfileComplete: false,
+    isProfileComplete: {type: Boolean, default: false},
     token: {type: String, default: null}
 });
 
