@@ -21,7 +21,7 @@ passport.use(
 		{
 			clientID: process.env.GOOGLE_CLIENT_ID,
 			clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-			callbackURL: `/auth/google/callback`,
+			callbackURL: `${process.env.SERVER_BASE_URL}/auth/google/callback`,
 			scope: ['profile', 'email']
 		},
 		async function (accessToken, refreshToken, profile, done) {
@@ -56,7 +56,7 @@ passport.use(
 		{
 			clientID: process.env.LINKEDIN_CLIENT_ID,
 			clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
-			callbackURL: `/auth/linkedin/callback`,
+			callbackURL: `${process.env.SERVER_BASE_URL}/auth/linkedin/callback`,
 			scope: ['openid', 'profile', 'email']
 		},
 		async function (accessToken, refreshToken, profile, done) {
