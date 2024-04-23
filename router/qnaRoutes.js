@@ -14,9 +14,11 @@ router.route('/updatedQuestionViaCSV').post(AdminAuth,QnaControllers.updatedQues
 router.route('/gettestquestions').get(Abort, QnaControllers.getTestQuestions);
 router.route('/getmodulequestions').get(Auth, QnaControllers.getModuleQuestions);
 router.route('/getallmodules').get(Auth,TestModuleControllers.getAllModules);
-router.route('/getallmodulesadmin').get(AdminAuth,TestModuleControllers.getAllModulesAdmin);
 router.route('/gettestreport').get(Auth, TestModuleControllers.getTestReport)
 router.route('/testsubmitteduserslist').get(QnaControllers.testSubmittedUsersList)
+// admin side implementation!
+router.route('/getallmodulesadmin').get(AdminAuth,TestModuleControllers.getAllModulesAdmin);
+router.route('/getalltestreport').get(AdminAuth, TestModuleControllers.getAllTestReport)
 
 // PUT ROUTES
 router.route('/submittestanswer').put(Auth, QnaControllers.submitAnswer);

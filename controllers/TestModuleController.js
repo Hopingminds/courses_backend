@@ -1,4 +1,5 @@
 import TestModuleModel from "../model/Testmodule.model.js";
+import UserModel from "../model/User.model.js";
 import UsertestreportModel from "../model/Usertestreport.model.js";
 
 /** POST: http://localhost:8080/api/createtestmodule
@@ -207,6 +208,94 @@ export async function getTestReport(req, res) {
 		testReport.scorePercentage = ((testReport.obtainedMarks / testReport.totalMarks) * 100).toFixed(2);
 
         return res.status(200).send({ success: true, isTestCompleted, testReport, data: newData,  });
+    } catch (error) {
+        return res.status(500).send({ error: 'Internal Server Error', error });
+    }
+}
+
+/** GET: http://localhost:8080/api/getalltestreport 
+* @param: {
+    "header" : "Admin <token>"
+}
+*/
+export async function getAllTestReport(req, res) {
+    try {
+        const allUsers = await UserModel.find({});
+        
+        const testReports = [];
+
+        for (const user of allUsers) {
+            const { _id: userID } = user;
+            let isTestCompleted = true;
+            let testReport = {
+                totalQuestion: 0,
+                attemptedQuestions: 0,
+                unAttemptedQuestions: 0,
+                correctAnswers: 0,
+                incorrectAnswers: 0,
+                totalMarks: 0,
+                obtainedMarks: 0,
+                scorePercentage: 0
+            };
+
+            if (!userID) {
+                return res.status(500).send({ error: 'User Not Found!' });
+            }
+
+            let Report = await UsertestreportModel.find({ user: userID }).populate('module').populate('generatedQustionSet.question').lean();
+            if (Report.length === 0) {
+                continue;
+            }
+
+            Report.forEach((report) => {
+                if (report.isModuleCompleted === false) {
+                    isTestCompleted = false;
+                    return;
+                }
+            });
+
+            if (!isTestCompleted) {
+                testReports.push({ user: user, isTestCompleted: false, message: "Test Not Submitted Yet!" });
+                continue;
+            }
+
+            let newData = Report.map((data) => {
+                const { module, ...restData } = data;
+                const { questions, __v, ...restModule } = module;
+                const updatedQuestions = data.generatedQustionSet.map(question => {
+                    const isCorrect = question.isSubmitted ? question.submittedAnswer === question.question.answer : null;
+                    return {
+                        ...question,
+                        isCorrect
+                    };
+                });
+                return { ...restData, module: { ...restModule }, generatedQustionSet: updatedQuestions };
+            });
+
+            Report.forEach(data => {
+                data.generatedQustionSet.forEach(question => {
+                    testReport.totalQuestion++;
+                    if (question.isSubmitted) {
+                        testReport.attemptedQuestions++;
+                        if (question.submittedAnswer === question.question.answer) {
+                            testReport.correctAnswers++;
+                            testReport.obtainedMarks += question.question.maxMarks;
+                        } else {
+                            testReport.incorrectAnswers++;
+                        }
+                    } else {
+                        testReport.unAttemptedQuestions++;
+                    }
+                    testReport.totalMarks += question.question.maxMarks;
+                });
+            });
+            testReport.scorePercentage = ((testReport.obtainedMarks / testReport.totalMarks) * 100).toFixed(2);
+
+            let {password, token, purchased_courses, blocked_courses, __v, ...rest} = user.toObject()
+            testReports.push({ user:rest, isTestCompleted: true, testReport: testReport, data: newData });
+        }
+
+        return res.status(200).send({ success: true, testReports });
     } catch (error) {
         return res.status(500).send({ error: 'Internal Server Error', error });
     }

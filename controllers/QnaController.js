@@ -214,8 +214,6 @@ function hidePhone(phone) {
     return phone;
 }
 
-
-
 /** PUT: http://localhost:8080/api/updatedQuestionViaCSV
  * @param: {
     "header" : "User <token>"
