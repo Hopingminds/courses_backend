@@ -175,3 +175,17 @@ export async function submitAnswer(req, res) {
         return res.status(501).send({ success: false, message: 'Error submitting answer' + error.message })
     }
 }
+
+/** PUT: http://localhost:8080/api/updatedQuestionViaCSV
+ * @param: {
+    "header" : "User <token>"
+}
+ * @body : {
+    "moduleID": { type: mongoose.Schema.Types.ObjectId, ref: 'Qnas' }
+    "questionID": { type: mongoose.Schema.Types.ObjectId, ref: 'Qnas' },
+    "answer": { type: String }
+}
+*/
+export async function updatedQuestionViaCSV(req, res) {
+    
+}

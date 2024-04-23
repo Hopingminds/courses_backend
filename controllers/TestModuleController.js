@@ -38,7 +38,7 @@ export async function createTestModule(req, res) {
 	}
 }
 
-/** POST: http://localhost:8080/api/submitmodule
+/** PUT: http://localhost:8080/api/submitmodule
 * @param: {
     "header" : "User <token>"
 }

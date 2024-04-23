@@ -9,6 +9,7 @@ import Auth from '../middleware/auth.js'
 // POST ROUTES
 router.route('/createtestmodule').post(AdminAuth,TestModuleControllers.createTestModule);
 router.route('/addquestiontomodule').post(AdminAuth,QnaControllers.addQuestionToModule);
+router.route('/updatedQuestionViaCSV').post(AdminAuth,QnaControllers.updatedQuestionViaCSV);
 // GET ROUTES
 router.route('/gettestquestions').get(Abort, QnaControllers.getTestQuestions);
 router.route('/getmodulequestions').get(Auth, QnaControllers.getModuleQuestions);
