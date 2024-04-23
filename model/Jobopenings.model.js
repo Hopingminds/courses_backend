@@ -7,6 +7,9 @@ export const JobopeningsSchema = new mongoose.Schema({
     company: {
         type: String,
     },
+    logoUrl: {
+        type: String,
+    },
     location: {
         type: String,
     },
