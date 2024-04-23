@@ -70,42 +70,45 @@ export async function submitModule(req, res) {
 
 /** GET: http://localhost:8080/api/getallmodules 
 * @param: {
-    "header" : "User/Admin <token>"
+    "header" : "User <token>"
 }
 */
 export async function getAllModules(req, res) {
 	try {
 		const { userID } = req.user;
-        let isTestCompleted = true;
+		let isTestCompleted = true;
+
 		if (!userID) {
 			return res.status(500).send({ error: 'User Not Found!' });
 		}
 
-		// Fetch all modules and user progress in parallel
 		const [modules, userProgress] = await Promise.all([
 			TestModuleModel.find({}).lean(),
 			UsertestreportModel.find({ user: userID }).lean()
 		]);
 
-		// Create a map to store module progress for constant time lookup
 		const progressMap = new Map();
 		userProgress.forEach(module => {
 			const progress = calculateProgress(module);
-            const isModuleCompleted = module.isModuleCompleted
-			progressMap.set(module.module.toString(), {progress, isModuleCompleted});
+			const isModuleCompleted = module.isModuleCompleted;
+			progressMap.set(module.module.toString(), { progress, isModuleCompleted });
 		});
 
-        userProgress.forEach((report) => {
-            if (report.isModuleCompleted === false) {
-                isTestCompleted = false;
-                return;
-            }
-        });
-		// Update progress for each module
+		if (userProgress.length === 0) {
+			isTestCompleted = false;
+		} else {
+			userProgress.forEach(report => {
+				if (report.isModuleCompleted === false) {
+					isTestCompleted = false;
+					return;
+				}
+			});
+		}
+
 		const data = modules.map(module => {
 			const { questions, ...rest } = module;
-			const progress = progressMap.get(module._id.toString()).progress || 0; // Default to 0 if progress not found
-			const isModuleCompleted = progressMap.get(module._id.toString()).isModuleCompleted || false; // Default to 0 if progress not found
+			const progressObj = progressMap.get(module._id.toString()) || { progress: 0, isModuleCompleted: false };
+			const { progress, isModuleCompleted } = progressObj;
 			return { ...rest, isModuleCompleted, progress };
 		});
 
@@ -114,6 +117,7 @@ export async function getAllModules(req, res) {
 		return res.status(500).send({ error: 'Internal Server Error', error });
 	}
 }
+
 
 function calculateProgress(module) {
 	const submittedCount = module.generatedQustionSet.filter(question => question.isSubmitted).length;
