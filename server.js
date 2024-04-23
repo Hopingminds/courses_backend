@@ -32,7 +32,9 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json())
-app.use(cors())
+app.use(cors({
+    credentials: true,
+}))
 app.use(morgan('tiny'))
 app.disable('x-powered-by') //less hackers know about our stack
 
