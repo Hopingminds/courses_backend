@@ -20,12 +20,15 @@ import './middleware/passport.js'
 import passport from 'passport'
 // middlewares
 app.use(
-	session({
-		secret: process.env.SESSION_SECRET_KEY,
-		resave: false,
-		saveUninitialized: true,
-	})
-)
+    session({
+        secret: process.env.SESSION_SECRET_KEY,
+        resave: false,
+        saveUninitialized: true,
+        cookie: {
+            maxAge: 3 * 30 * 24 * 60 * 60 * 1000, // 3 months in milliseconds
+        },
+    })
+);
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json())
@@ -36,7 +39,7 @@ app.disable('x-powered-by') //less hackers know about our stack
 const port = process.env.PORT || 3009;
 
 // HTTP GET Request
-app.get('/',(req,res)=>{
+app.get('/', (req, res) => {
     res.status(201).send('Home GET Request.')
 })
 
@@ -52,14 +55,14 @@ app.use('/api', qnaRouter)
 app.use('/auth', authRouter)
 
 // start server only when we have valid connection
-connect().then(()=>{
-    try{
-        app.listen(port,()=>{
+connect().then(() => {
+    try {
+        app.listen(port, () => {
             console.log(`Server connected to  http://localhost:${port}`)
         })
-    } catch(error){
+    } catch (error) {
         console.log("Can\'t connet to the server");
     }
-}).catch(error=>{
+}).catch(error => {
     console.log('Invalid databse connection...!');
 })
