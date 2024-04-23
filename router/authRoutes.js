@@ -33,6 +33,7 @@ router.get(
 );
 
 router.get("/linkedin", passport.authenticate("linkedin"));
+
 router.get(
     "/linkedin/callback",
 	passport.authenticate("linkedin", {

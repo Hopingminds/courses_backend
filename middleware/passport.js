@@ -56,13 +56,13 @@ passport.use(
 		{
 			clientID: process.env.LINKEDIN_CLIENT_ID,
 			clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
-			callbackURL: `${process.env.SERVER_BASE_URL}/auth/linkedin/callback`,
+			callbackURL: `/auth/linkedin/callback`,
 			scope: ['openid', 'profile', 'email']
 		},
 		async function (accessToken, refreshToken, profile, done) {
 			try {
 				let user = await UserModel.findOne({ email: profile.email });
-
+				console.log(user);
 				if (user) {
 					const token = generateToken(user);
 					await UserModel.updateOne({ email: user.email }, { token });
