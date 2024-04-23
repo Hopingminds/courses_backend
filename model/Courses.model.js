@@ -65,7 +65,7 @@ export const CoursesSchema = new mongoose.Schema({
     IsMinorDegreeCourse:{
         type: Boolean, default: false
     },
-    display: {type: Boolean, default: false},
+    display: {type: Boolean, default: true},
     credits: { type: Number }
 });
 
