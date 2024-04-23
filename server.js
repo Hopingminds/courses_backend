@@ -32,9 +32,12 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json())
+const allowedOrigins=["http://localhost:3000","http://hopingminds.in"]
 app.use(cors({
-    credentials: true,
-}))
+    origin: allowedOrigins,
+    methods: "GET,POST,PUT,DELETE",
+    credentials: true
+}));
 app.use(morgan('tiny'))
 app.disable('x-powered-by') //less hackers know about our stack
 
