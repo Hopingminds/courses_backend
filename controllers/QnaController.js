@@ -177,13 +177,6 @@ export async function submitAnswer(req, res) {
 }
 
 /** GET http://localhost:8080/api/testsubmitteduserslist  */
-function hidePhone(phone) {
-    phone = phone.toString()
-    if (phone && phone.length >= 10) {
-        return phone.substring(0, 3) + '****' + phone.substring(phone.length - 3);
-    }
-    return phone;
-}
 export async function testSubmittedUsersList(req, res) {
     try {
         const completedReports = await UsertestreportModel.find({}).populate('user', 'name phone').exec();
@@ -205,13 +198,20 @@ export async function testSubmittedUsersList(req, res) {
                 userData[userId].allModulesCompleted = false;
             }
         });
-        
+
         const uniqueUsers = Object.values(userData).filter(user => user.allModulesCompleted);
 
         return res.status(200).send({ success: true, data: uniqueUsers });
     } catch (error) {
         return res.status(501).send({ success: false, message: 'Error fetching completed users: ' + error.message });
     }
+}
+function hidePhone(phone) {
+    phone = phone.toString()
+    if (phone && phone.length >= 10) {
+        return phone.substring(0, 3) + '****' + phone.substring(phone.length - 3);
+    }
+    return phone;
 }
 
 
