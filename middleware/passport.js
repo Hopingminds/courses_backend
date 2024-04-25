@@ -31,7 +31,7 @@ passport.use(
 				if (user) {
 					const token = generateToken(user);
 					await UserModel.updateOne({ email: user.email }, { token });
-					return done(null, { token });
+					return done(null, { token, userID: user._id });
 				} else {
 					user = new UserModel({
 						password: 'itsNotAPassword!',
@@ -42,7 +42,7 @@ passport.use(
 					await user.save();
 					const token = generateToken(user);
 					await UserModel.updateOne({ email: user.email }, { token });
-					return done(null, { token });
+					return done(null, { token, userID: user._id });
 				}
 			} catch (error) {
 				return done(null, false, { message: 'Internal Server Error - Error Saving Token' });
@@ -65,7 +65,7 @@ passport.use(
 				if (user) {
 					const token = generateToken(user);
 					await UserModel.updateOne({ email: user.email }, { token });
-					return done(null, { token });
+					return done(null, { token, userID: user._id });
 				} else {
 					user = new UserModel({
 						password: null,
@@ -76,7 +76,7 @@ passport.use(
 					await user.save();
 					const token = generateToken(user);
 					await UserModel.updateOne({ email: user.email }, { token });
-					return done(null, { token });
+					return done(null, { token, userID: user._id });
 				}
 			} catch (error) {
 				return done(error);
