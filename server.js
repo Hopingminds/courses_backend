@@ -22,20 +22,20 @@ import passport from 'passport'
 // middlewares
 app.use(
     session({
-        name : 'coursesHopingminds',
-        secret: process.env.SESSION_SECRET_KEY,
+        name: "session",
+        secret: "hoping minds",
         resave: false,
-        saveUninitialized: true,
+        saveUninitialized: false,
         cookie: {
-            sameSite: false,
-            secure: false,
             maxAge: 3 * 30 * 24 * 60 * 60 * 1000, // 3 months in milliseconds
         },
     })
 );
+
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json())
+
 const allowedOrigins=["http://localhost:3000","http://hopingminds.in", "https://courses-admin-nine.vercel.app", "https://precious-marigold-5dd5d3.netlify.app"]
 app.use(cors({
     origin: allowedOrigins,
