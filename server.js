@@ -38,8 +38,7 @@ app.use(express.json())
 
 const allowedOrigins=["http://localhost:3000","http://hopingminds.in", "https://courses-admin-nine.vercel.app", "https://precious-marigold-5dd5d3.netlify.app"]
 app.use(cors({
-    origin: allowedOrigins,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: true,
     credentials: true,
 }));
 app.use(morgan('tiny'))
