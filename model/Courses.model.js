@@ -37,19 +37,8 @@ export const CoursesSchema = new mongoose.Schema({
         }
     ],
     instructor:{
-        firstName:{type: String},
-        lastName:{type: String},
-        about:{type: String},
-        profile:{type: String},
-        total_students: {type: String},
-        total_lessons: {type: Number},
-        experience:{type: String},
-        social_links:[
-            {
-                website_name:{ type: String},
-                profile_url: {type: String}
-            }
-        ]
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Instructors'
     },
     faqs:[{
         question: {type: String},
