@@ -36,9 +36,8 @@ app.use(express.json())
 const allowedOrigins=["http://localhost:3000","http://hopingminds.in", "https://courses-admin-nine.vercel.app"]
 app.use(cors({
     origin: allowedOrigins,
-    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
 }));
 app.use(morgan('tiny'))
 app.disable('x-powered-by') //less hackers know about our stack
