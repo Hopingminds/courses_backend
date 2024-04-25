@@ -3,6 +3,7 @@ import cors from 'cors'
 import morgan from 'morgan'
 import connect from './database/conn.js'
 import session from 'express-session'
+import CorsConfig from './cors.config.js'
 import 'dotenv/config'
 
 import userRouter from './router/userRoutes.js'
@@ -27,6 +28,8 @@ app.use(
         resave: false,
         saveUninitialized: false,
         cookie: {
+            secure: false,
+            SameSite: 'none',
             maxAge: 3 * 30 * 24 * 60 * 60 * 1000, // 3 months in milliseconds
         },
     })
@@ -36,9 +39,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json())
 
-const allowedOrigins=["http://localhost:3000","http://hopingminds.in", "https://courses-admin-nine.vercel.app", "https://precious-marigold-5dd5d3.netlify.app"]
 app.use(cors({
-    origin: true,
+    origin: CorsConfig,
     credentials: true,
 }));
 app.use(morgan('tiny'))
