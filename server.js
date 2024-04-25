@@ -22,6 +22,7 @@ import passport from 'passport'
 // middlewares
 app.use(
     session({
+        name : 'coursesHopingminds',
         secret: process.env.SESSION_SECRET_KEY,
         resave: false,
         saveUninitialized: true,
