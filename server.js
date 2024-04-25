@@ -27,6 +27,8 @@ app.use(
         resave: false,
         saveUninitialized: true,
         cookie: {
+            sameSite: false,
+            secure: false,
             maxAge: 3 * 30 * 24 * 60 * 60 * 1000, // 3 months in milliseconds
         },
     })
