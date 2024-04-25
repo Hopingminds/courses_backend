@@ -23,14 +23,12 @@ import passport from 'passport'
 // middlewares
 app.use(
     session({
-        name: "session",
+        name: "session.hm.courses",
         secret: process.env.SESSION_SECRET_KEY,
-        domain: 'localhost',
         resave: false,
         saveUninitialized: false,
         cookie: {
             secure: false,
-            SameSite: 'none',
             maxAge: 3 * 30 * 24 * 60 * 60 * 1000, // 3 months in milliseconds
         },
     })
