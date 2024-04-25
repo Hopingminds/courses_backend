@@ -33,7 +33,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json())
-const allowedOrigins=["http://localhost:3000","http://hopingminds.in", "https://courses-admin-nine.vercel.app"]
+const allowedOrigins=["http://localhost:3000","http://hopingminds.in", "https://courses-admin-nine.vercel.app", "https://precious-marigold-5dd5d3.netlify.app"]
 app.use(cors({
     origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
