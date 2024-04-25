@@ -86,8 +86,16 @@ export async function getCourses(req, res) {
 		}
 		const courses = await CoursesModel.find(query)
 			.sort(sortObj)
-			.populate(populate)
-		res.status(200).send({ courses })
+			.populate(populate).lean()
+		let filterData = courses.map((course)=>{
+			if (course.instructor) {
+				let {instructor, ...rest} = course
+				let {password, token, ...insRest} = instructor
+				return {...rest, instructor:insRest}
+			}
+			return course
+		})
+		res.status(200).send({ filterData })
 	} catch (err) {
 		console.log(err)
 		res.status(500).send('Internal Server Error')

@@ -38,7 +38,7 @@ export const CoursesSchema = new mongoose.Schema({
     ],
     instructor:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Instructors'
+        ref: 'Instructor'
     },
     faqs:[{
         question: {type: String},
