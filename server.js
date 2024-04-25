@@ -24,7 +24,8 @@ import passport from 'passport'
 app.use(
     session({
         name: "session",
-        secret: "hoping minds",
+        secret: process.env.SESSION_SECRET_KEY,
+        domain: 'localhost',
         resave: false,
         saveUninitialized: false,
         cookie: {
