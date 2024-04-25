@@ -36,8 +36,9 @@ app.use(express.json())
 const allowedOrigins=["http://localhost:3000","http://hopingminds.in", "https://courses-admin-nine.vercel.app"]
 app.use(cors({
     origin: allowedOrigins,
-    methods: "GET,POST,PUT,DELETE",
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(morgan('tiny'))
 app.disable('x-powered-by') //less hackers know about our stack
@@ -60,6 +61,12 @@ app.use('/api', pagesRouter)
 app.use('/api', qnaRouter)
 app.use('/api', jobopeningsRoute)
 app.use('/auth', authRouter)
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something went wrong!');
+});
 
 // start server only when we have valid connection
 connect().then(() => {
