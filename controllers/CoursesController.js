@@ -41,7 +41,6 @@ export async function getCourses(req, res) {
 		price_max,
 		search,
 		minordegree,
-		populate,
 		credits
 	} = req.query
 	try {
@@ -86,7 +85,7 @@ export async function getCourses(req, res) {
 		}
 		const courses = await CoursesModel.find(query)
 			.sort(sortObj)
-			.populate(populate).lean()
+			.populate('instructor').lean()
 		let filterData = courses.map((course)=>{
 			if (course.instructor) {
 				let {instructor, ...rest} = course
