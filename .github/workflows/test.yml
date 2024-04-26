@@ -1,0 +1,12 @@
+name: ENV TEST
+
+on:
+  workflow_dispatch
+
+jobs:
+  test-env:
+
+    runs-on: ubuntu-latest
+    steps:
+    - name: Diaply ENV values
+    - run: echo "ENV Values are ${{ secrets.PROV_ENV_FILE }}"
