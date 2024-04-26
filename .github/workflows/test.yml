@@ -5,8 +5,7 @@ on:
 
 jobs:
   test-env:
-
     runs-on: ubuntu-latest
     steps:
-    - name: Diaply ENV values
-    - run: echo "ENV Values are ${{ secrets.PROV_ENV_FILE }}"
+    - name: Display ENV values
+      run: echo "ENV Values are ${{ secrets.PROV_ENV_FILE }}"
