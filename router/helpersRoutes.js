@@ -27,7 +27,7 @@ router.route('/getcolleges').get(helperController.getColleges)
 
 // PUT ROUTES
 
-// DELETE ROUTES
+// DELETE ROUTES 
 router.route('/deletefilefromaws').delete(awsController.deleteFileFromAWS)
 
 export default router
