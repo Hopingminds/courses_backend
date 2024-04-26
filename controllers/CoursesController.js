@@ -114,10 +114,10 @@ export async function getRecommendedCourses(req, res) {
 			}
 			return course
 		})
-		res.status(200).send({ recommendedCourses:filterData })
+		res.status(200).send({ success: true, recommendedCourses:filterData })
 	} catch (err) {
 		console.log(err)
-		res.status(500).send('Internal Server Error')
+		res.status(500).send({success: false, message: 'Internal Server Error'})
 	}
 }
 
