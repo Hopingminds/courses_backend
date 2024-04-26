@@ -94,10 +94,10 @@ export async function getCourses(req, res) {
 			}
 			return course
 		})
-		res.status(200).send({ filterData })
+		res.status(200).send({ success: true, courses:filterData, })
 	} catch (err) {
 		console.log(err)
-		res.status(500).send('Internal Server Error')
+		res.status(500).send({success: false, message: 'Internal Server Error'})
 	}
 }
 
@@ -113,11 +113,11 @@ export async function getRecommendedCourses(req, res) {
 	}
 }
 
-/** GET: http://localhost:8080/api/user/:email/:coursename */
+/** GET: http://localhost:8080/api/course/:coursename */
 export async function getCourseBySlug(req, res) {
 	try {
 		const { coursename } = req.params
-		const course = await CoursesModel.findOne({ slug: coursename })
+		const course = await CoursesModel.findOne({ slug: coursename }).populate('instructor').lean()
 
 		if (!course) {
 			return res
@@ -125,7 +125,16 @@ export async function getCourseBySlug(req, res) {
 				.json({ success: false, message: 'Courses not found' })
 		}
 
-		res.status(200).json({ success: true, course })
+		let filterData = ( course )=>{
+			if (course.instructor) {
+				let {instructor, ...rest} = course
+				let {password, token, ...insRest} = instructor
+				return {...rest, instructor:insRest}
+			}
+			return course
+		}
+
+		res.status(200).json({ success: true, course:filterData(course) })
 	} catch (error) {
 		console.error(error)
 		res.status(500).json({
