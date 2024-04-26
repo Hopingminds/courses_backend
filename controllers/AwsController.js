@@ -2,7 +2,7 @@ import aws from 'aws-sdk'
 import multer from 'multer'
 import multerS3 from 'multer-s3'
 import UserModel from '../model/User.model.js';
-
+import InstructorModel from '../model/Instructor.model.js'
 // upading AWS config
 aws.config.update({
     secretAccessKey: process.env.AWS_ACCESS_SECRET,
@@ -42,6 +42,20 @@ export const uploadUserProfile = multer({
     })
 })
 
+export const uploadInstructorProfile = multer({
+    storage: multerS3({
+        s3: s3,
+        acl: "public-read",
+        bucket: BUCKET,
+        key: function (req, file, cb) {
+            var newFileName = Date.now() + "-" + file.originalname;
+            var fullPath = 'images/profile/instructors'+ newFileName;
+            cb(null, fullPath)
+        },
+        contentType: multerS3.AUTO_CONTENT_TYPE
+    })
+})
+
 /** POST: http://localhost:8080/api/uploadfiletoaws
     body:{
         file: file.mp4
@@ -54,13 +68,35 @@ export async function uploadFile(req, res) {
 /** POST: http://localhost:8080/api/uploaduserprofiletoaws
     header: Bearer <Token>
     body:{
-        file: file.mp4
+        file: file.jpeg
     }
 **/
 export async function uploaduserprofiletoaws(req, res) {
     const { userID } = req.user;
     if (req.file?.location) {
         UserModel.updateOne({ _id: userID }, {profile: req.file.location})
+        .exec()
+        .then(()=>{
+            return res.status(200).json({ success: true, message: 'User profile updated successfully.', url: req.file.location });
+        })
+        .catch((error)=>{
+            return res.status(200).json({ success: false, message: 'Internal Server Error', error});
+        })
+    } else {
+        return res.status(200).json({ success: false, message: 'Internal Server Error -  AWS'});
+    }
+}
+
+/** POST: http://localhost:8080/api/uploadinsprofiletoaws
+    header: Bearer <Token>
+    body:{
+        file: file.jpeg
+    }
+**/
+export async function uploadinsprofiletoaws(req, res) {
+    const { instructorID } = req.body;
+    if (req.file?.location) {
+        InstructorModel.updateOne({ _id: instructorID }, {profile: req.file.location})
         .exec()
         .then(()=>{
             return res.status(200).json({ success: true, message: 'User profile updated successfully.', url: req.file.location });
