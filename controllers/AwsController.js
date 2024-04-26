@@ -90,6 +90,7 @@ export async function uploaduserprofiletoaws(req, res) {
 /** POST: http://localhost:8080/api/uploadinsprofiletoaws
     header: Bearer <Token>
     body:{
+        instructorID: "ce6e8276323c7638117983"
         file: file.jpeg
     }
 **/
