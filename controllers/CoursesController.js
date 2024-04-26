@@ -104,9 +104,17 @@ export async function getCourses(req, res) {
 /** GET: http://localhost:8080/api/recommendedcourses */
 export async function getRecommendedCourses(req, res) {
 	try {
-		const courses = await CoursesModel.find({})
+		const courses = await CoursesModel.find({}).populate('instructor').lean()
 		const recommendedCourses = getRandomSubset(courses, 4)
-		res.status(200).send({ recommendedCourses })
+		let filterData = recommendedCourses.map((course)=>{
+			if (course.instructor) {
+				let {instructor, ...rest} = course
+				let {password, token, ...insRest} = instructor
+				return {...rest, instructor:insRest}
+			}
+			return course
+		})
+		res.status(200).send({ recommendedCourses:filterData })
 	} catch (err) {
 		console.log(err)
 		res.status(500).send('Internal Server Error')
