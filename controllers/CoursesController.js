@@ -172,9 +172,10 @@ export async function getUserCourseBySlug(req, res) {
 	try {
 		const { email } = req.params
 		const { coursename } = req.params
-		const user = await UserModel.findOne({ email }).populate(
-			'purchased_courses.course'
-		)
+		const user = await UserModel.findOne({ email }).populate({
+			path: 'purchased_courses.course',
+			populate: { path: 'instructor', select: '-token -password' }
+		})
 
 		if (!user) {
 			return res
