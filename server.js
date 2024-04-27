@@ -16,7 +16,7 @@ import pagesRouter from './router/pagesRoute.js'
 import authRouter from './router/authRoutes.js'
 import qnaRouter from './router/qnaRoutes.js'
 import jobopeningsRoute from './router/jobopeningsRoute.js'
-
+import * as ServerStatus from './middleware/helper.js'
 const app = express()
 import './middleware/passport.js'
 import passport from 'passport'
@@ -48,8 +48,20 @@ app.disable('x-powered-by') //less hackers know about our stack
 const port = process.env.PORT || 3009;
 
 // HTTP GET Request
-app.get('/', (req, res) => {
-    res.status(201).send('Home GET Request.')
+app.get('/', ServerStatus.getServerLoadInfo , (req, res) => {
+    const uptime =  ServerStatus.calculateUptime();
+    const serverLoadInfo = req.serverLoadInfo;
+    res.status(201).send({
+        success: true,
+        message: 'Hoping Minds Backend!',
+        dateTime: new Date().toLocaleString(),
+        connectedClient: process.env.CLIENT_BASE_URL,
+        systemStatus:{
+            uptime: `${uptime}s`,
+            cpuLoad: serverLoadInfo.cpuLoad,
+            memoryUsage: serverLoadInfo.memoryUsage,
+        }
+    })
 })
 
 // api routes
@@ -74,6 +86,7 @@ app.use((err, req, res, next) => {
 connect().then(() => {
     try {
         app.listen(port, () => {
+            ServerStatus.captureStartTime()
             console.log(`Server connected to  http://localhost:${port}`)
         })
     } catch (error) {
