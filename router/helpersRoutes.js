@@ -6,6 +6,7 @@ import * as helperController from '../controllers/HelpersController.js'
 import * as awsController from '../controllers/AwsController.js'
 import { registerMail } from '../controllers/mailer.js'
 import {upload, uploadUserProfile, uploadInstructorProfile} from '../controllers/AwsController.js'
+import { getBotResponse } from '../controllers/ChatBotController.js'
 import Auth, { localVariables } from '../middleware/auth.js'
 import AdminAuth from '../middleware/adminauth.js'
 // POST ROUTES
@@ -26,6 +27,7 @@ router.route('/getfilefromaws/:filename').get(awsController.getfilefromaws)
 
 router.route('/getcolleges').get(helperController.getColleges)
 
+router.route('/get-bot-response').get(getBotResponse)
 // PUT ROUTES
 
 // DELETE ROUTES 
