@@ -1,6 +1,10 @@
 import mongoose from 'mongoose'
 
 export const JobopeningsSchema = new mongoose.Schema({
+    publichedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Hirefromus'
+    },
     position: {
         type: String,
     },
