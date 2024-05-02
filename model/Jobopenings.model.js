@@ -7,9 +7,9 @@ export const JobopeningsSchema = new mongoose.Schema({
     employment_type: {
         type: String
     },
-    key_skills: {
-        type: String
-    },
+    key_skills: [
+        { type: String }
+    ],
     company: {
         type: String,
     },

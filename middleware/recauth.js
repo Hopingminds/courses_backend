@@ -1,24 +1,23 @@
 import jwt from 'jsonwebtoken';
 import 'dotenv/config'
-import AdminModel from "../model/Admin.model.js";
+import HirefromusModel from "../model/Hirefromus.model.js";
 
-export default async function AdminAuth(req,res,next) {
+export default async function Auth(req,res,next) {
     try {
         // access authorize header to validate request
         const token = req.headers.authorization.split(' ')[1];
-        // retrive the user details fo the logged in user
+
+        // retrive the rec details fo the logged in rec
         const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
 
-        let {adminID} = decodedToken
-        let admin = await AdminModel.findById(adminID)
-        if (admin.token === token) {
-            req.admin = decodedToken;
+        let {recID} = decodedToken
+        let rec = await HirefromusModel.findById(recID)
+        if (rec.token === token) {
+            req.rec = decodedToken;
             next()
         } else{
-            throw new Error("Invalid admin or token");
+            throw new Error("Invalid rec or token");
         }
-
-        next()
     } catch (error) {
         res.status(401).json({ error : "Authentication Failed!"})
     }

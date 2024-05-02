@@ -2,12 +2,13 @@ import {Router} from 'express'
 const router = Router()
 
 import * as jobopeningController from '../controllers/JobopeningsContoller.js'
-import AdminAuth from '../middleware/adminauth.js'
+import RecAuth from '../middleware/recauth.js'
+import Auth from '../middleware/auth.js'
 // POST ROUTES
-router.route('/createjobopening').post(AdminAuth, jobopeningController.createJobopening);
+router.route('/createjobopening').post(RecAuth, jobopeningController.createJobopening);
 
 // GET ROUTES
-router.route('/getalljobppenings').get(jobopeningController.getAllJobOpenings)
+router.route('/getalljobppenings').get(Auth, jobopeningController.getAllJobOpenings)
 
 // PUT ROUTES
 
