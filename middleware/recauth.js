@@ -12,7 +12,7 @@ export default async function Auth(req,res,next) {
 
         let {recID} = decodedToken
         let rec = await HirefromusModel.findById(recID)
-        if (rec.token === token) {
+        if (rec) {
             req.rec = decodedToken;
             next()
         } else{

@@ -11,7 +11,7 @@ export default async function AdminAuth(req,res,next) {
 
         let {adminID} = decodedToken
         let admin = await AdminModel.findById(adminID)
-        if (admin.token === token) {
+        if (admin) {
             req.admin = decodedToken;
             next()
         } else{

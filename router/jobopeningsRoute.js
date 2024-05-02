@@ -9,7 +9,7 @@ router.route('/createjobopening').post(RecAuth, jobopeningController.createJobop
 
 // GET ROUTES
 router.route('/getalljobppenings').get(Auth, jobopeningController.getAllJobOpenings)
-router.route('/getalljobppenings/res').get(RecAuth, jobopeningController.getAllJobOpeningsRec)
+router.route('/getalljobppenings/rec').get(RecAuth, jobopeningController.getAllJobOpeningsRec)
 
 // PUT ROUTES
 router.route('/update-job-opening-status').get(RecAuth, jobopeningController.updateJobOpeningStatus)
