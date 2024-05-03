@@ -27,8 +27,8 @@ router.route('/getfilefromaws/:filename').get(awsController.getfilefromaws)
 
 router.route('/getcolleges').get(helperController.getColleges)
 
-router.route('/get-bot-response').get(getBotResponse)
 // PUT ROUTES
+router.route('/get-bot-response').post(getBotResponse)
 
 // DELETE ROUTES 
 router.route('/deletefilefromaws').delete(awsController.deleteFileFromAWS)
