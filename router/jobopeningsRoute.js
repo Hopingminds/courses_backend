@@ -12,7 +12,7 @@ router.route('/getalljobppenings').get(Auth, jobopeningController.getAllJobOpeni
 router.route('/getalljobppenings/rec').get(RecAuth, jobopeningController.getAllJobOpeningsRec)
 
 // PUT ROUTES
-router.route('/update-job-opening-status').get(RecAuth, jobopeningController.updateJobOpeningStatus)
+router.route('/update-job-opening-status').put(RecAuth, jobopeningController.updateJobOpeningStatus)
 
 // DELETE ROUTES
 
