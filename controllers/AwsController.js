@@ -49,7 +49,28 @@ export const uploadInstructorProfile = multer({
         bucket: BUCKET,
         key: function (req, file, cb) {
             var newFileName = Date.now() + "-" + file.originalname;
-            var fullPath = 'images/profile/instructors'+ newFileName;
+            var fullPath = 'images/profile/instructors/'+ newFileName;
+            cb(null, fullPath)
+        },
+        contentType: multerS3.AUTO_CONTENT_TYPE
+    })
+})
+
+/** POST: http://localhost:8080/api/uploadassignmenttoaws
+    body: {
+        file: < file >
+        assignmentID: assignmentID
+    }
+ */
+export const uploadassignment = multer({
+    storage: multerS3({
+        s3: s3,
+        acl: "public-read",
+        bucket: BUCKET,
+        key: function (req, file, cb) {
+            console.log(req.body.assignmentID);
+            var newFileName = req.body.assignmentID;
+            var fullPath = 'assignments/'+ newFileName;
             cb(null, fullPath)
         },
         contentType: multerS3.AUTO_CONTENT_TYPE
@@ -110,12 +131,23 @@ export async function uploadinsprofiletoaws(req, res) {
     }
 }
 
+/** POST: http://localhost:8080/api/uploadinsprofiletoaws
+    header: Bearer <Token>
+    body:{
+        instructorID: "ce6e8276323c7638117983"
+        file: file.jpeg
+    }
+**/
+export async function uploadassignmenttoaws(req, res) {
+    return res.status(200).json({ success: true, message: 'Successfully Uploaded', url: req.file.location });
+}
+
 /** GET: http://localhost:8080/api/getfilesfromaws */
 export async function getfilesfromaws(req, res) {
     let r = await s3.listObjectsV2({ Bucket: BUCKET }).promise();
     let data = []
     r.Contents.map(item => {
-        if (!item.Key.includes("images/profile/")) {
+        if (!item.Key.includes("images/profile/") || !item.Key.includes("assignments/")) {
             data.push({
                 title: item.Key.replace(/^assets\/\d+-/, ''),
                 key: item.Key,

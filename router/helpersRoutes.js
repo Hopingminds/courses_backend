@@ -5,7 +5,7 @@ import * as controller from '../controllers/appController.js'
 import * as helperController from '../controllers/HelpersController.js'
 import * as awsController from '../controllers/AwsController.js'
 import { registerMail } from '../controllers/mailer.js'
-import {upload, uploadUserProfile, uploadInstructorProfile} from '../controllers/AwsController.js'
+import {upload, uploadUserProfile, uploadInstructorProfile, uploadassignment} from '../controllers/AwsController.js'
 import { getBotResponse } from '../controllers/ChatBotController.js'
 import Auth, { localVariables } from '../middleware/auth.js'
 import AdminAuth from '../middleware/adminauth.js'
@@ -15,6 +15,7 @@ router.route('/registerMail').post(registerMail)
 router.route('/uploadfiletoaws').post(AdminAuth, upload.single('file'), awsController.uploadFile)
 router.route('/uploaduserprofiletoaws').post(Auth,uploadUserProfile.single('file'), awsController.uploaduserprofiletoaws)
 router.route('/uploadinsprofiletoaws').post(AdminAuth,uploadInstructorProfile.single('file'), awsController.uploadinsprofiletoaws)
+router.route('/uploadassignmenttoaws').post(Auth, uploadassignment.single('file'), awsController.uploadassignmenttoaws)
 
 
 // GET ROUTES
