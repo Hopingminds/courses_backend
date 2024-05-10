@@ -119,7 +119,7 @@ export async function getfilesfromaws(req, res) {
             data.push({
                 title: item.Key.replace(/^assets\/\d+-/, ''),
                 key: item.Key,
-                url:  `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${item.Key}`
+                url:  `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${item.Key.replace(/ /g, "%20")}`
             })
         }
     })
