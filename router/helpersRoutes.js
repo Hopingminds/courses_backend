@@ -15,7 +15,7 @@ router.route('/registerMail').post(registerMail)
 router.route('/uploadfiletoaws').post(AdminAuth, upload.single('file'), awsController.uploadFile)
 router.route('/uploaduserprofiletoaws').post(Auth,uploadUserProfile.single('file'), awsController.uploaduserprofiletoaws)
 router.route('/uploadinsprofiletoaws').post(AdminAuth,uploadInstructorProfile.single('file'), awsController.uploadinsprofiletoaws)
-router.route('/uploadassignmenttoaws').post(Auth, uploadassignment.single('file'), awsController.uploadassignmenttoaws)
+router.route('/uploadassignmenttoaws/:assignmentID').post(Auth, uploadassignment.single('file'), awsController.uploadassignmenttoaws)
 
 
 // GET ROUTES

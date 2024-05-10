@@ -56,10 +56,9 @@ export const uploadInstructorProfile = multer({
     })
 })
 
-/** POST: http://localhost:8080/api/uploadassignmenttoaws
+/** POST: http://localhost:8080/api/uploadassignmenttoaws/:assignmentID
     body: {
         file: < file >
-        assignmentID: assignmentID
     }
  */
 export const uploadassignment = multer({
@@ -68,8 +67,7 @@ export const uploadassignment = multer({
         acl: "public-read",
         bucket: BUCKET,
         key: function (req, file, cb) {
-            console.log(req.body.assignmentID);
-            var newFileName = req.body.assignmentID;
+            var newFileName = req.params.assignmentID;
             var fullPath = 'assignments/'+ newFileName;
             cb(null, fullPath)
         },
