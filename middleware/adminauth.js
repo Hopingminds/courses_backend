@@ -17,8 +17,6 @@ export default async function AdminAuth(req,res,next) {
         } else{
             throw new Error("Invalid admin or token");
         }
-
-        next()
     } catch (error) {
         res.status(401).json({ error : "Authentication Failed!"})
     }
