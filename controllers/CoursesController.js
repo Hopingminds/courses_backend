@@ -162,6 +162,7 @@ export async function getUserCourseBySlug(req, res) {
 				return {
 					course: course.course,
 					completed_lessons: course.completed_lessons,
+					completed_assignments: course.completed_assignments,
 				}
 			}
 		}
