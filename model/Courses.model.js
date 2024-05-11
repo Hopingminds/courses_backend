@@ -51,11 +51,13 @@ export const CoursesSchema = new mongoose.Schema({
             reating: {type: Number}
         }
     ],
-    IsMinorDegreeCourse:{
-        type: Boolean, default: false
+    courseType: {
+        type: String,
+        enum: ['public' , 'minorDegree', 'internship'],
+        default: 'public'
     },
-    display: {type: Boolean, default: true},
-    credits: { type: Number }
+    credits: { type: Number },
+    display: {type: Boolean, default: true}
 });
 
 export default mongoose.model.Courses || mongoose.model('Courses', CoursesSchema);
