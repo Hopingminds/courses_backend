@@ -4,6 +4,7 @@ import wishlistModel from '../model/Wishlist.model.js'
 import CoursesModel from '../model/Courses.model.js'
 import UserModel from '../model/User.model.js'
 import OrdersModel from '../model/Orders.model.js'
+import { populate } from 'dotenv'
 // helper function
 function getRandomSubset(arr, size) {
 	const shuffled = arr.sort(() => 0.5 - Math.random())
@@ -718,7 +719,12 @@ export async function getwishlist(req, res) {
 		// Find the cart document and populate the courses field with course data
 		const wishlist = await wishlistModel
 			.findOne({ _id: userID })
-			.populate('courses.course')
+			.populate({
+				path:'courses.course',
+				populate:{
+					path: 'instructor'
+				}
+			})
 
 		if (!wishlist) {
 			return res
