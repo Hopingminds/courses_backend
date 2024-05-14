@@ -1,25 +1,23 @@
-import AdminModel from '../model/Admin.model.js'
+import CollegeUserModel from '../model/CollegeUser.model.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import 'dotenv/config'
-import otpGenerator from 'otp-generator'
-import UserModel from '../model/User.model.js'
-// middleware for verify admin
-export async function verifyAdmin(req, res, next) {
+// middleware for verify collegeUser
+export async function verifyCollegeUser(req, res, next) {
 	try {
 		const { email, mobile } = req.method == 'GET' ? req.query : req.body
-		// check the admin existance
+		// check the collegeUser existance
 		if (email && !mobile) {
-			let exit = await AdminModel.findOne({ email })
-			if (!exit) return res.status(404).send({ error: "Can't find admin!" })
-			req.adminID = exit._id
+			let exit = await CollegeUserModel.findOne({ email })
+			if (!exit) return res.status(404).send({ error: "Can't find collegeUser!" })
+			req.collegeUserID = exit._id
 			next()
 	}
 	
 	else if (!email && mobile) {
-			let exit = await AdminModel.findOne({ mobile })
-			if (!exit) return res.status(404).send({ error: "Can't find admin!" })
-			req.adminID = exit._id
+			let exit = await CollegeUserModel.findOne({ mobile })
+			if (!exit) return res.status(404).send({ error: "Can't find collegeUser!" })
+			req.collegeUserID = exit._id
 			next()	
 		}
 	} catch (error) {
@@ -27,9 +25,9 @@ export async function verifyAdmin(req, res, next) {
 	}
 }
 
-/** POST: http://localhost:8080/api/registeradmin 
+/** POST: http://localhost:8080/api/registercollegeUser 
 * @param : {
-    "password" : "admin123",
+    "password" : "collegeUser123",
     "email": "example@gmail.com",
     "firstName" : "bill",
     "lastName": "william",
@@ -39,13 +37,13 @@ export async function verifyAdmin(req, res, next) {
 */
 export async function register(req, res) {
     try {
-        const { password, email, profile, name, mobile, college } = req.body;
+        const { password, email, profile, firstName, lastName, mobile } = req.body;
 
         // check for existing mobile number
-        const existMobile = AdminModel.findOne({ mobile }).exec();
+        const existMobile = CollegeUserModel.findOne({ mobile }).exec();
 
         // check for existing email
-        const existEmail = AdminModel.findOne({ email }).exec();
+        const existEmail = CollegeUserModel.findOne({ email }).exec();
 
         // Checking for existing mobile and email
         const [mobileExist, emailExist] = await Promise.all([existMobile, existEmail]);
@@ -60,29 +58,29 @@ export async function register(req, res) {
 
         if (password) {
             const hashedPassword = await bcrypt.hash(password, 10);
-            const admin = new AdminModel({
+            const collegeUser = new CollegeUserModel({
                 password: hashedPassword,
                 profile: profile || '',
                 email,
-                name,
-                mobile,
-				college
+                firstName,
+                lastName,
+                mobile
             });
 
-            // Save the admin
-            const savedAdmin = await admin.save();
+            // Save the collegeUser
+            const savedCollegeUser = await collegeUser.save();
 			const token = jwt.sign(
 				{
-					adminID: savedAdmin._id,
-					email: savedAdmin.email,
-					mobile: savedAdmin.mobile
+					collegeUserID: savedCollegeUser._id,
+					email: savedCollegeUser.email,
+					mobile: savedCollegeUser.mobile
 				},
 				process.env.JWT_SECRET,
 				{ expiresIn: '24h' }
 			)
             // Send response with _id and email
             return res.status(201).send({
-                msg: 'Admin Registered Successfully',
+                msg: 'CollegeUser Registered Successfully',
                 token
             });
         }
@@ -91,19 +89,19 @@ export async function register(req, res) {
     }
 }
 
-/** POST: http://localhost:8080/api/loginAdminWithEmail 
+/** POST: http://localhost:8080/api/loginCollegeUserWithEmail 
 * @param : {
     "email" : "example123@mail.com",
-    "password" : "admin123",
+    "password" : "collegeUser123",
 }
 */
 export async function loginWithEmail(req, res) {
 	const { email, password } = req.body
 	try {
-		AdminModel.findOne({ email })
-			.then((admin) => {
+		CollegeUserModel.findOne({ email })
+			.then((collegeUser) => {
 				bcrypt
-					.compare(password, admin.password)
+					.compare(password, collegeUser.password)
 					.then((passwordCheck) => {
 						if (!passwordCheck)
 							return res
@@ -113,16 +111,16 @@ export async function loginWithEmail(req, res) {
 						// create jwt token
 						const token = jwt.sign(
 							{
-								adminID: admin._id,
-								email: admin.email,
-								mobile: admin.mobile
+								collegeUserID: collegeUser._id,
+								email: collegeUser.email,
+								mobile: collegeUser.mobile
 							},
 							process.env.JWT_SECRET,
 							{ expiresIn: '24h' }
 						)
 						return res.status(200).send({
 							msg: 'Login Successful',
-							email: admin.email,
+							email: collegeUser.email,
 							token,
 						})
 					})
@@ -140,19 +138,19 @@ export async function loginWithEmail(req, res) {
 	}
 }
 
-/** POST: http://localhost:8080/api/loginAdminWithMobile 
+/** POST: http://localhost:8080/api/loginCollegeUserWithMobile 
 * @param : {
     "mobile" : "1234567890",
-    "password" : "admin123",
+    "password" : "collegeUser123",
 }
 */
 export async function loginWithMobile(req, res) {
 	const { mobile, password } = req.body
 	try {
-		AdminModel.findOne({ mobile })
-			.then((admin) => {
+		CollegeUserModel.findOne({ mobile })
+			.then((collegeUser) => {
 				bcrypt
-					.compare(password, admin.password)
+					.compare(password, collegeUser.password)
 					.then((passwordCheck) => {
 						if (!passwordCheck)
 							return res
@@ -162,16 +160,16 @@ export async function loginWithMobile(req, res) {
 						// create jwt token
 						const token = jwt.sign(
 							{
-								adminID: admin._id,
-								email: admin.email,
-								mobile: admin.mobile
+								collegeUserID: collegeUser._id,
+								email: collegeUser.email,
+								mobile: collegeUser.mobile
 							},
 							process.env.JWT_SECRET,
 							{ expiresIn: '24h' }
 						)
 						return res.status(200).send({
 							msg: 'Login Successful',
-							email: admin.email,
+							email: collegeUser.email,
 							token,
 						})
 					})
@@ -189,22 +187,22 @@ export async function loginWithMobile(req, res) {
 	}
 }
 
-/** GET: http://localhost:8080/api/admin 
+/** GET: http://localhost:8080/api/collegeUser 
 	query: {
     --pass only one email or mobile according to reset with mobile or reset with email
     "email": "example@gmail.com",
     "mobile": 8009860560,
 }
 */
-export async function getAdmin(req, res) {
-	let adminID = req.adminID
+export async function getCollegeUser(req, res) {
+	let collegeUserID = req.collegeUserID
 	try {
-        const adminData = await AdminModel.findOne({_id:adminID});
+        const collegeUserData = await CollegeUserModel.findOne({_id:collegeUserID});
 
-        if (!adminData) {
-            return res.status(404).json({ success: false, msg: 'Admin not found' });
+        if (!collegeUserData) {
+            return res.status(404).json({ success: false, msg: 'CollegeUser not found' });
         }
-		const { password, ...rest } = adminData.toObject()
+		const { password, ...rest } = collegeUserData.toObject()
         res.status(200).json({ success: true, data:rest });
     } catch (error) {
         console.error(error);
@@ -212,30 +210,30 @@ export async function getAdmin(req, res) {
     }
 }
 
-/** GET: http://localhost:8080/api/admins */
-export async function getallAdmins(req, res) {
+/** GET: http://localhost:8080/api/collegeUsers */
+export async function getallCollegeUsers(req, res) {
 	try {
-        const adminData = await AdminModel.find({});
-		const adminDataWithoutPassword = adminData.map((admin) => {
-			const { password, ...rest } = admin.toObject()
+        const collegeUserData = await CollegeUserModel.find({});
+		const collegeUserDataWithoutPassword = collegeUserData.map((collegeUser) => {
+			const { password, ...rest } = collegeUser.toObject()
 			return rest
 		})
-        if (!adminDataWithoutPassword) {
-            return res.status(404).json({ success: false, msg: 'Admin not found' });
+        if (!collegeUserDataWithoutPassword) {
+            return res.status(404).json({ success: false, msg: 'CollegeUser not found' });
         }
-        res.status(200).json({ success: true, data:adminDataWithoutPassword });
+        res.status(200).json({ success: true, data:collegeUserDataWithoutPassword });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, msg: 'Internal server error' });
     }
 }
 
-/** PUT: http://localhost:8080/api/updateadmin 
+/** PUT: http://localhost:8080/api/updatecollegeUser 
  * @param: {
     "header" : "Bearer <token>"
 }
 body: { --pass only required fields
-    "password" : "admin123",
+    "password" : "collegeUser123",
     "email": "example@gmail.com",
     "firstName" : "bill",
     "lastName": "william",
@@ -243,15 +241,15 @@ body: { --pass only required fields
     "profile": ""
 }
 */
-export async function updateAdmin(req, res) {
+export async function updateCollegeUser(req, res) {
 	try {
-		const { adminID } = req.admin;
+		const { collegeUserID } = req.collegeUser;
 		const body = req.body
-		if (!adminID) return res.status(401).send({ error: 'Admin Not Found...!' })
+		if (!collegeUserID) return res.status(401).send({ error: 'CollegeUser Not Found...!' })
 
-		const updateAdmin = new Promise((resolve, reject) => {
+		const updateCollegeUser = new Promise((resolve, reject) => {
 			// update the data
-			AdminModel.updateOne({ _id: adminID }, body)
+			CollegeUserModel.updateOne({ _id: collegeUserID }, body)
             .exec()
             .then(()=>{
                 resolve()
@@ -261,7 +259,7 @@ export async function updateAdmin(req, res) {
             })
 		})
         
-        Promise.all([updateAdmin])
+        Promise.all([updateCollegeUser])
         .then(()=>{
             return res.status(201).send({ msg : "Record Updated"});
         })
@@ -293,11 +291,11 @@ export async function resetPassword(req,res){
         if (email && !mobile) {
 			try {
             
-				AdminModel.findOne({ email })
-					.then(admin => {
+				CollegeUserModel.findOne({ email })
+					.then(collegeUser => {
 						bcrypt.hash(password, 10)
 							.then(hashedPassword => {
-								AdminModel.updateOne({ email : admin.email },
+								CollegeUserModel.updateOne({ email : collegeUser.email },
 								{ password: hashedPassword})
 								.exec()
 								.then(()=>{
@@ -325,11 +323,11 @@ export async function resetPassword(req,res){
 		else if (!email && mobile) {
 			try {
             
-				AdminModel.findOne({ mobile })
-					.then(admin => {
+				CollegeUserModel.findOne({ mobile })
+					.then(collegeUser => {
 						bcrypt.hash(password, 10)
 							.then(hashedPassword => {
-								AdminModel.updateOne({ mobile : admin.mobile },
+								CollegeUserModel.updateOne({ mobile : collegeUser.mobile },
 								{ password: hashedPassword})
 								.exec()
 								.then(()=>{
@@ -358,34 +356,4 @@ export async function resetPassword(req,res){
     } catch (error) {
         return res.status(401).send({ error })
     }
-}
-
-export async function getDashboardData(req, res) {
-	try {
-		let query = {role: "user"}
-		let {university} = req.query
-		let enrolled_students = 0
-		let enrolled_courses = 0
-
-		if (university) {
-			query.college = university
-		}
-
-		let users = await UserModel.find(query)
-		users.forEach(user => {
-			if (user.purchased_courses.length > 0) {
-				enrolled_students+=1
-				enrolled_courses+= user.purchased_courses.length
-			}
-		});
-
-		let userData = users.map(user => {
-			const { token, password, role, ...rest } = user.toObject();
-			return rest;
-		});
-
-		return res.status(201).send({ success: true, data:{enrolled_students, enrolled_courses, users: userData}})
-	} catch (error) {
-		return res.status(401).send({ success: false, msg:'Internal Server Error', error })
-	}
 }
