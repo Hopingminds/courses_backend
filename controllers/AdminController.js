@@ -39,7 +39,7 @@ export async function verifyAdmin(req, res, next) {
 */
 export async function register(req, res) {
     try {
-        const { password, email, profile, name, mobile, college } = req.body;
+        const { password, email, profile, firstName, lastName, mobile, college } = req.body;
 
         // check for existing mobile number
         const existMobile = AdminModel.findOne({ mobile }).exec();
@@ -64,7 +64,8 @@ export async function register(req, res) {
                 password: hashedPassword,
                 profile: profile || '',
                 email,
-                name,
+                firstName, 
+				lastName,
                 mobile,
 				college
             });
