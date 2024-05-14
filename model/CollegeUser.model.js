@@ -20,6 +20,10 @@ export const CollegeUserSchema = new mongoose.Schema({
         type:String, 
         required: [true, "Please provide a college name"]
     },
+    coins:{
+        type: Number,
+        default: 0
+    }
 });
 
 export default mongoose.model.collegeusers || mongoose.model('collegeuser', CollegeUserSchema);
