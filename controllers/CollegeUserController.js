@@ -2,6 +2,7 @@ import CollegeUserModel from '../model/CollegeUser.model.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import 'dotenv/config'
+import UserModel from '../model/User.model.js'
 // middleware for verify collegeUser
 export async function verifyCollegeUser(req, res, next) {
 	try {
@@ -358,4 +359,19 @@ export async function resetPassword(req,res){
     } catch (error) {
         return res.status(401).send({ error })
     }
+}
+
+export async function getAllCollegeStudents(req, res) {
+	try {
+		let { collegeUserID } = req.collegeUser
+		let collegeUser = await CollegeUserModel.findById(collegeUserID)
+		if (!collegeUser) {
+			return res.status(404).send({ success: false, error : "College User Not Found!"});
+		}
+		let userData = await UserModel.find({college: collegeUser.college}).select('-password -token')
+		return res.status(201).send({ success: true, data: userData})
+	} catch (error) {
+		console.log(error);
+		return res.status(500).send({success: false, msg: 'Internal Server Error!'})
+	}
 }

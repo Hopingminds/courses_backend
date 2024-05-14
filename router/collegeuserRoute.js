@@ -14,6 +14,7 @@ router.route('/loginCollegeUserWithMobile').post(collegeUserController.verifyCol
 // GET ROUTES
 router.route('/collegeUser').get(collegeUserController.verifyCollegeUser, collegeUserController.getCollegeUser)
 router.route('/collegeUsers').get(AdminAuth, collegeUserController.getallCollegeUsers)
+router.route('/get-college-students').get(CollegeUserAuth, collegeUserController.getAllCollegeStudents)
 
 // PUT ROUTES
 router.route('/updatecollegeUser').put(CollegeUserAuth, collegeUserController.updateCollegeUser)
