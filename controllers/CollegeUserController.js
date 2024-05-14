@@ -120,6 +120,7 @@ export async function loginWithEmail(req, res) {
 							{ expiresIn: '24h' }
 						)
 						return res.status(200).send({
+							success: true,
 							msg: 'Login Successful',
 							email: collegeUser.email,
 							token,
@@ -128,14 +129,14 @@ export async function loginWithEmail(req, res) {
 					.catch((error) => {
 						return res
 							.status(400)
-							.send({ error: 'Password does not match' })
+							.send({success: false, msg: 'Password does not match' })
 					})
 			})
 			.catch((error) => {
-				return res.status(404).send({ error: 'Email not Found' })
+				return res.status(404).send({success: false, msg: 'Email not Found' })
 			})
 	} catch (error) {
-		return res.status(500).send(error)
+		return res.status(500).send({success: false, msg: 'Internal Server Error!'})
 	}
 }
 
