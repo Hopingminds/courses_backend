@@ -37,7 +37,7 @@ export async function verifyCollegeUser(req, res, next) {
 */
 export async function register(req, res) {
     try {
-        const { password, email, profile, name, mobile } = req.body;
+        const { password, email, profile, name, mobile, college } = req.body;
 
         // check for existing mobile number
         const existMobile = CollegeUserModel.findOne({ mobile }).exec();
@@ -63,7 +63,8 @@ export async function register(req, res) {
                 profile: profile || '',
                 email,
                 name,
-                mobile
+                mobile,
+				college
             });
 
             // Save the collegeUser
@@ -84,6 +85,7 @@ export async function register(req, res) {
             });
         }
     } catch (error) {
+		console.log(error);
         return res.status(500).send({ error: 'Internal Server Error' });
     }
 }

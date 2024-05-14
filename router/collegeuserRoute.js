@@ -5,7 +5,7 @@ import * as collegeUserController from '../controllers/CollegeUserController.js'
 import CollegeUserAuth from '../middleware/collegeUserauth.js'
 
 // POST ROUTES
-router.route('/registercollegeUser').post(CollegeUserAuth, collegeUserController.register)
+router.route('/registercollegeUser').post(collegeUserController.register)
 router.route('/authenticatecollegeUser').post(CollegeUserAuth,(req,res)=>res.end())
 router.route('/loginCollegeUserWithEmail').post(collegeUserController.verifyCollegeUser,collegeUserController.loginWithEmail)
 router.route('/loginCollegeUserWithMobile').post(collegeUserController.verifyCollegeUser,collegeUserController.loginWithMobile)
