@@ -369,7 +369,7 @@ export async function getAllCollegeStudents(req, res) {
 			return res.status(404).send({ success: false, error : "College User Not Found!"});
 		}
 		let userData = await UserModel.find({college: collegeUser.college}).select('-password -token')
-		return res.status(201).send({ success: true, data: userData})
+		return res.status(201).send({ success: true, data: userData, length: userData.length})
 	} catch (error) {
 		console.log(error);
 		return res.status(500).send({success: false, msg: 'Internal Server Error!'})
