@@ -42,7 +42,8 @@ export async function getCourses(req, res) {
 		price_max,
 		search,
 		minordegree,
-		credits
+		credits,
+		type
 	} = req.query
 	try {
 		let query = {}
@@ -54,7 +55,9 @@ export async function getCourses(req, res) {
 		if (subcategory) {
 			query.subcategory = subcategory
 		}
-
+		if (type) {
+			query.courseType = type
+		}
 		if (minordegree) {
 			query.IsMinorDegreeCourse = minordegree
 		}
