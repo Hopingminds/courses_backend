@@ -18,6 +18,7 @@ router.route('/get-college-students').get(CollegeUserAuth, collegeUserController
 
 // PUT ROUTES
 router.route('/updatecollegeUser').put(CollegeUserAuth, collegeUserController.updateCollegeUser)
+router.route('/updatecollegeUserAdmin/:collegeUserID').put(AdminAuth, collegeUserController.updateCollegeUserAdmin)
 router.route('/resetcollegeUserPassword').put(collegeUserController.verifyCollegeUser, collegeUserController.resetPassword)
 
 // DELETE ROUTES

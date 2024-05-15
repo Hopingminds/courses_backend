@@ -276,6 +276,50 @@ export async function updateCollegeUser(req, res) {
 	}
 }
 
+/** PUT: http://localhost:8080/api//updatecollegeUserAdmin/:collegeUserID
+ * @param: {
+    "header" : "Bearer <Admin token>"
+}
+body: { --pass only required fields
+    "password" : "collegeUser123",
+    "email": "example@gmail.com",
+    "firstName" : "bill",
+    "lastName": "william",
+    "mobile": 8009860560,
+    "profile": ""
+}
+*/
+export async function updateCollegeUserAdmin(req, res) {
+	try {
+		const { collegeUserID } = req.params;
+		const body = req.body
+		if (!collegeUserID) return res.status(401).send({ error: 'CollegeUser Not Found...!' })
+
+		const updateCollegeUser = new Promise((resolve, reject) => {
+			// update the data
+			CollegeUserModel.updateOne({ _id: collegeUserID }, body)
+            .exec()
+            .then(()=>{
+                resolve()
+            })
+            .catch((error)=>{
+                throw error
+            })
+		})
+        
+        Promise.all([updateCollegeUser])
+        .then(()=>{
+            return res.status(201).send({ msg : "Record Updated"});
+        })
+        .catch((error) => {
+            return res.status(500).send({ error: error.message })
+        })
+
+	} catch (error) {
+		return res.status(401).send({ error })
+	}
+}
+
 // update the password when we have valid session
 /** PUT: http://localhost:8080/api/resetPassword 
 body: { 
