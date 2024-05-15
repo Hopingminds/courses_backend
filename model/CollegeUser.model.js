@@ -11,7 +11,7 @@ export const CollegeUserSchema = new mongoose.Schema({
         required : [true, "Please provide a unique email"],
         unique: true,
     },
-    phone: {
+    mobile: {
         type: Number,
     },
     name: { type: String},
