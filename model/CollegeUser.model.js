@@ -23,6 +23,10 @@ export const CollegeUserSchema = new mongoose.Schema({
     coins:{
         type: Number,
         default: 0
+    },
+    used_coins:{
+        type: Number,
+        default: 0
     }
 });
 
