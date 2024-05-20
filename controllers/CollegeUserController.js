@@ -38,7 +38,7 @@ export async function verifyCollegeUser(req, res, next) {
 */
 export async function register(req, res) {
     try {
-        const { password, email, profile, name, mobile, college, coins } = req.body;
+        const { password, email, profile, name, mobile, college, coins, coursesAllotted } = req.body;
 
         // check for existing mobile number
         const existMobile = CollegeUserModel.findOne({ mobile }).exec();
@@ -66,7 +66,8 @@ export async function register(req, res) {
                 name,
                 mobile,
 				college,
-				coins
+				coins,
+				coursesAllotted
             });
 
             // Save the collegeUser

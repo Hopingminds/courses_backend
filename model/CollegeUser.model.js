@@ -20,6 +20,12 @@ export const CollegeUserSchema = new mongoose.Schema({
         type:String, 
         required: [true, "Please provide a college name"]
     },
+    coursesAllotted:[
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Courses'
+        }
+    ],
     coins:{
         type: Number,
         default: 0
