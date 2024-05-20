@@ -45,7 +45,7 @@ export async function upload(req, res) {
     try {
         let usersData = req.sheetData
         let { collegeUserID } = req.collegeUser
-        let { coursesAllotted, used_coins, coins } = await CollegeUserModel.findById(collegeUserID)
+        let { coursesAllotted, used_coins, coins, college } = await CollegeUserModel.findById(collegeUserID)
         
         let coursesAllottedData = coursesAllotted.map((course)=>{
             return { course: course };
@@ -61,7 +61,7 @@ export async function upload(req, res) {
             const { email, name, phone, degree, stream } = user;
             await UserModel.findOneAndUpdate(
                 { email: email },
-                { $set: { name, phone, degree, stream, purchased_courses:coursesAllottedData } },
+                { $set: { name, phone, degree, stream, college, purchased_courses:coursesAllottedData } },
                 { upsert: true, new: true }  // Create if not exists, return new doc
             );
         }
