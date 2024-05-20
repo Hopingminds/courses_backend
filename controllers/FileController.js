@@ -45,23 +45,28 @@ export async function upload(req, res) {
     try {
         let usersData = req.sheetData
         let { collegeUserID } = req.collegeUser
-        let { coursesAllotted } = await CollegeUserModel.findById(collegeUserID)
+        let { coursesAllotted, used_coins, coins } = await CollegeUserModel.findById(collegeUserID)
         
         let coursesAllottedData = coursesAllotted.map((course)=>{
             return { course: course };
         })
 
+        if (usersData.length > (coins - used_coins)) {
+            return res.status(500).send({success: false, msg: `Not Enough Coins left to Upload ${usersData.length} users!`})
+        }
+
+        await CollegeUserModel.findByIdAndUpdate(collegeUserID, { used_coins: used_coins+usersData.length});
+        
         for (const user of usersData) {
             const { email, name, phone, degree, stream } = user;
             await UserModel.findOneAndUpdate(
                 { email: email },
-                { 
-                    $set: { name, phone, degree, stream },
-                    $addToSet: { purchased_courses: { $each: coursesAllottedData } }
-                },
+                { $set: { name, phone, degree, stream, purchased_courses:coursesAllottedData } },
                 { upsert: true, new: true }  // Create if not exists, return new doc
             );
         }
+        
+
         return res.status(201).send({success: true, msg: "Records Created or Updated Successfully!"})
     } catch (error) {
         console.log(error);
