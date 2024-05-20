@@ -1,6 +1,8 @@
 import multer from 'multer'
 import csv from 'csv-parser'
 import { Readable } from 'stream'
+import CollegeUserModel from '../model/CollegeUser.model.js'
+import UserModel from '../model/User.model.js'
 
 const storage = multer.memoryStorage()
 const uploadFile = multer({ storage: storage })
@@ -40,5 +42,29 @@ export async function handleFileUpload(req, res, next) {
 }
 
 export async function upload(req, res) {
-    res.send(req.sheetData)
+    try {
+        let usersData = req.sheetData
+        let { collegeUserID } = req.collegeUser
+        let { coursesAllotted } = await CollegeUserModel.findById(collegeUserID)
+        
+        let coursesAllottedData = coursesAllotted.map((course)=>{
+            return { course: course };
+        })
+
+        for (const user of usersData) {
+            const { email, name, phone, degree, stream } = user;
+            await UserModel.findOneAndUpdate(
+                { email: email },
+                { 
+                    $set: { name, phone, degree, stream },
+                    $addToSet: { purchased_courses: { $each: coursesAllottedData } }
+                },
+                { upsert: true, new: true }  // Create if not exists, return new doc
+            );
+        }
+        return res.status(201).send({success: true, msg: "Records Created or Updated Successfully!"})
+    } catch (error) {
+        console.log(error);
+        return res.status(501).send({success: false, msg: "Internal Server Error!"})
+    }
 }

@@ -9,7 +9,7 @@ import {upload, uploadUserProfile, uploadInstructorProfile, uploadassignment} fr
 import { getBotResponse } from '../controllers/ChatBotController.js'
 import Auth, { localVariables } from '../middleware/auth.js'
 import AdminAuth from '../middleware/adminauth.js'
-import * as fileController from '../controllers/FileController.js'
+
 // POST ROUTES
 router.route('/registerMail').post(registerMail) 
 
@@ -17,9 +17,6 @@ router.route('/uploadfiletoaws').post(AdminAuth, upload.single('file'), awsContr
 router.route('/uploaduserprofiletoaws').post(Auth,uploadUserProfile.single('file'), awsController.uploaduserprofiletoaws)
 router.route('/uploadinsprofiletoaws').post(AdminAuth,uploadInstructorProfile.single('file'), awsController.uploadinsprofiletoaws)
 router.route('/uploadassignmenttoaws/:assignmentID').post(Auth, uploadassignment.single('file'), awsController.uploadassignmenttoaws)
-
-//-- File Handler
-router.route('/upload-students').post(fileController.handleFileUpload, fileController.upload) // upload xlsx file
 
 // GET ROUTES
 router.route('/generateOTP').get(controller.verifyUser, localVariables, controller.generateOTP)
