@@ -33,6 +33,16 @@ export async function getAllJobOpeningsRec(req, res) {
     }
 }
 
+export async function getOneJobOpeningDeatils(req, res) {
+    try {
+        const { jobid } = req.params
+        const jobOpenings = await JobopeningsModel.findById(jobID);
+        return res.status(200).json({ success: true, jobOpenings });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: "Internal server error" });
+    }
+}
+
 export async function updateJobOpeningStatus(req, res) {
     try {
         const { id, status } = req.body;
