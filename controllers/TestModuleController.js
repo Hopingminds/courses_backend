@@ -12,7 +12,7 @@ body: {
 */
 export async function createTestModule(req, res) {
 	try {
-		const { module_name} = req.body
+		const { module_name, module_description} = req.body
 
 		const existingModule_name = await TestModuleModel.findOne({
 			module_name
@@ -25,14 +25,15 @@ export async function createTestModule(req, res) {
 		}
 
 		const newTestModule = new TestModuleModel({
-			module_name
+			module_name,
+            module_description
 		})
 
 		await newTestModule.save()
 
 		return res.status(201).json({
 			message: 'Test Module added successfully',
-			category: newTestModule.module_name,
+			module_name: newTestModule.module_name,
 		})
 	} catch (error) {
 		return res.status(500).json({ error: 'Internal server error' })
