@@ -15,7 +15,7 @@ body: {
         "opt_3":"Option 3",
         "opt_4":"Option 4"
     },
-    "answer": 3
+    "answer": "opt_3"
 }
 */
 export async function addQuestionToModule(req, res) {
