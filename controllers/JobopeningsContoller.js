@@ -36,7 +36,7 @@ export async function getAllJobOpeningsRec(req, res) {
 export async function getOneJobOpeningDeatils(req, res) {
     try {
         const { jobid } = req.params
-        const jobOpenings = await JobopeningsModel.findById(jobID);
+        const jobOpenings = await JobopeningsModel.findById(jobid);
         return res.status(200).json({ success: true, jobOpenings });
     } catch (error) {
         return res.status(500).json({ success: false, message: "Internal server error" });
