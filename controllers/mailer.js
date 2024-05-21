@@ -11,15 +11,10 @@ let nodeConfig = {
     auth: {
         type: 'OAuth2',
         user: process.env.EMAIL_USERNAME,
-        serviceClient: process.env.EMAIL_USERNAME,
-        privateKey: process.env.EMAIL_USERNAME
+        serviceClient: process.env.OAUTH_CLIENTID,
+        privateKey: process.env.OAUTH_PRIVATE_KEY.replace(/\\n/g, '\n'),
     },
 };
-
-console.log({
-    serviceClient: key.client_id,
-        privateKey: key.private_key
-});
 
 let transporter = nodemailer.createTransport(nodeConfig);
 
