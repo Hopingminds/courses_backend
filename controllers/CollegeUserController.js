@@ -202,7 +202,7 @@ export async function loginWithMobile(req, res) {
 export async function getCollegeUser(req, res) {
 	let collegeUserID = req.collegeUserID
 	try {
-        const collegeUserData = await CollegeUserModel.findOne({_id:collegeUserID});
+        const collegeUserData = await CollegeUserModel.findOne({_id:collegeUserID}).populate('coursesAllotted');
 
         if (!collegeUserData) {
             return res.status(404).json({ success: false, msg: 'CollegeUser not found' });
@@ -218,7 +218,7 @@ export async function getCollegeUser(req, res) {
 /** GET: http://localhost:8080/api/collegeUsers */
 export async function getallCollegeUsers(req, res) {
 	try {
-        const collegeUserData = await CollegeUserModel.find({});
+        const collegeUserData = await CollegeUserModel.find({}).populate('coursesAllotted');
 		const collegeUserDataWithoutPassword = collegeUserData.map((collegeUser) => {
 			const { password, ...rest } = collegeUser.toObject()
 			return rest
