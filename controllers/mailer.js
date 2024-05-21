@@ -1,7 +1,6 @@
 import nodemailer from 'nodemailer';
 import Mailgen from 'mailgen';
 import 'dotenv/config';
-import key from '../key.json' assert { type: 'json' };
 
 // Configuration for G Suite Gmail
 let nodeConfig = {
