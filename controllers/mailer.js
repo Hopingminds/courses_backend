@@ -1,26 +1,35 @@
-import nodemailer from 'nodemailer'
-import Mailgen from 'mailgen'
-import 'dotenv/config'
+import nodemailer from 'nodemailer';
+import Mailgen from 'mailgen';
+import 'dotenv/config';
+import key from '../key.json' assert { type: 'json' };
 
+// Configuration for G Suite Gmail
 let nodeConfig = {
-	host: 'smtp.gmail.com',
-	port: 587,
-	secure: false, // true for 465, false for other ports
-	auth: {
-		user: process.env.EMAIL_USERNAME,
-		pass: process.env.EMAIL_PASSWORD,
-	},
-}
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: {
+        type: 'OAuth2',
+        user: process.env.EMAIL_USERNAME,
+        serviceClient: process.env.EMAIL_USERNAME,
+        privateKey: process.env.EMAIL_USERNAME
+    },
+};
 
-let transporter = nodemailer.createTransport(nodeConfig)
+console.log({
+    serviceClient: key.client_id,
+        privateKey: key.private_key
+});
+
+let transporter = nodemailer.createTransport(nodeConfig);
 
 let MailGenerator = new Mailgen({
-	theme: 'default',
-	product: {
-		name: 'Mailgen',
-		link: 'https://mailgen.js/',
-	},
-})
+    theme: 'default',
+    product: {
+        name: 'Hoping Minds',
+        link: 'https://hopingminds.in/',
+    },
+});
 
 /** POST: http://localhost:8080/api/registerMail 
  * @param: {
@@ -31,30 +40,32 @@ let MailGenerator = new Mailgen({
 }
 */
 export const registerMail = async (req, res) => {
-	const { username, userEmail, text, subject } = req.body
+    const { username, userEmail, text, subject } = req.body;
 
-	// body of the email
-	var email = {
-		body: {
-			name: username,
-			intro: text || "Welcome. We're very excited to have you on board.",
-			outro: "Need help, or have questions? Just reply to this email, we'd love to help.",
-		},
-	}
+    // body of the email
+    var email = {
+        body: {
+            name: username,
+            intro: text || "Welcome. We're very excited to have you on board.",
+            outro: "Need help, or have questions? Just reply to this email, we'd love to help.",
+        },
+    };
 
-	var emailBody = MailGenerator.generate(email)
+    var emailBody = MailGenerator.generate(email);
 
-	let message = {
-		from: process.env.EMAIL,
-		to: userEmail,
-		subject: subject || 'Signup Successful',
-		html: emailBody,
-	}
+    let message = {
+        from: process.env.EMAIL_USERNAME,
+        to: userEmail,
+        subject: subject || 'Signup Successful',
+        html: emailBody,
+    };
 
-	// send mail
-	transporter.sendMail(message)
-		.then(() => {
-			return res.status(200) 
-		})
-		.catch((error) => {console.log(error); res.status(500)})
-}
+    // send mail
+    try {
+        await transporter.sendMail(message);
+        return res.status(200).json({ msg: "Email sent successfully" });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Failed to send email" });
+    }
+};
