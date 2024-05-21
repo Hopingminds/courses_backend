@@ -5,7 +5,6 @@ import * as collegeUserController from '../controllers/CollegeUserController.js'
 import CollegeUserAuth from '../middleware/collegeUserauth.js'
 import AdminAuth from '../middleware/adminauth.js'
 import * as fileController from '../controllers/FileController.js'
-
 // POST ROUTES
 router.route('/registercollegeUser').post(AdminAuth, collegeUserController.register)
 router.route('/authenticatecollegeUser').post(CollegeUserAuth,(req,res)=>res.end())
@@ -18,6 +17,7 @@ router.route('/upload-students').post(CollegeUserAuth, fileController.handleFile
 router.route('/collegeUser').get(collegeUserController.verifyCollegeUser, collegeUserController.getCollegeUser)
 router.route('/collegeUsers').get(AdminAuth, collegeUserController.getallCollegeUsers)
 router.route('/get-college-students').get(CollegeUserAuth, collegeUserController.getAllCollegeStudents)
+router.route('/acceptCourse/:email').get(fileController.acceptCourse)
 
 // PUT ROUTES
 router.route('/updatecollegeUser').put(CollegeUserAuth, collegeUserController.updateCollegeUser)

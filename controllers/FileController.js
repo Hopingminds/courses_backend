@@ -1,5 +1,6 @@
 import multer from 'multer'
 import csv from 'csv-parser'
+import 'dotenv/config'
 import { Readable } from 'stream'
 import CollegeUserModel from '../model/CollegeUser.model.js'
 import UserModel from '../model/User.model.js'
@@ -62,7 +63,7 @@ export async function upload(req, res) {
             const { email, name, phone, degree, stream } = user;
             await UserModel.findOneAndUpdate(
                 { email: email },
-                { $set: { name, phone, degree, stream, college, purchased_courses:coursesAllottedData } },
+                { $set: { name, phone, degree, stream, college, isCourseOpened:false, purchased_courses:coursesAllottedData } },
                 { upsert: true, new: true }  // Create if not exists, return new doc
             );
 
@@ -75,9 +76,9 @@ export async function upload(req, res) {
                         text: `Hey ${name} some courses has been added to My Learnings at <a href="https://hopingminds.in" target="_blank">hopingminds.in</a> by your college ${college}. 
                         Click the below button to accept all those courses.
                         <center>
-                            <a href="${`https://api.hopingminds.in/api/acceptCourse/${email}`}" target="_blank"><button style="color:#1DBF73;">Accept Course</button></a>
+                            <a href="${`https://api.hopingminds.in/api/acceptCourse/${email}`}" target="_blank"><button style="background-color:#1DBF73;cursor:pointer;">Accept Course</button></a>
                         </center>
-                        <h6>Note: If you are a new user you need to <a href="https://hopingminds.in/forgot-password" target="_blank">rest password</a>.</h6>
+                        <h6>Note: If you are a new user you need to <a href="https://hopingminds.in/forgot-password" target="_blank">reset password</a>.</h6>
                         `,
                     },
                 },
@@ -98,4 +99,11 @@ export async function upload(req, res) {
         console.log(error);
         return res.status(501).send({success: false, msg: "Internal Server Error!"})
     }
+}
+
+export async function acceptCourse(req, res) {
+    let { email } = req.params
+    await UserModel.findOneAndUpdate(
+        { email }, { isCourseOpened:true })
+    res.redirect(`${process.env.CLIENT_BASE_URL}/login`);
 }
