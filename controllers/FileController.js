@@ -3,6 +3,7 @@ import csv from 'csv-parser'
 import { Readable } from 'stream'
 import CollegeUserModel from '../model/CollegeUser.model.js'
 import UserModel from '../model/User.model.js'
+import { registerMail } from './mailer.js'
 
 const storage = multer.memoryStorage()
 const uploadFile = multer({ storage: storage })
@@ -64,6 +65,31 @@ export async function upload(req, res) {
                 { $set: { name, phone, degree, stream, college, purchased_courses:coursesAllottedData } },
                 { upsert: true, new: true }  // Create if not exists, return new doc
             );
+
+            registerMail(
+                {
+                    body: {
+                        username: name ,
+                        userEmail: email,
+                        subject: 'Congratulations! You Got a New Courses.',
+                        text: `Hey ${name} some courses has been added to My Learnings at <a href="https://hopingminds.in" target="_blank">hopingminds.in</a> by your college ${college}. 
+                        Click the below button to accept all those courses.
+                        <center>
+                            <a href="${`https://api.hopingminds.in/api/acceptCourse/${email}`}" target="_blank"><button style="color:#1DBF73;">Accept Course</button></a>
+                        </center>
+                        <h6>Note: If you are a new user you need to <a href="https://hopingminds.in/forgot-password" target="_blank">rest password</a>.</h6>
+                        `,
+                    },
+                },
+                {
+                    status(status) {
+                        if (status === 200) {
+                        } else {
+                        }
+                    },
+                }
+            )
+
         }
         
 

@@ -35,7 +35,7 @@ let MailGenerator = new Mailgen({
 */
 export const registerMail = async (req, res) => {
     const { username, userEmail, text, subject } = req.body;
-
+    console.log(username, userEmail, subject);
     // body of the email
     var email = {
         body: {
@@ -57,9 +57,9 @@ export const registerMail = async (req, res) => {
     // send mail
     try {
         await transporter.sendMail(message);
-        return res.status(200).json({ msg: "Email sent successfully" });
+        return res.status(200)
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ error: "Failed to send email" });
+        return res.status(500)
     }
 };
