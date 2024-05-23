@@ -45,6 +45,26 @@ export async function hideFromUsForm(req, res) {
     }
 }
 
+export async function updateRecruiter(req, res) {
+	const body = req.body
+	try {
+		HirefromusModel.updateOne({ _id: body._id }, body)
+			.exec()
+			.then(()=>{
+				return res
+					.status(200)
+					.json({ message: 'Updated Successfully!', success: true })
+			})
+			.catch((error)=>{
+				return res
+					.status(500)
+					.json({ message: 'Internal server error', success: false, error })
+			})
+	} catch (error) {
+		
+	}
+}
+
 export async function loginRecWithEmail(req, res) {
 	const { email, password } = req.body
 	try {

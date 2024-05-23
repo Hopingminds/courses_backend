@@ -5,7 +5,8 @@ export const HirefromusSchema = new mongoose.Schema({
     email: { type: String },
     phone: { type: Number },
     company: { type: String },
-    password: {type: String}
+    password: {type: String},
+    isVeriied: {type: String}
 })
 
 export default mongoose.model.Hirefromus || mongoose.model('Hirefromus', HirefromusSchema);
