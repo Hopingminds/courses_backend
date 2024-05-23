@@ -410,11 +410,30 @@ export async function resetPassword(req,res){
 export async function getAllCollegeStudents(req, res) {
 	try {
 		let { collegeUserID } = req.collegeUser
+		let { stream, degree, courseAccepted, profileComplete } = req.query
 		let collegeUser = await CollegeUserModel.findById(collegeUserID)
 		if (!collegeUser) {
 			return res.status(404).send({ success: false, error : "College User Not Found!"});
 		}
-		let userData = await UserModel.find({college: collegeUser.college}).select('-password -token')
+		
+		let query = {}
+		if (stream) {
+			query.stream =  stream
+		}
+		if (degree) {
+			query.degree =  degree
+		}
+		if (courseAccepted) {
+			query.isCourseOpened =  courseAccepted
+		}
+		
+		if (profileComplete) {
+			query.isProfileComplete =  profileComplete
+		}
+
+		query.college = collegeUser.college
+		
+		let userData = await UserModel.find(query).select('-password -token')
 		return res.status(201).send({ success: true, data: userData, length: userData.length})
 	} catch (error) {
 		console.log(error);
