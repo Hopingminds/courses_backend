@@ -44,6 +44,12 @@ export const CoursesSchema = new mongoose.Schema({
         question: {type: String},
         answer: {type: String}
     }],
+    liveClasses:[{
+        topic: {type: String},
+        date: {type: Date},
+        time: {type: String},
+        meetingLink: {type: String}
+    }],
     reviews:[
         { 
             userID: String,
