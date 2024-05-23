@@ -20,7 +20,11 @@ export const UserSchema = new mongoose.Schema({
     degree: {type:String},
     stream: {type:String},
     yearofpass: {type:Number},
+    percentage: {type:Number},
     position: {type: String},
+    address: {type:String},
+    city: {type:String},
+    state: {type:String},
     bio: {type: String},
     purchased_courses:[
         {
@@ -38,10 +42,40 @@ export const UserSchema = new mongoose.Schema({
             ref: 'Courses'
         }
     ],
+    trainingInternships: [{
+        companyName: {type: String},
+        postName: {type: String},
+        location: {type: String},
+        duration:{
+            from: {type: String},
+            to: {type: String},
+        }
+    }],
+    projects:[{
+        projectName: {type: String},
+        projectRole: {type: String},
+        projectDescription: {type: String}
+    }],
+    certifications: [{
+        certificateName: {type: String},
+        certifiedBy: {type: String},
+    }],
+    skills: [{
+        skill: {type: String},
+        skill_lever: {type: Number, min: 0, max: 10}
+    }],
     role: {
         type: String,
         enum: ['user' , 'subadmin'],
         default: 'user'
+    },
+    profileLinks:{
+        hackerRank: {type: String},
+        github: {type: String},
+        linkedIn: {type: String},
+        codeChef: {type: String},
+        leetCode: {type: String},
+        geekForGeeks: {type: String},
     },
     isCourseOpened: {type: Boolean, default: false},
     isProfileComplete: {type: Boolean, default: false},
