@@ -65,8 +65,7 @@ export const CoursesSchema = new mongoose.Schema({
     credits: { type: Number },
     internshipPeriod: {
         type: String,
-        enum: ['6 Weeks' , '6 Months'],
-        default: 'public'
+        enum: ['6 Weeks' , '6 Months']
     },
     display: {type: Boolean, default: true}
 });
