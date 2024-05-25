@@ -28,3 +28,16 @@ export async function applyJob(req, res) {
         return res.status(404).send({ success: false, error })
     }
 }
+
+export async function getUserApplications(req, res) {
+    let { userID } = req.user
+    try {
+        let jobApplications = await JobsApplyModel.find({
+            appliedBy: userID
+        }).populate('jobApplied')
+
+        return res.status(200).send({ success: true, data: jobApplications })
+    } catch (error) {
+        return res.status(404).send({ success: false, error })
+    }
+}

@@ -13,6 +13,7 @@ router.route('/apply-job').post(Auth, applyJob.applyJob);
 router.route('/getalljobppenings').get(Auth, jobopeningController.getAllJobOpenings)
 router.route('/getalljobppenings/rec').get(RecAuth, jobopeningController.getAllJobOpeningsRec)
 router.route('/get-one-job-opening-details/:jobid').get(jobopeningController.getOneJobOpeningDeatils)
+router.route('/get-user-job-applications').get(Auth, applyJob.getUserApplications)
 
 // PUT ROUTES
 router.route('/update-job-opening-status').put(RecAuth, jobopeningController.updateJobOpeningStatus)
