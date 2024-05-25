@@ -5,7 +5,7 @@ export const HirefromusSchema = new mongoose.Schema({
     email: { type: String },
     phone: { type: Number },
     company: { type: String },
-    password: {type: String, default: "$2a$10$ind/oo9YPP.NFd.0tqEmFu8gFJuSW6pbQcSzMWBr8UZ3S.pRht2S."},
+    password: {type: String},
     isVerified: {type: Boolean, default: false}
 })
 
