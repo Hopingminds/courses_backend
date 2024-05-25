@@ -65,6 +65,15 @@ export async function updateRecruiter(req, res) {
 	}
 }
 
+export async function getAllRecruiter(req, res) {
+	try {
+        const hrs = await HirefromusModel.find({});
+        return res.status(200).json({ success: true, data:hrs });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: "Internal server error" });
+    }
+}
+
 export async function loginRecWithEmail(req, res) {
 	const { email, password } = req.body
 	try {

@@ -6,7 +6,7 @@ export const HirefromusSchema = new mongoose.Schema({
     phone: { type: Number },
     company: { type: String },
     password: {type: String},
-    isVeriied: {type: Boolean, default: false}
+    isVerified: {type: Boolean, default: false}
 })
 
 export default mongoose.model.Hirefromus || mongoose.model('Hirefromus', HirefromusSchema);
