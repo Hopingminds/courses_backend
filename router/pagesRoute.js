@@ -9,7 +9,7 @@ router.route('/addhirefromusform').post(pagesController.hideFromUsForm);
 router.route('/loginrecwithemail').post(pagesController.loginRecWithEmail);
 
 // GET ROUTES
-router.route('/getAllRec').get(AdmnAuth, pagesController.getAllRecruiter);
+router.route('/getAllRec').get(AdminAuth, pagesController.getAllRecruiter);
 
 // PUT ROUTES
 router.route('/updateRec').put(AdminAuth, pagesController.updateRecruiter);
