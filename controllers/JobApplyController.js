@@ -8,13 +8,13 @@ export async function applyJob(req, res) {
             return res.status(501).send({ success: false, error: 'Job is required' }) 
         }
 
-        let isExsist = await JobsApplyModel.find({
+        let isExsist = await JobsApplyModel.findOne({
             appliedBy: userID,
             jobApplied: jobID
         })
 
         if (isExsist) {
-            return res.status(501).send({ success: false, error: 'Already Applied!' }) 
+            return res.status(501).send({ success: false, error: 'Already Applied!', data: isExsist }) 
         }
 
         let jobApply = new JobsApplyModel({
