@@ -56,6 +56,20 @@ export const uploadInstructorProfile = multer({
     })
 })
 
+export const uploadCompanyLogo = multer({
+    storage: multerS3({
+        s3: s3,
+        acl: "public-read",
+        bucket: BUCKET,
+        key: function (req, file, cb) {
+            var newFileName = Date.now() + "-" + file.originalname;
+            var fullPath = 'images/profile/companylogo/'+ newFileName;
+            cb(null, fullPath)
+        },
+        contentType: multerS3.AUTO_CONTENT_TYPE
+    })
+})
+
 /** POST: http://localhost:8080/api/uploadassignmenttoaws/:assignmentID
     body: {
         file: < file >
@@ -81,6 +95,10 @@ export const uploadassignment = multer({
     }
 **/
 export async function uploadFile(req, res) {
+    return res.status(200).json({ success: true, message: 'Successfully Uploaded', url: req.file.location });
+}
+
+export async function uploadCompanyLogoFun(req, res) {
     return res.status(200).json({ success: true, message: 'Successfully Uploaded', url: req.file.location });
 }
 
