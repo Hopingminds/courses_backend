@@ -9,12 +9,12 @@ import {upload, uploadUserProfile, uploadInstructorProfile, uploadassignment, up
 import { getBotResponse } from '../controllers/ChatBotController.js'
 import Auth, { localVariables } from '../middleware/auth.js'
 import AdminAuth from '../middleware/adminauth.js'
-import instAuth from '../middleware/instAuth.js'
+import RecAuth from '../middleware/recauth.js'
 // POST ROUTES
 router.route('/registerMail').post(registerMail) 
 
 router.route('/uploadfiletoaws').post(AdminAuth, upload.single('file'), awsController.uploadFile)
-router.route('/uploadCompanyLogo').post(instAuth, uploadCompanyLogo.single('file'), awsController.uploadCompanyLogoFun)
+router.route('/uploadCompanyLogo').post(RecAuth, uploadCompanyLogo.single('file'), awsController.uploadCompanyLogoFun)
 router.route('/uploaduserprofiletoaws').post(Auth,uploadUserProfile.single('file'), awsController.uploaduserprofiletoaws)
 router.route('/uploadinsprofiletoaws').post(AdminAuth,uploadInstructorProfile.single('file'), awsController.uploadinsprofiletoaws)
 router.route('/uploadassignmenttoaws/:assignmentID').post(Auth, uploadassignment.single('file'), awsController.uploadassignmenttoaws)
