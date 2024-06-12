@@ -4,19 +4,29 @@ export const AssessmentSchema = new mongoose.Schema({
     assessment_id: {
         type: Number
     },
-    question: {
+    assessmentName: {
         type: String
     },
-    options:{
-        type: Object,
+    startDate: {
+        type: Date,
+        default: Date.now
     },
-    answer: {
-        type: String
+    lastDate: {
+        type: Date
     },
-    maxMarks: {
-        type: Number,
-        default: 5
-    }
+    UploadDate: {
+        type: Date,
+        default: Date.now
+    },
+    questions: [{
+        question: { type: String, required: true },
+        options: [{
+            option: { type: String, required: true }
+        }],
+        answer: { type: String, required: true },
+        maxMarks: { type: Number, default: 5 }
+    }]
+
 });
 
 export default mongoose.model.Assessments || mongoose.model('Assessment', AssessmentSchema);

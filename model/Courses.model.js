@@ -68,7 +68,9 @@ export const CoursesSchema = new mongoose.Schema({
         enum: ['6 Weeks' , '6 Months']
     },
     display: {type: Boolean, default: true},
-    bannerImg: {type: String}
+    bannerImg: {type: String},
+    assessments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Assessment" }]
+
 });
 
 export default mongoose.model.Courses || mongoose.model('Courses', CoursesSchema);

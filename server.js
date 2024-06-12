@@ -17,6 +17,7 @@ import authRouter from './router/authRoutes.js'
 import qnaRouter from './router/qnaRoutes.js'
 import jobopeningsRoute from './router/jobopeningsRoute.js'
 import collegeUserRoute from './router/collegeuserRoute.js'
+import assessmentRoutes from './router/assessmentRoutes.js'
 import * as ServerStatus from './middleware/helper.js'
 const app = express()
 import './middleware/passport.js'
@@ -76,6 +77,7 @@ app.use('/api', pagesRouter)
 app.use('/api', qnaRouter)
 app.use('/api', collegeUserRoute)
 app.use('/api', jobopeningsRoute)
+app.use('/api', assessmentRoutes)
 app.use('/auth', authRouter)
 
 // Error handling middleware
