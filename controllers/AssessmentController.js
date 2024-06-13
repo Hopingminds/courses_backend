@@ -6,10 +6,15 @@ import AssessmentSchema from '../model/Assessment.model.js';
 import CoursesSchema from '../model/Courses.model.js';
 import ResultSchema from '../model/Result.model.js';
 
-// Set up multer storage
+// Ensure the uploads directory exists
+const uploadDir = path.resolve('uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/'); // Define upload directory
+        cb(null, uploadDir); // Define upload directory using absolute path
     },
     filename: function (req, file, cb) {
         const ext = path.extname(file.originalname);
@@ -17,7 +22,6 @@ const storage = multer.diskStorage({
     }
 });
 
-// File filter to allow CSV and Excel files
 const fileFilter = (req, file, cb) => {
     const allowedFileTypes = ['text/csv', 'application/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
     if (allowedFileTypes.includes(file.mimetype)) {
@@ -26,6 +30,7 @@ const fileFilter = (req, file, cb) => {
         cb(new Error('Only CSV or Excel files are allowed'), false);
     }
 };
+
 
 export const upload = multer({ storage: storage, fileFilter: fileFilter });
 
