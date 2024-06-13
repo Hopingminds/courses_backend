@@ -69,8 +69,12 @@ export const CoursesSchema = new mongoose.Schema({
     },
     display: {type: Boolean, default: true},
     bannerImg: {type: String},
-    assessments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Assessment" }]
-
+    assessments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Assessment" }],
+    courseCategory: {
+        type: String,
+        enum: ['course', 'liveCourse'],
+        default: 'course'
+    },
 });
 
 export default mongoose.model.Courses || mongoose.model('Courses', CoursesSchema);

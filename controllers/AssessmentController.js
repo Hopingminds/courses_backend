@@ -4,6 +4,7 @@ import xlsx from 'xlsx';
 import fs from 'fs';
 import AssessmentSchema from '../model/Assessment.model.js';
 import CoursesSchema from '../model/Courses.model.js';
+import ResultSchema from '../model/Result.model.js';
 
 // Set up multer storage
 const storage = multer.diskStorage({
@@ -131,7 +132,7 @@ export const createAssessment = async (req, res) => {
     }
 };
 
-/** GET: http://localhost:8080/api/course/:coursename/assessments */
+/** GET: http://localhost:8080/api/courseassessments/:coursename */
 export const getCourseAllAssessment = async (req, res) => {
     try {
         const { coursename } = req.params;
@@ -177,3 +178,118 @@ export const getCourseAllAssessment = async (req, res) => {
         });
     }
 };
+
+/** GET: http://localhost:8080/api/getassessments/:assessmentId */
+export const getAssesment = async (req,res) => {
+    try {
+        const { assessmentId } = req.params;
+
+        // Find the assessment by ObjectId
+        const assessment = await AssessmentSchema.findById(assessmentId).lean();
+
+        if (!assessment) {
+            return res.status(404).json({ success: false, message: 'Assessment not found' });
+        }
+
+        // Remove the 'answer' field from each question in the assessment
+        const sanitizedAssessment = {
+            ...assessment,
+            questions: assessment.questions.map(({ answer, ...rest }) => rest)
+        };
+
+        res.status(200).json({ success: true, assessment: sanitizedAssessment });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Internal server error',
+        });
+    }
+}
+
+/** POST: http://localhost:8080/api/submitassessment
+* @param: {
+    "header" : "User <token>"
+}
+body: {
+    "assessmentId": "MongoDB ObjectId of the assessment",
+    "userId": "MongoDB ObjectId of the user submitting",
+    "answers": "Array of answers corresponding to the assessment questions"
+}
+*/
+export const submitAssessment = async (req,res) => {
+    try {
+        const { assessmentId, userId, answers } = req.body;
+        const assessment = await AssessmentSchema.findById(assessmentId).lean();
+
+        if (!assessment) {
+            return res.status(404).json({ success: false, message: 'Assessment not found' });
+        }
+
+        let score = 0;
+        let totalMarks = 0;
+
+        assessment.questions.forEach((question, index) => {
+            totalMarks += question.maxMarks;
+
+            if (answers[index] && answers[index] === question.answer) {
+                score += question.maxMarks;
+            }
+        });
+
+        const result = new ResultSchema({
+            assessmentId,
+            userId,
+            score,
+            totalMarks,
+        });
+
+        await result.save();
+
+        await AssessmentSchema.findByIdAndUpdate(assessmentId, { isSubmited: true });
+
+        res.status(200).json({ success: true, result });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Internal server error',
+        });
+    }
+}
+
+/** POST: http://localhost:8080/api/resetassessment
+* @param: {
+    "header" : "User <token>"
+}
+body: {
+    "assessmentId": "MongoDB ObjectId of the assessment"
+}
+*/
+export const requestForReassesment = async (req, res) => {
+    try {
+        const { assessmentId } = req.body;
+
+        if (!mongoose.Types.ObjectId.isValid(assessmentId)) {
+            return res.status(400).json({ success: false, message: 'Invalid assessment ID or user ID' });
+        }
+
+        const assessment = await AssessmentSchema.findById(assessmentId);
+
+        if (!assessment) {
+            return res.status(404).json({ success: false, message: 'Assessment not found' });
+        }
+
+        assessment.isSubmited = false;
+        await assessment.save();
+
+        res.status(200).json({ success: true, message: 'Assessment reset successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+        });
+    }
+}

@@ -25,7 +25,8 @@ export const AssessmentSchema = new mongoose.Schema({
         }],
         answer: { type: String, required: true },
         maxMarks: { type: Number, default: 5 }
-    }]
+    }],
+    isSubmited:{type: Boolean, default:false}
 
 });
 
