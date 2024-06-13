@@ -95,7 +95,7 @@ export async function loginRecWithEmail(req, res) {
 								mobile: rec.mobile
 							},
 							process.env.JWT_SECRET,
-							{ expiresIn: '24h' }
+							{ expiresIn: '7d' }
 						)
 						return res.status(200).send({
 							msg: 'Login Successful',

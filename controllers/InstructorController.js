@@ -82,7 +82,7 @@ export async function register(req, res) {
 											role: instructor.role,
 										},
 										process.env.JWT_SECRET,
-										{ expiresIn: '24h' }
+										{ expiresIn: '7d' }
 									)
 									
 									InstructorModel.updateOne({ email:instructor.email }, { token })
@@ -146,7 +146,7 @@ export async function login(req, res) {
 								role: instructor.role,
 							},
 							process.env.JWT_SECRET,
-							{ expiresIn: '24h' }
+							{ expiresIn: '7d' }
 						)
 						
 						InstructorModel.updateOne({ email }, { token })

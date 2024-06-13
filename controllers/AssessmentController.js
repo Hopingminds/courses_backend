@@ -2,9 +2,11 @@ import multer from 'multer';
 import path from 'path';
 import xlsx from 'xlsx';
 import fs from 'fs';
+import cron from 'node-cron';
 import AssessmentSchema from '../model/Assessment.model.js';
 import CoursesSchema from '../model/Courses.model.js';
 import ResultSchema from '../model/Result.model.js';
+import AssessmentExpirySchema from '../model/AssessmentExpiry.model.js';
 
 // Ensure the uploads directory exists
 const uploadDir = path.resolve('uploads');
@@ -184,7 +186,7 @@ export const getCourseAllAssessment = async (req, res) => {
     }
 };
 
-/** GET: http://localhost:8080/api/getassessments/:assessmentId */
+/** GET: http://localhost:8080/api/getassessment/:assessmentId */
 export const getAssesment = async (req,res) => {
     try {
         const { assessmentId } = req.params;
@@ -274,9 +276,9 @@ body: {
 */
 export const requestForReassesment = async (req, res) => {
     try {
-        const { assessmentId } = req.body;
+        const { assessmentId, userId } = req.params;
 
-        if (!mongoose.Types.ObjectId.isValid(assessmentId)) {
+        if (!mongoose.Types.ObjectId.isValid(assessmentId) || !mongoose.Types.ObjectId.isValid(userId)) {
             return res.status(400).json({ success: false, message: 'Invalid assessment ID or user ID' });
         }
 
@@ -286,10 +288,43 @@ export const requestForReassesment = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Assessment not found' });
         }
 
-        assessment.isSubmited = false;
-        await assessment.save();
+        // Check if the user has already submitted the assessment
+        const userSubmission = assessment.submissions.find(sub => sub.userId.toString() === userId);
 
-        res.status(200).json({ success: true, message: 'Assessment reset successfully' });
+        if (!userSubmission) {
+            return res.status(404).json({ success: false, message: 'User submission not found' });
+        }
+
+        // Calculate expiration date (3 days from now)
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 3);
+
+        // Create a job schedule in the database
+        const job = new AssessmentExpirySchema({ assessmentId, userId, expiresAt });
+        await job.save();
+
+        // Schedule the job using cron
+        const jobId = job._id.toString();
+        cron.schedule('0 0 * * *', async () => {
+            const now = new Date();
+            const job = await AssessmentExpirySchema.findById(jobId);
+
+            if (job && now >= job.expiresAt) {
+                // Reset the isSubmited flag to false for the specific user
+                const updatedAssessment = await AssessmentSchema.findOneAndUpdate(
+                    { _id: assessmentId, 'submissions.userId': userId },
+                    { $set: { 'submissions.$.isSubmited': false } },
+                    { new: true }
+                );
+
+                // Delete the job from the database
+                await AssessmentExpirySchema.findByIdAndDelete(jobId);
+
+                console.log(`User ${userId} submission flag reset for assessment ${assessmentId}`);
+            }
+        });
+
+        res.status(200).json({ success: true, message: 'User-specific assessment reset scheduled' });
     } catch (error) {
         console.error(error);
         res.status(500).json({

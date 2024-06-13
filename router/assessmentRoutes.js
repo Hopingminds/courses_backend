@@ -12,6 +12,6 @@ router.route('/submitassessment').post(Auth, AssessmentController.submitAssessme
 
 // GET ROUTES
 router.route('/courseassessments/:coursename').get(Auth, AssessmentController.getCourseAllAssessment);
-router.route('/getassessments/:assessmentId').get(Auth, AssessmentController.getAssesment);
+router.route('/getassessment/:assessmentId').get(Auth, AssessmentController.getAssesment);
 
 export default router;

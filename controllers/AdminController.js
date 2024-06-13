@@ -78,7 +78,7 @@ export async function register(req, res) {
 					mobile: savedAdmin.mobile
 				},
 				process.env.JWT_SECRET,
-				{ expiresIn: '24h' }
+				{ expiresIn: '7d' }
 			)
             // Send response with _id and email
             return res.status(201).send({
@@ -118,7 +118,7 @@ export async function loginWithEmail(req, res) {
 								mobile: admin.mobile
 							},
 							process.env.JWT_SECRET,
-							{ expiresIn: '24h' }
+							{ expiresIn: '7d' }
 						)
 						return res.status(200).send({
 							msg: 'Login Successful',
@@ -167,7 +167,7 @@ export async function loginWithMobile(req, res) {
 								mobile: admin.mobile
 							},
 							process.env.JWT_SECRET,
-							{ expiresIn: '24h' }
+							{ expiresIn: '7d' }
 						)
 						return res.status(200).send({
 							msg: 'Login Successful',
