@@ -7,7 +7,7 @@ import { upload } from '../controllers/AssessmentController.js';
 import Auth from '../middleware/auth.js';
 
 // POST ROUTES
-router.route('/createcourseassessment').post(AdminAuth, upload.single('questions'), AssessmentController.createAssessment);
+router.route('/createcourseassessment').post( upload.single('questions'), AssessmentController.createAssessment);
 router.route('/submitassessment').post(Auth, AssessmentController.submitAssessment);
 
 // GET ROUTES

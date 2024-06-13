@@ -71,7 +71,8 @@ export const createAssessment = async (req, res) => {
             return res.status(400).send('No valid data found in the uploaded file');
         }
 
-        const courseID = req.body.courseID;
+        const { courseID, assessmentName, startDate, lastDate } = req.body;
+
         const questions = [];
 
         // Iterate through JSON array to gather questions
@@ -103,9 +104,9 @@ export const createAssessment = async (req, res) => {
         // Create a single assessment object with all questions
         const assessment = new AssessmentSchema({
             assessment_id: Date.now(), // Generate assessment_id as needed
-            assessmentName: "Unnamed Assessment", // Provide a default name if not provided
-            startDate: new Date(),
-            lastDate: new Date(),
+            assessmentName: assessmentName || "Unnamed Assessment", // Use provided name or default
+            startDate: startDate ? new Date(startDate) : new Date(),
+            lastDate: lastDate ? new Date(lastDate) : new Date(),
             UploadDate: new Date(),
             questions: questions
         });
