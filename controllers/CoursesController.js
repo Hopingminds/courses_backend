@@ -87,6 +87,7 @@ export async function getCourses(req, res) {
 		} else if (sort === 'price_desc') {
 			sortObj.base_price = -1
 		}
+		sortObj.courseCategory = -1;
 		const courses = await CoursesModel.find(query)
 			.sort(sortObj)
 			.populate('instructor').lean()

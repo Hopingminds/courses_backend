@@ -235,6 +235,11 @@ export const submitAssessment = async (req,res) => {
             return res.status(404).json({ success: false, message: 'Assessment not found' });
         }
 
+        const existingResult = await ResultSchema.findOne({ assessmentId, userId }).lean();
+        if (existingResult) {
+            return res.status(400).json({ success: false, message: 'You have already submitted this assessment.' });
+        }
+
         let score = 0;
         let totalMarks = 0;
 
