@@ -55,11 +55,15 @@ export const CoursesSchema = new mongoose.Schema({
             userID: String,
             review: {type: String},
             reating: {type: Number},
+            userName: {type: String},
             userProfileImg: {type: String}
         }
     ],
     testimonials:[{
-        reviewVideo: {type: String}
+        reviewVideo: {type: String},
+        rating: {type: Number},
+        userName: {type: String},
+        review: {type: String}
     }],
     courseType: {
         type: String,
