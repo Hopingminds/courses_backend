@@ -207,10 +207,20 @@ export const getAssesment = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Assessment not found' });
         }
 
-        // Remove the 'answer' field from each question in the assessment and shuffle the questions
+        // Remove the 'answer' field from each question in the assessment
+        let sanitizedQuestions = assessment.questions.map(({ answer, ...rest }) => rest);
+
+        // Shuffle the questions
+        sanitizedQuestions = shuffleArray(sanitizedQuestions);
+
+        // If there are more than 30 questions, select only 30 random questions
+        if (sanitizedQuestions.length > 30) {
+            sanitizedQuestions = sanitizedQuestions.slice(0, 30);
+        }
+
         const sanitizedAssessment = {
             ...assessment,
-            questions: shuffleArray(assessment.questions.map(({ answer, ...rest }) => rest))
+            questions: sanitizedQuestions
         };
 
         res.status(200).json({ success: true, assessment: sanitizedAssessment });
@@ -223,7 +233,6 @@ export const getAssesment = async (req, res) => {
         });
     }
 }
-
 /** POST: http://localhost:8080/api/submitassessment
 * @param: {
     "header" : "User <token>"

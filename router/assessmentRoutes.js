@@ -9,6 +9,7 @@ import Auth from '../middleware/auth.js';
 // POST ROUTES
 router.route('/createcourseassessment').post(AdminAuth, upload.single('questions'), AssessmentController.createAssessment);
 router.route('/submitassessment').post(Auth, AssessmentController.submitAssessment);
+router.route('/resetassessment').post(Auth, AssessmentController.requestForReassesment);
 
 // GET ROUTES
 router.route('/courseassessments/:coursename').get(Auth, AssessmentController.getCourseAllAssessment);
