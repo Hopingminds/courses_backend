@@ -133,12 +133,12 @@ function calculateProgress(module) {
 */
 export async function getAllModulesAdmin(req, res) {
 	try {
-		let Module = await TestModuleModel.find({ }).lean();
-		let data  = Module.map((module)=>{
-			const { questions, ...rest } = module
-			return rest
-		})
-		return res.status(200).send({ success: true, data: data })
+		let Module = await TestModuleModel.find({ }).populate('questions').lean();
+		// let data  = Module.map((module)=>{
+		// 	const { questions, ...rest } = module
+		// 	return rest
+		// })
+		return res.status(200).send({ success: true, data: Module })
 	} catch (error) {
 		return res.status(500).send({ error: 'Internal Server Error', error })
 	}
