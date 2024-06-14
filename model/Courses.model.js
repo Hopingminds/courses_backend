@@ -54,9 +54,13 @@ export const CoursesSchema = new mongoose.Schema({
         { 
             userID: String,
             review: {type: String},
-            reating: {type: Number}
+            reating: {type: Number},
+            userProfileImg: {type: String}
         }
     ],
+    testimonial:[{
+        reviewVideo: {type: String}
+    }],
     courseType: {
         type: String,
         enum: ['public' , 'minorDegree', 'internship'],
