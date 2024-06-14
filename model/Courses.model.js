@@ -58,7 +58,7 @@ export const CoursesSchema = new mongoose.Schema({
             userProfileImg: {type: String}
         }
     ],
-    testimonial:[{
+    testimonials:[{
         reviewVideo: {type: String}
     }],
     courseType: {
