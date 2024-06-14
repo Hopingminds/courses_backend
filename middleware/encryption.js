@@ -1,10 +1,13 @@
-const crypto = require('crypto');
+import crypto from "crypto";
 
-const encrypt = (text, encryptionKey) => {
-    const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(encryptionKey, 'hex'), Buffer.alloc(16, 0));
-    let encrypted = cipher.update(text, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
+export const encrypt = (text, encryptionKey) => {
+    const key = Buffer.from(encryptionKey, 'utf8'); // Ensure the key is treated as a buffer
+
+    // Create cipher without an IV for ECB mode
+    const cipher = crypto.createCipheriv('aes-128-ecb', key, null);
+
+    let encrypted = cipher.update(text, 'utf8', 'base64');
+    encrypted += cipher.final('base64');
+
     return encrypted;
 };
-
-module.exports = encrypt;
