@@ -187,22 +187,30 @@ export const getCourseAllAssessment = async (req, res) => {
     }
 };
 
+// Function to shuffle an array using the Fisher-Yates algorithm
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
 /** GET: http://localhost:8080/api/getassessment/:assessmentId */
-export const getAssesment = async (req,res) => {
+export const getAssesment = async (req, res) => {
     try {
         const { assessmentId } = req.params;
 
-        // Find the assessment by ObjectId
         const assessment = await AssessmentSchema.findById(assessmentId).lean();
 
         if (!assessment) {
             return res.status(404).json({ success: false, message: 'Assessment not found' });
         }
 
-        // Remove the 'answer' field from each question in the assessment
+        // Remove the 'answer' field from each question in the assessment and shuffle the questions
         const sanitizedAssessment = {
             ...assessment,
-            questions: assessment.questions.map(({ answer, ...rest }) => rest)
+            questions: shuffleArray(assessment.questions.map(({ answer, ...rest }) => rest))
         };
 
         res.status(200).json({ success: true, assessment: sanitizedAssessment });

@@ -65,6 +65,9 @@ export const CoursesSchema = new mongoose.Schema({
         userName: {type: String},
         review: {type: String}
     }],
+    learningOutcome:[{
+        point:{type: String}
+    }],
     courseType: {
         type: String,
         enum: ['public' , 'minorDegree', 'internship'],
