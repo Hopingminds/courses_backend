@@ -23,7 +23,8 @@ export const AssessmentSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    isProcted:{type: Boolean, default: false},
+    timelimit:{type: Date},
+    isProtected:{type: Boolean, default: false},
     questions: [{
         question: { type: String, required: true },
         options: [{
