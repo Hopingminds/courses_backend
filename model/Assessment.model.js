@@ -1,10 +1,5 @@
 import mongoose from "mongoose";
 
-const SubmissionSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
-    isSubmited: { type: Boolean, default: false }
-});
-
 export const AssessmentSchema = new mongoose.Schema({
     assessment_id: {
         type: Number
@@ -33,7 +28,7 @@ export const AssessmentSchema = new mongoose.Schema({
         answer: { type: String, required: true },
         maxMarks: { type: Number, default: 5 }
     }],
-    submissions: [SubmissionSchema]
+    isSubmited: { type: Boolean, default: false }
 });
 
 export default mongoose.model.Assessments || mongoose.model('Assessment', AssessmentSchema);

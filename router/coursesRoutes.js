@@ -5,11 +5,15 @@ import * as CoursesController from '../controllers/CoursesController.js'
 import * as CategoriesController from '../controllers/CategoriesController.js'
 import Auth from '../middleware/auth.js'
 import AdminAuth from '../middleware/adminauth.js'
+import * as paymentController from '../controllers/paymentController.js'
 
 // POST ROUTES
 router.route('/addcourse').post(AdminAuth, CoursesController.addcourse)
 router.route('/addcategory').post(CategoriesController.addcategory)
 router.route('/addsubcategory').post(CategoriesController.addsubcategory)
+
+//Test route
+router.route('/payment').post(paymentController.initiatePayment);
 
 // GET ROUTES
 router.route('/courses').get(CoursesController.getCourses)
