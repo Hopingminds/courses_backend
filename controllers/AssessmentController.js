@@ -46,7 +46,7 @@ body: {
     "questions":".xlsx file"
     "startDate":"Date" optional,
     "lastDate":"Date" optional,
-    "isProcted":"isProcted"
+    "isProtected":"isProtected"
 }
 */
 export const createAssessment = async (req, res) => {
@@ -72,7 +72,7 @@ export const createAssessment = async (req, res) => {
             return res.status(400).send('No valid data found in the uploaded file');
         }
 
-        const { courseID, assessmentName, startDate, lastDate, isProcted } = req.body;
+        const { courseID, assessmentName, startDate, lastDate, isProtected,timelimit } = req.body;
 
         const questions = [];
 
@@ -109,7 +109,8 @@ export const createAssessment = async (req, res) => {
             startDate: startDate ? new Date(startDate) : new Date(),
             lastDate: lastDate ? new Date(lastDate) : new Date(),
             UploadDate: new Date(),
-            isProcted:isProcted,
+            isProtected:isProtected,
+            timelimit:timelimit,
             questions: questions
         });
 
