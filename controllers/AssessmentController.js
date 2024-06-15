@@ -65,7 +65,7 @@ export const createAssessment = async (req, res) => {
         } else {
             return res.status(400).send('Unsupported file type');
         }
-        console.log('Parsed JSON Array:', jsonArray);
+        // console.log('Parsed JSON Array:', jsonArray);
 
 
         if (!jsonArray || jsonArray.length === 0) {
@@ -82,7 +82,7 @@ export const createAssessment = async (req, res) => {
             // if (index === 0) return;
 
             // Log each row to debug
-            console.log(`Processing row ${index}:`, row);
+            // console.log(`Processing row ${index}:`, row);
 
             const [question, ...rest] = row;
             const maxMarks = rest.pop(); // Assume the last element is max marks
@@ -114,10 +114,7 @@ export const createAssessment = async (req, res) => {
             questions: questions
         });
 
-        console.log('Logging the assessment', assessment);
-        // Save assessment document
-        await assessment.save();
-
+        
         // Update course with assessment ID
         const updatedCourse = await CoursesSchema.findOneAndUpdate(
             { courseID },
@@ -125,13 +122,22 @@ export const createAssessment = async (req, res) => {
             { new: true, useFindAndModify: false }
         );
 
+        console.log('Updated Course:', updatedCourse);
+        
+        if (!updatedCourse) {
+            return res.status(404).send('Course not found');
+        }
+        
+        // console.log('Logging the assessment', assessment);
+        // Save assessment document
+        await assessment.save();
+
         res.status(201).json({
             success: true,
             message: "Assessment created and added to the course successfully",
             assessment,
             updatedCourse
         });
-
 
     } catch (error) {
         console.error('Error creating assessment:', error);
