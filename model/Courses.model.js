@@ -88,7 +88,10 @@ export const CoursesSchema = new mongoose.Schema({
     },
     companies:[{
         companyName:{type: String},
-        avgpkg:{type: Number}
+        avgpkg:{
+            from:{type: Number},
+            to:{type: Number}
+        }
     }],
 });
 
