@@ -72,7 +72,7 @@ export const createAssessment = async (req, res) => {
             return res.status(400).send('No valid data found in the uploaded file');
         }
 
-        const { courseID, assessmentName, startDate, lastDate, isProtected,timelimit } = req.body;
+        const { courseID, assessmentName, startDate, lastDate, isProtected, timelimit, isSubmited } = req.body;
 
         const questions = [];
 
@@ -109,8 +109,9 @@ export const createAssessment = async (req, res) => {
             startDate: startDate ? new Date(startDate) : new Date(),
             lastDate: lastDate ? new Date(lastDate) : new Date(),
             UploadDate: new Date(),
-            isProtected:isProtected,
-            timelimit:timelimit,
+            isProtected: isProtected,
+            isSubmited: isSubmited,
+            timelimit: timelimit,
             questions: questions
         });
 
@@ -127,7 +128,7 @@ export const createAssessment = async (req, res) => {
         if (!updatedCourse) {
             return res.status(404).send('Course not found');
         }
-        
+
         // console.log('Logging the assessment', assessment);
         // Save assessment document
         await assessment.save();

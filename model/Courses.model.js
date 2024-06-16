@@ -86,6 +86,10 @@ export const CoursesSchema = new mongoose.Schema({
         enum: ['course', 'liveCourse'],
         default: 'course'
     },
+    companies:[{
+        companyName:{type: String},
+        avgpkg:{type: Number}
+    }],
 });
 
 export default mongoose.model.Courses || mongoose.model('Courses', CoursesSchema);
