@@ -130,7 +130,7 @@ export async function getRecommendedCourses(req, res) {
 export async function getCourseBySlug(req, res) {
 	try {
 		const { coursename } = req.params
-		const course = await CoursesModel.findOne({ slug: coursename }).populate('instructor').lean()
+		const course = await CoursesModel.findOne({ slug: coursename }).populate('instructor').populate({ path: 'assessments',select: '-questions' }).lean()
 
 		if (!course) {
 			return res
