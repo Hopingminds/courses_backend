@@ -34,7 +34,6 @@ export const CoursesSchema = new mongoose.Schema({
                     assignment: {type:  String},
                 },
                 {
-                    type: Object,
                     project:{
                         title: {type: String},
                         startDate: {type: Date},
