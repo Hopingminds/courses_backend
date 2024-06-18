@@ -32,6 +32,17 @@ export const CoursesSchema = new mongoose.Schema({
                     video: {type: String},
                     notes: {type:  String},
                     assignment: {type:  String},
+                },
+                {
+                    type: Object,
+                    project:{
+                        title: {type: String},
+                        startDate: {type: Date},
+                        endDate: {type: Date},
+                        projectInfoPdf: {type: String},
+                        isSubmit: {type: Boolean},
+                    },
+                    required: false
                 }
             ]
         }
