@@ -7,6 +7,7 @@ import AssessmentSchema from '../model/Assessment.model.js';
 import CoursesSchema from '../model/Courses.model.js';
 import ResultSchema from '../model/Result.model.js';
 import AssessmentExpirySchema from '../model/AssessmentExpiry.model.js';
+import mongoose from 'mongoose';
 
 // Ensure the uploads directory exists
 const uploadDir = path.resolve('uploads');
@@ -65,8 +66,6 @@ export const createAssessment = async (req, res) => {
         } else {
             return res.status(400).send('Unsupported file type');
         }
-        // console.log('Parsed JSON Array:', jsonArray);
-
 
         if (!jsonArray || jsonArray.length === 0) {
             return res.status(400).send('No valid data found in the uploaded file');
@@ -78,12 +77,6 @@ export const createAssessment = async (req, res) => {
 
         // Iterate through JSON array to gather questions
         jsonArray.forEach((row, index) => {
-            // Skip the first row if it contains headers
-            // if (index === 0) return;
-
-            // Log each row to debug
-            // console.log(`Processing row ${index}:`, row);
-
             const [question, ...rest] = row;
             const maxMarks = rest.pop(); // Assume the last element is max marks
             const correctOption = rest.pop(); // Assume the second last element is the correct option
@@ -104,7 +97,6 @@ export const createAssessment = async (req, res) => {
 
         // Create a single assessment object with all questions
         const assessment = new AssessmentSchema({
-            assessment_id: Date.now(), // Generate assessment_id as needed
             assessmentName: assessmentName || "Unnamed Assessment", // Use provided name or default
             startDate: startDate ? new Date(startDate) : new Date(),
             lastDate: lastDate ? new Date(lastDate) : new Date(),
@@ -116,6 +108,8 @@ export const createAssessment = async (req, res) => {
         });
 
         
+        await assessment.save();
+
         // Update course with assessment ID
         const updatedCourse = await CoursesSchema.findOneAndUpdate(
             { courseID },
@@ -123,15 +117,9 @@ export const createAssessment = async (req, res) => {
             { new: true, useFindAndModify: false }
         );
 
-        console.log('Updated Course:', updatedCourse);
-        
         if (!updatedCourse) {
             return res.status(404).send('Course not found');
         }
-
-        // console.log('Logging the assessment', assessment);
-        // Save assessment document
-        await assessment.save();
 
         res.status(201).json({
             success: true,
@@ -154,6 +142,8 @@ export const createAssessment = async (req, res) => {
 export const getCourseAllAssessment = async (req, res) => {
     try {
         const { coursename } = req.params;
+
+        // Find the course by slug and populate assessments
         const course = await CoursesSchema.findOne({ slug: coursename }).populate('assessments').lean();
 
         if (!course) {
@@ -163,7 +153,7 @@ export const getCourseAllAssessment = async (req, res) => {
         // Function to fetch detailed assessment information without questions
         const fetchAssessmentDetails = async (assessmentId) => {
             try {
-                const assessment = await AssessmentSchema.findOne({ assessment_id: assessmentId }).lean();
+                const assessment = await AssessmentSchema.findById(assessmentId).lean();
                 if (assessment) {
                     // Exclude questions field
                     const { questions, ...rest } = assessment;
@@ -179,12 +169,12 @@ export const getCourseAllAssessment = async (req, res) => {
         // Populate assessments without questions
         const populatedAssessments = await Promise.all(
             course.assessments.map(async (assessment) => {
-                const detailedAssessment = await fetchAssessmentDetails(assessment.assessment_id); // Ensure this matches your schema
+                const detailedAssessment = await fetchAssessmentDetails(assessment._id); // Ensure this matches your schema
                 return detailedAssessment;
             })
         );
 
-        // Filter out any null assessments
+        // Filter out any null assessments (if any error occurred during fetching)
         const filteredAssessments = populatedAssessments.filter(assessment => assessment !== null);
 
         res.status(200).json({ success: true, assessments: filteredAssessments });
@@ -254,51 +244,45 @@ body: {
     "answers": "Array of answers corresponding to the assessment questions"
 }
 */
-export const submitAssessment = async (req,res) => {
+export const submitAssessment = async (req, res) => {
     try {
-        const { assessmentId, userId, answers } = req.body;
-        const assessment = await AssessmentSchema.findById(assessmentId).lean();
+        const { userID, assessment_id } = req.body;
+
+        // Ensure the assessment_id is properly formatted
+        const formattedAssessmentId = new mongoose.Types.ObjectId(assessment_id);
+
+        // Find the assessment based on assessmentID
+        const assessment = await AssessmentSchema.findById(formattedAssessmentId).lean();
 
         if (!assessment) {
-            return res.status(404).json({ success: false, message: 'Assessment not found' });
+            return res.status(404).send({ success: false, message: 'Assessment not found' });
         }
 
-        const existingResult = await ResultSchema.findOne({ assessmentId, userId }).lean();
-        if (existingResult) {
-            return res.status(400).json({ success: false, message: 'You have already submitted this assessment.' });
+        // Calculate the total marks of the assessment
+        const totalMarks = assessment.questions.reduce((acc, question) => acc + question.maxMarks, 0);
+
+        // Find the result document for this assessment and user
+        let result = await ResultSchema.findOne({ assessment_id: formattedAssessmentId, userId: userID });
+        if (!result) {
+            return res.status(404).send({ success: false, message: 'Result not found for this user and assessment' });
         }
 
-        let score = 0;
-        let totalMarks = 0;
+        // Check if the assessment is already submitted
+        if (result.isSubmitted) {
+            return res.status(400).send({ success: false, message: 'Assessment is already submitted' });
+        }
 
-        assessment.questions.forEach((question, index) => {
-            totalMarks += question.maxMarks;
-
-            if (answers[index] && answers[index] === question.answer) {
-                score += question.maxMarks;
-            }
-        });
-
-        const result = new ResultSchema({
-            assessmentId,
-            userId,
-            score,
-            totalMarks,
-        });
-
+        // Mark the assessment as submitted and update total marks
+        result.isSubmitted = true;
+        result.totalMarks = totalMarks;
         await result.save();
 
-        await AssessmentSchema.findByIdAndUpdate(assessmentId, { isSubmited: true });
-
-        res.status(200).json({ success: true, result });
+        return res.status(200).send({ success: true, message: 'Assessment submitted successfully', result });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            success: false,
-            message: error.message || 'Internal server error',
-        });
+        console.error('Error submitting assessment:', error);
+        return res.status(500).send({ success: false, message: 'Error submitting assessment: ' + error.message });
     }
-}
+};
 
 /** POST: http://localhost:8080/api/resetassessment
 * @param: {
@@ -365,5 +349,99 @@ export const requestForReassesment = async (req, res) => {
             success: false,
             message: 'Internal server error',
         });
+    }
+}
+
+/** PUT: http://localhost:8080/api/submitassessmentanswer
+ * @param: {
+    "header" : "User <token>"
+}
+ * @body : {
+    "assessmentID": "MongoDB ObjectId of the assessment",
+    "questionID": "MongoDB ObjectId of the question",
+    "answer": "User's submitted answer",
+    UserId: "userId"
+}
+*/
+export async function submitAnswerForAssessment(req, res) {
+    try {
+        const { userID, assessment_id, questionID, answer } = req.body;
+
+        console.log('Received request data:', { userID, assessment_id, questionID, answer });
+
+        // Ensure the assessment_id is properly formatted
+        const formattedAssessmentId = new mongoose.Types.ObjectId(assessment_id);
+
+        // Find the assessment based on assessmentID
+        const assessment = await AssessmentSchema.findById(formattedAssessmentId);
+
+        console.log('Assessment found:', assessment);
+
+        if (!assessment) {
+            return res.status(404).send({ success: false, message: 'Assessment not found' });
+        }
+
+        // Find the index of the question in the questions array using the question ID
+        const questionIndex = assessment.questions.findIndex(q => q._id.toString() === questionID);
+
+        if (questionIndex === -1) {
+            return res.status(404).send({ success: false, message: 'Question not found in the assessment' });
+        }
+
+        const question = assessment.questions[questionIndex];
+
+        // Check if the answer for this question is already submitted by the same user
+        const userSubmissionIndex = question.submissions.findIndex(submission => submission.userId.toString() === userID);
+
+        if (userSubmissionIndex !== -1) {
+            return res.status(400).send({ success: false, message: 'Answer for this question is already submitted by this user' });
+        }
+
+        // Determine if the submitted answer is correct
+        const isCorrect = question.answer === answer;
+        const obtainedMarks = isCorrect ? question.maxMarks : 0;
+
+        // Add the new submission for the user
+        question.submissions.push({
+            userId: userID,
+            submittedAnswer: answer,
+            isCorrect: isCorrect
+        });
+
+        // Save the updated assessment
+        await assessment.save();
+
+        // Find or create a result document for this assessment and user
+        let result = await ResultSchema.findOne({ assessment_id: formattedAssessmentId, userId: userID });
+        if (!result) {
+            result = new ResultSchema({
+                assessment_id: formattedAssessmentId,
+                userId: userID,
+                questions: [],
+                score: 0,
+                totalMarks: 0
+            });
+        }
+
+        // Add the question result to the result document
+        result.questions.push({
+            questionId: questionID,
+            submittedAnswer: answer,
+            isCorrect: isCorrect,
+            maxMarks: question.maxMarks,
+            obtainedMarks: obtainedMarks
+        });
+
+        // Update the total score and total marks
+        result.score += obtainedMarks;
+        result.totalMarks += question.maxMarks;
+
+        // Save the result document
+        await result.save();
+
+        return res.status(200).send({ success: true, message: 'Answer submitted successfully' });
+    } catch (error) {
+        console.error('Error submitting answer:', error);
+        return res.status(500).send({ success: false, message: 'Error submitting answer: ' + error.message });
     }
 }

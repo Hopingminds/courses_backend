@@ -1,7 +1,31 @@
 import mongoose from 'mongoose';
 
+const QuestionResultSchema = new mongoose.Schema({
+    questionId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Assessment.questions',
+        required: true,
+    },
+    submittedAnswer: {
+        type: String,
+        required: true,
+    },
+    isCorrect: {
+        type: Boolean,
+        required: true,
+    },
+    maxMarks: {
+        type: Number,
+        required: true,
+    },
+    obtainedMarks: {
+        type: Number,
+        required: true,
+    }
+});
+
 const ResultSchema = new mongoose.Schema({
-    assessmentId: {
+    assessment_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Assessment',
         required: true,
@@ -11,6 +35,7 @@ const ResultSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
     },
+    questions: [QuestionResultSchema],
     score: {
         type: Number,
         required: true,
@@ -22,6 +47,10 @@ const ResultSchema = new mongoose.Schema({
     submissionDate: {
         type: Date,
         default: Date.now,
+    },
+    isSubmitted: {
+        type: Boolean,
+        default: false,
     }
 });
 
