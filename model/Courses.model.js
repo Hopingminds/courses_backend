@@ -32,16 +32,14 @@ export const CoursesSchema = new mongoose.Schema({
                     video: {type: String},
                     notes: {type:  String},
                     assignment: {type:  String},
-                },
+                }
+            ],
+            project:[
                 {
-                    project:{
-                        title: {type: String},
-                        startDate: {type: Date},
-                        endDate: {type: Date},
-                        projectInfoPdf: {type: String},
-                        isSubmit: {type: Boolean},
-                    },
-                    required: false
+                    title: {type: String},
+                    startDate: {type: Date},
+                    endDate: {type: Date},
+                    projectInfoPdf: {type: String},
                 }
             ]
         }

@@ -71,7 +71,7 @@ export const createAssessment = async (req, res) => {
             return res.status(400).send('No valid data found in the uploaded file');
         }
 
-        const { courseID, assessmentName, startDate, lastDate, isProtected, timelimit, isSubmited } = req.body;
+        const { courseID, assessmentName, startDate, lastDate, isProtected, timelimit } = req.body;
 
         const questions = [];
 
@@ -102,7 +102,6 @@ export const createAssessment = async (req, res) => {
             lastDate: lastDate ? new Date(lastDate) : new Date(),
             UploadDate: new Date(),
             isProtected: isProtected,
-            isSubmited: isSubmited,
             timelimit: timelimit,
             questions: questions
         });
@@ -110,7 +109,6 @@ export const createAssessment = async (req, res) => {
         
         await assessment.save();
 
-        // Update course with assessment ID
         const updatedCourse = await CoursesSchema.findOneAndUpdate(
             { courseID },
             { $push: { assessments: assessment._id } },
@@ -292,7 +290,7 @@ body: {
     "assessmentId": "MongoDB ObjectId of the assessment"
 }
 */
-export const requestForReassesment = async (req, res) => {
+export const requestForReassessment = async (req, res) => {
     try {
         const { assessmentId, userId } = req.params;
 
@@ -307,10 +305,10 @@ export const requestForReassesment = async (req, res) => {
         }
 
         // Check if the user has already submitted the assessment
-        const userSubmission = assessment.submissions.find(sub => sub.userId.toString() === userId);
+        const userResult = await ResultSchema.findOne({ assessment_id: assessmentId, userId });
 
-        if (!userSubmission) {
-            return res.status(404).json({ success: false, message: 'User submission not found' });
+        if (!userResult || !userResult.isSubmitted) {
+            return res.status(404).json({ success: false, message: 'User submission not found or not submitted' });
         }
 
         // Calculate expiration date (3 days from now)
@@ -328,10 +326,10 @@ export const requestForReassesment = async (req, res) => {
             const job = await AssessmentExpirySchema.findById(jobId);
 
             if (job && now >= job.expiresAt) {
-                // Reset the isSubmited flag to false for the specific user
-                const updatedAssessment = await AssessmentSchema.findOneAndUpdate(
-                    { _id: assessmentId, 'submissions.userId': userId },
-                    { $set: { 'submissions.$.isSubmited': false } },
+                // Reset the isSubmitted flag to false for the specific user in the ResultSchema
+                const updatedResult = await ResultSchema.findOneAndUpdate(
+                    { assessment_id: assessmentId, userId },
+                    { $set: { isSubmitted: false } },
                     { new: true }
                 );
 
@@ -351,6 +349,7 @@ export const requestForReassesment = async (req, res) => {
         });
     }
 }
+
 
 /** PUT: http://localhost:8080/api/submitassessmentanswer
  * @param: {
@@ -391,40 +390,33 @@ export async function submitAnswerForAssessment(req, res) {
         const question = assessment.questions[questionIndex];
 
         // Check if the answer for this question is already submitted by the same user
-        const userSubmissionIndex = question.submissions.findIndex(submission => submission.userId.toString() === userID);
-
-        if (userSubmissionIndex !== -1) {
-            return res.status(400).send({ success: false, message: 'Answer for this question is already submitted by this user' });
+        const result = await ResultSchema.findOne({ assessment_id: formattedAssessmentId, userId: userID });
+        if (result) {
+            const questionResultIndex = result.questions.findIndex(q => q.questionId.toString() === questionID);
+            if (questionResultIndex !== -1) {
+                return res.status(400).send({ success: false, message: 'Answer for this question is already submitted by this user' });
+            }
         }
 
         // Determine if the submitted answer is correct
         const isCorrect = question.answer === answer;
         const obtainedMarks = isCorrect ? question.maxMarks : 0;
 
-        // Add the new submission for the user
-        question.submissions.push({
-            userId: userID,
-            submittedAnswer: answer,
-            isCorrect: isCorrect
-        });
-
-        // Save the updated assessment
-        await assessment.save();
-
         // Find or create a result document for this assessment and user
-        let result = await ResultSchema.findOne({ assessment_id: formattedAssessmentId, userId: userID });
-        if (!result) {
-            result = new ResultSchema({
+        let userResult = await ResultSchema.findOne({ assessment_id: formattedAssessmentId, userId: userID });
+        if (!userResult) {
+            userResult = new ResultSchema({
                 assessment_id: formattedAssessmentId,
                 userId: userID,
                 questions: [],
                 score: 0,
-                totalMarks: 0
+                totalMarks: 0,
+                isSubmitted: false
             });
         }
 
         // Add the question result to the result document
-        result.questions.push({
+        userResult.questions.push({
             questionId: questionID,
             submittedAnswer: answer,
             isCorrect: isCorrect,
@@ -433,11 +425,11 @@ export async function submitAnswerForAssessment(req, res) {
         });
 
         // Update the total score and total marks
-        result.score += obtainedMarks;
-        result.totalMarks += question.maxMarks;
+        userResult.score += obtainedMarks;
+        userResult.totalMarks += question.maxMarks;
 
         // Save the result document
-        await result.save();
+        await userResult.save();
 
         return res.status(200).send({ success: true, message: 'Answer submitted successfully' });
     } catch (error) {

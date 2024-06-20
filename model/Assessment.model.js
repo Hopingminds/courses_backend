@@ -4,21 +4,21 @@ const OptionSchema = new mongoose.Schema({
     option: { type: String, required: true }
 });
 
-const SubmissionSchema = new mongoose.Schema({
-    userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true,
-    },
-    submittedAnswer: {
-        type: String,
-        required: true,
-    },
-    isCorrect: {
-        type: Boolean,
-        required: true,
-    }
-});
+// const SubmissionSchema = new mongoose.Schema({
+//     userId: {
+//         type: mongoose.Schema.Types.ObjectId,
+//         ref: 'User',
+//         required: true,
+//     },
+//     submittedAnswer: {
+//         type: String,
+//         required: true,
+//     },
+//     isCorrect: {
+//         type: Boolean,
+//         required: true,
+//     }
+// });
 
 const QuestionSchema = new mongoose.Schema({
     question: { type: String, required: true },
@@ -26,7 +26,7 @@ const QuestionSchema = new mongoose.Schema({
     answer: { type: String, required: true },
     maxMarks: { type: Number, default: 5 },
     submittedAnswer: { type: String },
-    submissions: [SubmissionSchema] 
+    // submissions: [SubmissionSchema] 
 });
 
 export const AssessmentSchema = new mongoose.Schema({
@@ -38,7 +38,7 @@ export const AssessmentSchema = new mongoose.Schema({
     timelimit: { type: Date },
     isProtected: { type: Boolean, default: false },
     questions: [QuestionSchema],
-    isSubmited: { type: Boolean, default: false }
+    // isSubmited: { type: Boolean, default: false }
 });
 
 export default mongoose.model.Assessments || mongoose.model('Assessment', AssessmentSchema);

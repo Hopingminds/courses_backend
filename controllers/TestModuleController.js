@@ -226,32 +226,28 @@ export async function getTestReport(req, res) {
 export async function getAllTestReport(req, res) {
     try {
         const allUsers = await UserModel.find({});
-        
+
         const testReports = [];
 
         for (const user of allUsers) {
             const { _id: userID } = user;
-            let isTestCompleted = true;
-            let testReport = {
-                totalQuestion: 0,
-                attemptedQuestions: 0,
-                unAttemptedQuestions: 0,
-                correctAnswers: 0,
-                incorrectAnswers: 0,
-                totalMarks: 0,
-                obtainedMarks: 0,
-                scorePercentage: 0
-            };
 
             if (!userID) {
-                return res.status(500).send({ error: 'User Not Found!' });
+                return res.status(500).send({ error: 'User ID not found!' });
             }
 
-            let Report = await UsertestreportModel.find({ user: userID }).populate('module').populate('generatedQustionSet.question').lean();
+            let isTestCompleted = true;
+
+            let Report = await UsertestreportModel.find({ user: userID })
+                .populate('module')
+                .populate('generatedQustionSet.question')
+                .lean();
+
             if (Report.length === 0) {
                 continue;
             }
 
+            // Check if all modules are completed
             Report.forEach((report) => {
                 if (report.isModuleCompleted === false) {
                     isTestCompleted = false;
@@ -264,25 +260,24 @@ export async function getAllTestReport(req, res) {
                 continue;
             }
 
-            let newData = Report.map((data) => {
-                const { module, ...restData } = data;
-                const { questions, __v, ...restModule } = module;
-                const updatedQuestions = data.generatedQustionSet.map(question => {
-                    const isCorrect = question.isSubmitted ? question.submittedAnswer === question.question.answer : null;
-                    return {
-                        ...question,
-                        isCorrect
-                    };
-                });
-                return { ...restData, module: { ...restModule }, generatedQustionSet: updatedQuestions };
-            });
+            // Processing the test report
+            let testReport = {
+                totalQuestion: 0,
+                attemptedQuestions: 0,
+                unAttemptedQuestions: 0,
+                correctAnswers: 0,
+                incorrectAnswers: 0,
+                totalMarks: 0,
+                obtainedMarks: 0,
+                scorePercentage: 0
+            };
 
-            Report.forEach(data => {
-                data.generatedQustionSet.forEach(question => {
+            Report.forEach((data) => {
+                data.generatedQustionSet.forEach((question) => {
                     testReport.totalQuestion++;
                     if (question.isSubmitted) {
                         testReport.attemptedQuestions++;
-                        if (question.submittedAnswer === question.question.answer) {
+                        if (question.question && question.submittedAnswer === question.question.answer) {
                             testReport.correctAnswers++;
                             testReport.obtainedMarks += question.question.maxMarks;
                         } else {
@@ -291,17 +286,27 @@ export async function getAllTestReport(req, res) {
                     } else {
                         testReport.unAttemptedQuestions++;
                     }
-                    testReport.totalMarks += question.question.maxMarks;
+                    if (question.question) {
+                        testReport.totalMarks += question.question.maxMarks;
+                    }
                 });
             });
+
             testReport.scorePercentage = ((testReport.obtainedMarks / testReport.totalMarks) * 100).toFixed(2);
 
-            let {password, token, purchased_courses, blocked_courses, __v, ...rest} = user.toObject()
-            testReports.push({ user:rest, isTestCompleted: true, testReport: testReport, data: newData });
+            let { password, token, purchased_courses, blocked_courses, __v, ...rest } = user.toObject();
+
+            testReports.push({
+                user: rest,
+                isTestCompleted: true,
+                testReport: testReport,
+                data: Report // Assuming you wanted to keep the original Report here
+            });
         }
 
         return res.status(200).send({ success: true, testReports });
     } catch (error) {
-        return res.status(500).send({ error: 'Internal Server Error', error });
+        console.error('Error in getAllTestReport:', error);
+        return res.status(500).send({ error: 'Internal Server Error', message: error.message });
     }
 }
