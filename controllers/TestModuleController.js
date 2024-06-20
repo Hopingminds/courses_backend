@@ -168,7 +168,7 @@ export async function getTestReport(req, res) {
             return res.status(500).send({ error: 'User Not Found!' });
         }
 
-        let Report = await UsertestreportModel.find({ user: userID }).populate('module').populate('generatedQustionSet.question').lean();
+        let Report = await UsertestreportModel.find({ user: userID }).populate('module').populate('user', 'name phone email').populate('generatedQustionSet.question').lean();
         Report.forEach((report) => {
             if (report.isModuleCompleted === false) {
                 isTestCompleted = false;
