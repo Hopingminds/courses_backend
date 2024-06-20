@@ -288,15 +288,17 @@ export const submitAssessment = async (req, res) => {
 }
 body: {
     "assessmentId": "MongoDB ObjectId of the assessment"
+    "userId": "MongoDB ObjectId of the assessment"
 }
 */
 export const requestForReassessment = async (req, res) => {
     try {
-        const { assessmentId, userId } = req.params;
+        const { assessmentId, userId } = req.body;
 
-        if (!mongoose.Types.ObjectId.isValid(assessmentId) || !mongoose.Types.ObjectId.isValid(userId)) {
-            return res.status(400).json({ success: false, message: 'Invalid assessment ID or user ID' });
-        }
+        // Validate IDs
+        // if (!mongoose.Types.ObjectId.isValid(assessmentId) || !mongoose.Types.ObjectId.isValid(userId)) {
+        //     return res.status(400).json({ success: false, message: 'Invalid assessment ID or user ID' });
+        // }
 
         const assessment = await AssessmentSchema.findById(assessmentId);
 
@@ -309,6 +311,13 @@ export const requestForReassessment = async (req, res) => {
 
         if (!userResult || !userResult.isSubmitted) {
             return res.status(404).json({ success: false, message: 'User submission not found or not submitted' });
+        }
+
+        // Check if a job already exists for this assessment and user
+        const existingJob = await AssessmentExpirySchema.findOne({ assessmentId, userId });
+
+        if (existingJob) {
+            return res.status(200).json({ success: true, message: 'Reassessment job already scheduled' });
         }
 
         // Calculate expiration date (3 days from now)
