@@ -13,7 +13,7 @@ router.route('/resetassessment').post(Auth, AssessmentController.requestForReass
 
 // GET ROUTES
 router.route('/courseassessments/:coursename').get(Auth, AssessmentController.getCourseAllAssessment);
-router.route('/getassessment/:assessmentId').get(Auth, AssessmentController.getAssesment);
+router.route('/getassessment').get(Auth, AssessmentController.getAssesment);
 
 //PUT ROUTES
 router.route('/submitassessmentanswer').put(Auth, AssessmentController.submitAnswerForAssessment);

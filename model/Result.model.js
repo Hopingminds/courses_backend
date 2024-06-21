@@ -3,12 +3,12 @@ import mongoose from 'mongoose';
 const QuestionResultSchema = new mongoose.Schema({
     questionId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Assessment.questions',
+        ref: 'Assessment',
         required: true,
     },
     submittedAnswer: {
         type: String,
-        required: true,
+        // required: true,
     },
     isCorrect: {
         type: Boolean,

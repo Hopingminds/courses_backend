@@ -1,35 +1,18 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const OptionSchema = new mongoose.Schema({
     option: { type: String, required: true }
 });
-
-// const SubmissionSchema = new mongoose.Schema({
-//     userId: {
-//         type: mongoose.Schema.Types.ObjectId,
-//         ref: 'User',
-//         required: true,
-//     },
-//     submittedAnswer: {
-//         type: String,
-//         required: true,
-//     },
-//     isCorrect: {
-//         type: Boolean,
-//         required: true,
-//     }
-// });
 
 const QuestionSchema = new mongoose.Schema({
     question: { type: String, required: true },
     options: [OptionSchema],
     answer: { type: String, required: true },
     maxMarks: { type: Number, default: 5 },
-    submittedAnswer: { type: String },
-    // submissions: [SubmissionSchema] 
+    submittedAnswer: { type: String }
 });
 
-export const AssessmentSchema = new mongoose.Schema({
+const AssessmentSchema = new mongoose.Schema({
     assessment_id: { type: Number },
     assessmentName: { type: String },
     startDate: { type: Date, default: Date.now },
@@ -37,8 +20,9 @@ export const AssessmentSchema = new mongoose.Schema({
     UploadDate: { type: Date, default: Date.now },
     timelimit: { type: Date },
     isProtected: { type: Boolean, default: false },
-    questions: [QuestionSchema],
-    // isSubmited: { type: Boolean, default: false }
+    questions: [QuestionSchema]
 });
 
-export default mongoose.model.Assessments || mongoose.model('Assessment', AssessmentSchema);
+mongoose.model('Question', QuestionSchema);
+
+export default mongoose.models.Assessment || mongoose.model('Assessment', AssessmentSchema);

@@ -194,10 +194,31 @@ function shuffleArray(array) {
     return array;
 }
 
-/** GET: http://localhost:8080/api/getassessment/:assessmentId */
+/** GET: http://localhost:8080/api/getassessment?assessmentId=6620c1a48cb4bcb50f84748f&index=1
+    @body : {
+        UserId: "userId"
+    }
+  */
 export const getAssesment = async (req, res) => {
     try {
-        const { assessmentId } = req.params;
+        const { userID } = req.body;
+        const { assessmentId, index } = req.query;
+
+        // Validate assessmentId
+        if (!mongoose.Types.ObjectId.isValid(assessmentId)) {
+            return res.status(400).json({ success: false, message: 'Invalid assessment ID' });
+        }
+
+        // Validate userID
+        if (!mongoose.Types.ObjectId.isValid(userID)) {
+            return res.status(400).json({ success: false, message: 'Invalid user ID' });
+        }
+
+        // Validate index
+        const questionIndex = parseInt(index, 10);
+        if (isNaN(questionIndex) || questionIndex <= 0) {
+            return res.status(400).json({ success: false, message: 'Valid index required.' });
+        }
 
         const assessment = await AssessmentSchema.findById(assessmentId).lean();
 
@@ -205,24 +226,43 @@ export const getAssesment = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Assessment not found' });
         }
 
-        // Remove the 'answer' field from each question in the assessment
-        let sanitizedQuestions = assessment.questions.map(({ answer, ...rest }) => rest);
-
-        // Shuffle the questions
-        sanitizedQuestions = shuffleArray(sanitizedQuestions);
-
-        // If there are more than 30 questions, select only 30 random questions
-        if (sanitizedQuestions.length > 30) {
-            sanitizedQuestions = sanitizedQuestions.slice(0, 30);
+        let result = await ResultSchema.findOne({ assessment_id: assessmentId, userId: userID });
+        if (!result) {
+            result = new ResultSchema({ assessment_id: assessmentId, userId: userID, questions: [], score: 0, totalMarks: 0 });
         }
 
-        const sanitizedAssessment = {
-            ...assessment,
-            questions: sanitizedQuestions
-        };
+        if (!result.questions.length) {
+            result.questions = shuffleArray(assessment.questions).map(question => ({
+                questionId: question._id,
+                submittedAnswer: '',
+                isCorrect: false,
+                maxMarks: question.maxMarks,
+                obtainedMarks: 0
+            }));
+            await result.save();
+        }
 
-        res.status(200).json({ success: true, assessment: sanitizedAssessment });
+        const fetchAgain = await ResultSchema.findOne({ assessment_id: assessmentId, userId: userID })
+            .populate('questions') // Populate questionId to get question details
+            .lean();
 
+
+            const responseData = fetchAgain.questions.map((data) => {
+                const { questionId, ...rest } = data;
+                const questionDetail = assessment.questions.find(q => q._id.equals(questionId));
+                const { answer, ...questionWithoutAnswer } = questionDetail; // Omitting 'answer' field
+                return questionWithoutAnswer;
+            });
+    
+            
+            const selectedQuestion = responseData[questionIndex - 1];
+            
+            return res.status(200).json({
+                success: selectedQuestion ? true : false,
+                length: responseData.length,
+                data: selectedQuestion ? selectedQuestion : `Max index = ${responseData.length}`
+            });
+            
     } catch (error) {
         console.error(error);
         res.status(500).json({
