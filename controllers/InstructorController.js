@@ -2,6 +2,33 @@ import InstructorModel from '../model/Instructor.model.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import 'dotenv/config'
+import aws from 'aws-sdk'
+import multer from 'multer'
+import multerS3 from 'multer-s3'
+
+aws.config.update({
+	secretAccessKey: process.env.AWS_ACCESS_SECRET,
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    region: process.env.AWS_REGION,
+});
+
+const BUCKET = process.env.AWS_BUCKET
+const s3 = new aws.S3();
+
+export const uploadInstructormedia = multer({
+    storage: multerS3({
+        s3: s3,
+        acl: "public-read",
+        bucket: BUCKET,
+        key: function (req, file, cb) {
+            const { instructorID } = req.instructor;
+            const newFileName = Date.now() + '-' + file.originalname;
+            const fullPath = `instructor/media/${instructorID}/${newFileName}`;
+            cb(null, fullPath);
+        },
+        contentType: multerS3.AUTO_CONTENT_TYPE
+    })
+})
 
 // middleware for verify instructor
 export async function verifyInstructor(req, res, next) {
@@ -372,5 +399,41 @@ export async function resetPassword(req,res){
 
     } catch (error) {
         return res.status(401).send({ error })
+    }
+}
+
+/** POST: http://localhost:8080/api/uploadfiletoaws
+    body:{
+        file: file.mp4,
+		instructorID: "instructorID"
+    }
+**/
+export async function uploadInstMediatoAws(req, res) {
+    return res.status(200).json({ 
+        success: true, 
+        message: 'Successfully Uploaded', 
+        url: req.file.location 
+    });
+}
+
+/** GET: http://localhost:8080/api/getinstfilesfromaws */
+export async function getInstFilesFromAws(req, res) {
+	const { instructorID } = req.instructor;
+    try {
+        // List objects in the specified bucket
+        const result = await s3.listObjectsV2({ Bucket: BUCKET }).promise();
+
+        // Filter and process objects to include only instructor media
+        const mediaFiles = result.Contents.filter(item => item.Key.startsWith(`instructor/media/${instructorID}/`)).map(item => ({
+            title: item.Key.replace(/^instructor\/media\/\d+-/, ''),
+            key: item.Key,
+            url: `https://${BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${encodeURIComponent(item.Key)}`
+        }));
+
+        // Return the processed data
+        return res.status(200).json({ success: true, mediaFiles });
+    } catch (error) {
+        console.error("Error retrieving instructor media from S3:", error);
+        return res.status(500).json({ success: false, message: "Failed to retrieve instructor media." });
     }
 }

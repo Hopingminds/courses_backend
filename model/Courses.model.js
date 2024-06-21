@@ -41,6 +41,14 @@ export const CoursesSchema = new mongoose.Schema({
                     endDate: {type: Date},
                     projectInfoPdf: {type: String},
                 }
+            ],
+            liveClasses:[
+                {
+                    topic: {type: String},
+                    date: {type: Date},
+                    time: {type: String},
+                    meetingLink: {type: String}
+                }
             ]
         }
     ],
