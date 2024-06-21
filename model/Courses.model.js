@@ -37,15 +37,19 @@ export const CoursesSchema = new mongoose.Schema({
             project:[
                 {
                     title: {type: String},
-                    duration: {type: Number }, // 60 = 1 hours
+                    startDate: {type: Date},
+                    endDate: {type: Date},
                     projectInfoPdf: {type: String},
+                    duration: {type: Number},
                 }
             ],
             liveClasses:[
                 {
                     topic: {type: String},
-                    duration: {type: Number }, // 60 = 1 hours
-                    meetingLink: {type: String}
+                    startDate: {type: Date},
+                    endDate: {type: Date},
+                    meetingLink: {type: String},
+                    duration: {type: Number},
                 }
             ]
         }
@@ -107,7 +111,7 @@ export const CoursesSchema = new mongoose.Schema({
             to:{type: Number}
         }
     }],
-    placementData:[{type: String}]
+    placementOpportunities:[{type: String}]
 });
 
 export default mongoose.model.Courses || mongoose.model('Courses', CoursesSchema);
