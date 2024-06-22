@@ -41,7 +41,7 @@ app.use(passport.session());
 app.use(express.json())
 
 app.use(cors({
-    origin: CorsConfig,
+    origin: '*',
     credentials: true,
 }));
 app.use(morgan('tiny'))
