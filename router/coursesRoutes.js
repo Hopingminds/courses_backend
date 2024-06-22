@@ -18,6 +18,7 @@ router.route('/course/:coursename').get(CoursesController.getCourseBySlug)
 router.route('/categories').get(CategoriesController.getcategories)
 router.route('/getminordegreecategories').get(CategoriesController.getMinordegreeCategories)
 router.route('/categories/:categoryname').get(CategoriesController.getsubcategories)
+router.route('/search').get(CoursesController.courseSearch)
 
 // PUT ROUTES
 router.route('/purchasecourse').put(Auth,CoursesController.purchasedCourse)

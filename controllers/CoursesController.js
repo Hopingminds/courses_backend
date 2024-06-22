@@ -957,3 +957,29 @@ export async function getUserCompletedAssignments(req, res) {
 	})
 	return res.status(200).json({ data: completedAssignmentsLessonNames })
 }
+
+/** GET: http://localhost:3000/api/search?title=xyz */
+export async function courseSearch(req,res) {
+	try {
+		const { title } = req.query;
+        
+        // Build the search criteria object
+        let searchCriteria = {};
+
+        if (title) {
+            // Match titles containing the given keyword anywhere in the title (case-insensitive)
+            searchCriteria.title = { $regex: new RegExp(title, 'i') };
+        }
+
+        const courses = await CoursesModel.find(searchCriteria);
+
+        if (courses.length === 0) {
+            return res.status(404).json({ message: 'No courses found' });
+        }
+
+		res.status(200).json({ success: true, courses: courses });
+	} catch (error) {
+		console.error('Error getting course:', error);
+        return res.status(500).send({ success: false, message: 'Error getting course: ' + error.message });
+	}
+}
