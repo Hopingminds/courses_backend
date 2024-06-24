@@ -53,7 +53,7 @@ router.get("/logout", (req, res) => {
 router.get("/inslogout", (req, res) => {
 	req.logout(function(err) {
         if (err) { return next(err); }
-        res.redirect(process.env.CLIENT_BASE_URL);
+        res.redirect("/");
     });
 });
 
