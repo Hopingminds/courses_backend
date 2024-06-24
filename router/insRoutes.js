@@ -14,6 +14,7 @@ router.route('/uploadinsmediatoaws').post(instAuth, instructorController.uploadI
 router.route('/inst/:email').get(instructorController.getInstructor)
 router.route('/instructors').get(AdminAuth, instructorController.getAllInstructors)
 router.route('/getinsmedia').get(instAuth, instructorController.getInstFilesFromAws);
+router.route('/instructorcourses/:instructorId').get( instructorController.getCoursesByInstructorId);
 
 // PUT ROUTES
 router.route('/updateinst').put(instAuth, instructorController.updateInstructor);

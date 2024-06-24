@@ -1,4 +1,5 @@
 import InstructorModel from '../model/Instructor.model.js'
+import CoursesModel from '../model/Courses.model.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import 'dotenv/config'
@@ -435,5 +436,16 @@ export async function getInstFilesFromAws(req, res) {
     } catch (error) {
         console.error("Error retrieving instructor media from S3:", error);
         return res.status(500).json({ success: false, message: "Failed to retrieve instructor media." });
+    }
+}
+
+/** GET: http://localhost:8080/api/instructorcourses/:instructorId */
+export const getCoursesByInstructorId = async (req, res) => {
+    try {
+        const instructorId = req.params.instructorId;
+        const courses = await CoursesModel.find({ instructor: instructorId }).populate('instructor');
+        res.status(200).json(courses);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 }

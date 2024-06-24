@@ -330,11 +330,6 @@ export const requestForReassessment = async (req, res) => {
     try {
         const { assessmentId, userId } = req.body;
 
-        // Validate IDs
-        // if (!mongoose.Types.ObjectId.isValid(assessmentId) || !mongoose.Types.ObjectId.isValid(userId)) {
-        //     return res.status(400).json({ success: false, message: 'Invalid assessment ID or user ID' });
-        // }
-
         const assessment = await AssessmentSchema.findById(assessmentId);
 
         if (!assessment) {

@@ -8,7 +8,6 @@ const QuestionResultSchema = new mongoose.Schema({
     },
     submittedAnswer: {
         type: String,
-        // required: true,
     },
     isCorrect: {
         type: Boolean,
