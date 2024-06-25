@@ -983,3 +983,85 @@ export async function courseSearch(req,res) {
         return res.status(500).send({ success: false, message: 'Error getting course: ' + error.message });
 	}
 }
+
+/** POST: http://localhost:8080/api/addliveclass
+body: {
+    "courseId": "React Js",
+    "chapterName": "Introduction",
+	"liveClass": {
+        "topic": "New Live Class",
+        "startDate": "2024-06-30T09:00:00Z",
+        "endDate": "2024-06-30T10:00:00Z",
+        "meetingLink": "https://example.com",
+        "duration": 60,
+		"isCompleted": true,
+    }
+}
+*/
+export async function addLiveClassToChapter(req,res) {
+	const { courseId, chapterName, liveClass } = req.body;
+
+	try {
+		let course = await CoursesModel.findOne({ courseID: courseId });
+
+        if (!course) {
+            return res.status(404).json({ message: 'Course not found' });
+        }
+
+        let chapter = course.curriculum.find(chap => chap.chapter_name === chapterName);
+
+        if (!chapter) {
+            // Create a new chapter if not found
+            chapter = {
+                chapter_name: chapterName,
+                lessons: [],
+                project: [],
+                liveClasses: [liveClass]
+            };
+            course.curriculum.push(chapter);
+        } else {
+            chapter.liveClasses.push(liveClass);
+        }
+
+        await course.save();
+
+        res.status(200).json({ message: 'Live class added successfully', course });
+	} catch (error) {
+		console.error('Error getting course:', error);
+        return res.status(500).send({ success: false, message: 'Error getting course: ' + error.message });
+	}
+}
+
+/** GET: http://localhost:8080/api/completedliveclasses?courseId=xyz */
+export async function getCompletedLiveClasses(req, res) {
+    const { courseId } = req.query;
+
+    try {
+        // Find the course by courseID (string)
+        let course = await CoursesModel.findOne({ courseID: courseId });
+
+        if (!course) {
+            return res.status(404).json({ message: 'Course not found' });
+        }
+
+        // Extract completed live classes
+        let completedLiveClasses = [];
+
+        course.curriculum.forEach(chapter => {
+            chapter.liveClasses.forEach(liveClass => {
+                if (liveClass.isCompleted) {
+                    completedLiveClasses.push({
+                        courseID: course.courseID,
+                        chapterName: chapter.chapter_name,
+                        ...liveClass._doc // Spread liveClass details
+                    });
+                }
+            });
+        });
+
+        res.status(200).json({ completedLiveClasses });
+    } catch (error) {
+        console.error('Error getting completed live classes:', error);
+        res.status(500).json({ success: false, message: 'Error getting completed live classes: ' + error.message });
+    }
+}

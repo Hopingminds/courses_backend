@@ -10,6 +10,7 @@ import AdminAuth from '../middleware/adminauth.js'
 router.route('/addcourse').post(AdminAuth, CoursesController.addcourse)
 router.route('/addcategory').post(CategoriesController.addcategory)
 router.route('/addsubcategory').post(CategoriesController.addsubcategory)
+router.route('/addliveclass').post(CoursesController.addLiveClassToChapter)
 
 // GET ROUTES
 router.route('/courses').get(CoursesController.getCourses)
@@ -19,6 +20,7 @@ router.route('/categories').get(CategoriesController.getcategories)
 router.route('/getminordegreecategories').get(CategoriesController.getMinordegreeCategories)
 router.route('/categories/:categoryname').get(CategoriesController.getsubcategories)
 router.route('/search').get(CoursesController.courseSearch)
+router.route('/completedliveclasses').get(CoursesController.getCompletedLiveClasses)
 
 // PUT ROUTES
 router.route('/purchasecourse').put(Auth,CoursesController.purchasedCourse)

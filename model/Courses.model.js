@@ -52,6 +52,7 @@ export const CoursesSchema = new mongoose.Schema({
                     endDate: {type: Date},
                     meetingLink: {type: String},
                     duration: {type: Number},
+                    isCompleted : {type: Boolean, default: false}
                 }
             ]
         }
