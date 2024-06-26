@@ -8,6 +8,7 @@ export const UsertestreportSchema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     module: { type: mongoose.Schema.Types.ObjectId, ref: 'Test' },
     isModuleCompleted: { type: Boolean, default: false },
+    isSuspended: { type: Boolean, default: false },
     generatedQustionSet: [
         {
             question: { type: mongoose.Schema.Types.ObjectId, ref: 'Qna' },
