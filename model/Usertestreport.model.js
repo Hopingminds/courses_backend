@@ -15,6 +15,7 @@ export const UsertestreportSchema = new mongoose.Schema({
             submittedAnswer: { type: String }
         }
     ],
-}, {_id: false});
+    remarks: { type: String }
+}, {_id: false, timestamps: true});
 
 export default mongoose.model.Usertestreports || mongoose.model('Usertestreport', UsertestreportSchema);

@@ -50,12 +50,12 @@ body: {
 */
 export async function submitModule(req, res) {
     const { userID } = req.user;
-    const { moduleID } = req.body;
+    const { moduleID, remarks } = req.body;
 
     try {
         const result = await UsertestreportModel.findOneAndUpdate(
             { user: userID, module: moduleID },
-            { $set: { isModuleCompleted: true } },
+            { $set: { isModuleCompleted: true, remarks: remarks } },
             { new: true }
         );
 
