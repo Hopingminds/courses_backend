@@ -106,6 +106,16 @@ export async function getCourses(req, res) {
 	}
 }
 
+/** GET: http://localhost:8080/api/coursesforadmin */
+export const getAllCourses = async (req, res) => {
+    try {
+        const courses = await CoursesModel.find().populate('instructor assessments');
+        res.status(200).json(courses);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
 /** GET: http://localhost:8080/api/recommendedcourses */
 export async function getRecommendedCourses(req, res) {
 	try {
