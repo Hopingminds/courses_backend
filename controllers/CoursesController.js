@@ -79,11 +79,22 @@ export async function getCourses(req, res) {
 			query.title = { $regex: search, $options: 'i' }
 		}
 
+		// Handle courseType logic
+		if (type === 'internship') {
+			query.courseType = 'internship'
+		} else if (type === 'minorDegree') {
+			query.courseType = 'minorDegree'
+			// query.courseType = { $ne: 'internship' }
+		} else {
+			query.courseType = { $ne: 'internship' }
+		}
+
+
 		// Build the sort object based on the 'sort' parameter
 		let sortObj = {}
 		sortObj.display = -1
 		query.display = { $ne: false};
-		query.courseType = { $ne: 'internship' };
+		// query.courseType = { $ne: 'internship' };
 		if (sort === 'price_asc') {
 			sortObj.base_price = 1
 		} else if (sort === 'price_desc') {
