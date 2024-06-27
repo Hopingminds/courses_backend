@@ -13,7 +13,7 @@ import RecAuth from '../middleware/recauth.js'
 // POST ROUTES
 router.route('/registerMail').post(registerMail) 
 
-router.route('/uploadfiletoaws').post(AdminAuth, upload.single('file'), awsController.uploadFile)
+router.route('/uploadfiletoaws').post( upload.array('file',10), awsController.uploadFile)
 router.route('/uploadCompanyLogo').post(RecAuth, uploadCompanyLogo.single('file'), awsController.uploadCompanyLogoFun)
 router.route('/uploaduserprofiletoaws').post(Auth,uploadUserProfile.single('file'), awsController.uploaduserprofiletoaws)
 router.route('/uploadinsprofiletoaws').post(AdminAuth,uploadInstructorProfile.single('file'), awsController.uploadinsprofiletoaws)

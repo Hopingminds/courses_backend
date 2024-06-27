@@ -84,17 +84,14 @@ export async function getCourses(req, res) {
 			query.courseType = 'internship'
 		} else if (type === 'minorDegree') {
 			query.courseType = 'minorDegree'
-			// query.courseType = { $ne: 'internship' }
 		} else {
 			query.courseType = { $ne: 'internship' }
 		}
-
 
 		// Build the sort object based on the 'sort' parameter
 		let sortObj = {}
 		sortObj.display = -1
 		query.display = { $ne: false};
-		// query.courseType = { $ne: 'internship' };
 		if (sort === 'price_asc') {
 			sortObj.base_price = 1
 		} else if (sort === 'price_desc') {
@@ -132,7 +129,7 @@ export const getAllCourses = async (req, res) => {
 /** GET: http://localhost:8080/api/recommendedcourses */
 export async function getRecommendedCourses(req, res) {
 	try {
-		const courses = await CoursesModel.find({}).populate('instructor').lean()
+		const courses = await CoursesModel.find({}).find({ display: true }).populate('instructor').lean()
 		const recommendedCourses = getRandomSubset(courses, 4)
 		let filterData = recommendedCourses.map((course)=>{
 			if (course.instructor) {
@@ -984,7 +981,7 @@ export async function getUserCompletedAssignments(req, res) {
 /** GET: http://localhost:3000/api/search?title=xyz */
 export async function courseSearch(req,res) {
 	try {
-		const { title } = req.query;
+		const { title, category } = req.query;
         
         // Build the search criteria object
         let searchCriteria = {};
@@ -993,6 +990,14 @@ export async function courseSearch(req,res) {
             // Match titles containing the given keyword anywhere in the title (case-insensitive)
             searchCriteria.title = { $regex: new RegExp(title, 'i') };
         }
+
+		if (category) {
+            // Add category filter to search criteria
+            searchCriteria.courseType = category;
+        }
+		else{
+			searchCriteria.courseType = {$ne : 'internship'}
+		}
 
         const courses = await CoursesModel.find(searchCriteria);
 
