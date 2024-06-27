@@ -999,7 +999,7 @@ export async function courseSearch(req,res) {
 			searchCriteria.courseType = {$ne : 'internship'}
 		}
 
-        const courses = await CoursesModel.find(searchCriteria);
+        const courses = await CoursesModel.find({ display: true }).find(searchCriteria);
 
         if (courses.length === 0) {
             return res.status(404).json({ message: 'No courses found' });
