@@ -92,7 +92,8 @@ export async function getAllModules(req, res) {
 		userProgress.forEach(module => {
 			const progress = calculateProgress(module);
 			const isModuleCompleted = module.isModuleCompleted;
-			progressMap.set(module.module.toString(), { progress, isModuleCompleted });
+			const isSuspended = module.isSuspended;
+			progressMap.set(module.module.toString(), { progress, isModuleCompleted, isSuspended });
 		});
 
 		if (userProgress.length === 0) {
@@ -108,9 +109,10 @@ export async function getAllModules(req, res) {
 
 		const data = modules.map(module => {
 			const { questions, ...rest } = module;
-			const progressObj = progressMap.get(module._id.toString()) || { progress: 0, isModuleCompleted: false };
-			const { progress, isModuleCompleted } = progressObj;
-			return { ...rest, isModuleCompleted, progress };
+			const progressObj = progressMap.get(module._id.toString()) || { progress: 0, isModuleCompleted: false, isSuspended: false };
+            console.log(progressObj);
+            const { progress, isModuleCompleted, isSuspended } = progressObj;
+			return { ...rest, isModuleCompleted, isSuspended, progress };
 		});
 
 		return res.status(200).send({ success: true, isTestCompleted, data });
