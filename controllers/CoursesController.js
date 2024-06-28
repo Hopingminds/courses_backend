@@ -978,7 +978,7 @@ export async function getUserCompletedAssignments(req, res) {
 	return res.status(200).json({ data: completedAssignmentsLessonNames })
 }
 
-/** GET: http://localhost:3000/api/search?title=xyz */
+/** GET: http://localhost:3000/api/search?title=xyz&category=internship */
 export async function courseSearch(req,res) {
 	try {
 		const { title, category } = req.query;

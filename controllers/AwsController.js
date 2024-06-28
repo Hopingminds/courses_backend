@@ -226,3 +226,54 @@ export async function deleteFileFromAWS(req, res) {
         return res.status(500).json({success: false, message: "File Not Found"})
     }
 }
+
+export const uploadCoursemedia = multer({
+    storage: multerS3({
+        s3: s3,
+        acl: "public-read",
+        bucket: BUCKET,
+        key: function (req, file, cb) {
+            const { slug } = req.params;
+            const newFileName = Date.now() + '-' + file.originalname;
+            const fullPath = `course/${slug}/${newFileName}`;
+            cb(null, fullPath);
+        },
+        contentType: multerS3.AUTO_CONTENT_TYPE
+    })
+})
+
+/** POST: http://localhost:8080/api/uploadcoursefiletoaws/:slug
+    body:{
+        file: file.mp4,
+		slug: "Course Slug Name"
+    }
+**/
+export async function uploadCourseMediatoAws(req, res) {
+    return res.status(200).json({ 
+        success: true, 
+        message: 'Successfully Uploaded', 
+        url: req.file.location 
+    });
+}
+
+/** GET: http://localhost:8080/api/getcoursemedia/:slug */
+export async function getCourseFilesFromAws(req, res) {
+	const { slug } = req.params;
+    try {
+        // List objects in the specified bucket
+        const result = await s3.listObjectsV2({ Bucket: BUCKET }).promise();
+
+        // Filter and process objects to include only instructor media
+        const mediaFiles = result.Contents.filter(item => item.Key.startsWith(`course/${slug}/`)).map(item => ({
+            title: item.Key.replace(/^course\/\d+-/, ''),
+            key: item.Key,
+            url: `https://${BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${encodeURIComponent(item.Key)}`
+        }));
+
+        // Return the processed data
+        return res.status(200).json({ success: true, mediaFiles });
+    } catch (error) {
+        console.error("Error retrieving instructor media from S3:", error);
+        return res.status(500).json({ success: false, message: "Failed to retrieve instructor media." });
+    }
+}

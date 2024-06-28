@@ -18,6 +18,7 @@ router.route('/uploadCompanyLogo').post(RecAuth, uploadCompanyLogo.single('file'
 router.route('/uploaduserprofiletoaws').post(Auth,uploadUserProfile.single('file'), awsController.uploaduserprofiletoaws)
 router.route('/uploadinsprofiletoaws').post(AdminAuth,uploadInstructorProfile.single('file'), awsController.uploadinsprofiletoaws)
 router.route('/uploadassignmenttoaws/:assignmentID').post(Auth, uploadassignment.single('file'), awsController.uploadassignmenttoaws)
+router.route('/uploadcoursefiletoaws/:slug').post(AdminAuth, awsController.uploadCoursemedia.single('file'), awsController.uploadCourseMediatoAws)
 
 // GET ROUTES
 router.route('/generateOTP').get(controller.verifyUser, localVariables, controller.generateOTP)
@@ -26,6 +27,7 @@ router.route('/createResetSession').get(controller.createResetSession)
 
 router.route('/getfilesfromaws').get(awsController.getfilesfromaws)
 router.route('/getfilefromaws/:filename').get(awsController.getfilefromaws)
+router.route('/getcoursemedia/:slug').get(AdminAuth, awsController.getCourseFilesFromAws)
 
 router.route('/getcolleges').get(helperController.getColleges)
 
