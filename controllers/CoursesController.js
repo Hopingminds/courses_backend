@@ -79,11 +79,19 @@ export async function getCourses(req, res) {
 			query.title = { $regex: search, $options: 'i' }
 		}
 
+		// Handle courseType logic
+		if (type === 'internship') {
+			query.courseType = 'internship'
+		} else if (type === 'minorDegree') {
+			query.courseType = 'minorDegree'
+		} else {
+			query.courseType = { $ne: 'internship' }
+		}
+
 		// Build the sort object based on the 'sort' parameter
 		let sortObj = {}
 		sortObj.display = -1
 		query.display = { $ne: false};
-		query.courseType = { $ne: 'internship' };
 		if (sort === 'price_asc') {
 			sortObj.base_price = 1
 		} else if (sort === 'price_desc') {
@@ -108,10 +116,20 @@ export async function getCourses(req, res) {
 	}
 }
 
+/** GET: http://localhost:8080/api/coursesforadmin */
+export const getAllCourses = async (req, res) => {
+    try {
+        const courses = await CoursesModel.find().populate('instructor assessments');
+        res.status(200).json(courses);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
 /** GET: http://localhost:8080/api/recommendedcourses */
 export async function getRecommendedCourses(req, res) {
 	try {
-		const courses = await CoursesModel.find({}).populate('instructor').lean()
+		const courses = await CoursesModel.find({}).find({ display: true }).populate('instructor').lean()
 		const recommendedCourses = getRandomSubset(courses, 4)
 		let filterData = recommendedCourses.map((course)=>{
 			if (course.instructor) {
@@ -963,7 +981,7 @@ export async function getUserCompletedAssignments(req, res) {
 /** GET: http://localhost:3000/api/search?title=xyz */
 export async function courseSearch(req,res) {
 	try {
-		const { title } = req.query;
+		const { title, category } = req.query;
         
         // Build the search criteria object
         let searchCriteria = {};
@@ -973,7 +991,15 @@ export async function courseSearch(req,res) {
             searchCriteria.title = { $regex: new RegExp(title, 'i') };
         }
 
-        const courses = await CoursesModel.find(searchCriteria);
+		if (category) {
+            // Add category filter to search criteria
+            searchCriteria.courseType = category;
+        }
+		else{
+			searchCriteria.courseType = {$ne : 'internship'}
+		}
+
+        const courses = await CoursesModel.find({ display: true }).find(searchCriteria);
 
         if (courses.length === 0) {
             return res.status(404).json({ message: 'No courses found' });

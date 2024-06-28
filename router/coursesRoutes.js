@@ -14,6 +14,7 @@ router.route('/addliveclass').post(CoursesController.addLiveClassToChapter)
 
 // GET ROUTES
 router.route('/courses').get(CoursesController.getCourses)
+router.route('/coursesforadmin').get(CoursesController.getAllCourses)
 router.route('/recommendedcourses').get(CoursesController.getRecommendedCourses)
 router.route('/course/:coursename').get(CoursesController.getCourseBySlug)
 router.route('/categories').get(CategoriesController.getcategories)

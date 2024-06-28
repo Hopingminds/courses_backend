@@ -91,11 +91,29 @@ export const uploadassignment = multer({
 
 /** POST: http://localhost:8080/api/uploadfiletoaws
     body:{
-        file: file.mp4
+        file:[ file.mp4]
     }
 **/
 export async function uploadFile(req, res) {
-    return res.status(200).json({ success: true, message: 'Successfully Uploaded', url: req.file.location });
+    try {
+        const files = req.files; // Multer will attach an array of files to req.files
+        if (!files || files.length === 0) {
+            return res.status(400).send({ success: false, message: 'No files uploaded' });
+        }
+
+        // If you need to do something with the uploaded files, you can process them here
+        const fileDetails = files.map(file => ({
+            originalName: file.originalname,
+            path: file.location,
+            mimetype: file.mimetype,
+            size: file.size,
+        }));
+
+        res.status(200).send({ success: true, files: fileDetails });
+    } catch (error) {
+        console.error('Error uploading files:', error);
+        res.status(500).send({ success: false, message: 'Error uploading files: ' + error.message });
+    }
 }
 
 export async function uploadCompanyLogoFun(req, res) {
