@@ -113,7 +113,7 @@ export async function getAllModules(req, res) {
 			return { ...rest, isModuleCompleted, progress };
 		});
 
-		return res.status(200).send({ success: true, isTestCompleted, data });
+		return res.status(200).send({ success: true, isTestCompleted, isSuspended:userProgress.isSuspended, data });
 	} catch (error) {
 		return res.status(500).send({ error: 'Internal Server Error', error });
 	}
