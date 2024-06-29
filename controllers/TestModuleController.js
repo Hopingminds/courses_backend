@@ -12,7 +12,7 @@ body: {
 */
 export async function createTestModule(req, res) {
 	try {
-		const { module_name, module_description} = req.body
+		const { module_name, module_description, timelimit} = req.body
 
 		const existingModule_name = await TestModuleModel.findOne({
 			module_name
@@ -26,7 +26,8 @@ export async function createTestModule(req, res) {
 
 		const newTestModule = new TestModuleModel({
 			module_name,
-            module_description
+            module_description,
+            timelimit
 		})
 
 		await newTestModule.save()
