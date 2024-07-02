@@ -39,7 +39,7 @@ export async function verifyAdmin(req, res, next) {
 */
 export async function register(req, res) {
     try {
-        const { password, email, profile, firstName, lastName, mobile } = req.body;
+        const { password, email, profile, firstName, lastName, mobile, role } = req.body;
 
         // check for existing mobile number
         const existMobile = AdminModel.findOne({ mobile }).exec();
@@ -66,7 +66,8 @@ export async function register(req, res) {
                 email,
                 firstName, 
 				lastName,
-                mobile
+                mobile,
+				role
             });
 
             // Save the admin
@@ -75,7 +76,8 @@ export async function register(req, res) {
 				{
 					adminID: savedAdmin._id,
 					email: savedAdmin.email,
-					mobile: savedAdmin.mobile
+					mobile: savedAdmin.mobile,
+					role: savedAdmin.role
 				},
 				process.env.JWT_SECRET,
 				{ expiresIn: '7d' }
@@ -115,7 +117,8 @@ export async function loginWithEmail(req, res) {
 							{
 								adminID: admin._id,
 								email: admin.email,
-								mobile: admin.mobile
+								mobile: admin.mobile,
+								role: admin.role
 							},
 							process.env.JWT_SECRET,
 							{ expiresIn: '7d' }

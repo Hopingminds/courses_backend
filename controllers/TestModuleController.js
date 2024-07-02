@@ -308,3 +308,25 @@ export async function getAllTestReport(req, res) {
         return res.status(500).send({ error: 'Internal Server Error', error });
     }
 }
+
+/** DELETE: http://localhost:8080/api/deletestudentreport
+    body {
+        "userId": "7gh8h76fgbn767gh7yug67yuy7t67"
+    }
+*/
+export async function deleteStudentReport(req, res) {
+    try {
+        const { userId } = req.body;
+        const result = await UsertestreportModel.deleteMany({ user: userId });
+
+        if (result.deletedCount > 0) {
+            return res.status(200).json({ success: true, message: 'User test reports deleted successfully.' });
+        }
+        else {
+            return res.status(404).json({ success: false, message: 'No user test reports found for the given user ID.' });
+        }
+    } catch (error) {
+        return res.status(500).send({ error: 'Internal Server Error', error });
+    }
+}
+

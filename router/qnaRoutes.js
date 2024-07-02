@@ -25,5 +25,5 @@ router.route('/submittestanswer').put(Auth, QnaControllers.submitAnswer);
 router.route('/submitmodule').put(Auth, TestModuleControllers.submitModule);
 
 // DELETE ROUTES
-
+router.route('/deletestudentreport').delete(TestModuleControllers.deleteStudentReport)
 export default router
