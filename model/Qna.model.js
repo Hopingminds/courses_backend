@@ -2,13 +2,16 @@ import mongoose from "mongoose";
 
 export const QnaSchema = new mongoose.Schema({
     question: {
-        type: String
+        type: String,
+        required: true,
     },
     options:{
         type: Object,
+        required: true,
     },
     answer: {
-        type: String
+        type: String,
+        required: true,
     },
     maxMarks: {
         type: Number,

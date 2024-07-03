@@ -9,6 +9,7 @@ router.route('/registeradmin').post(AdminAuth, adminController.register)
 router.route('/authenticateadmin').post(AdminAuth,(req,res)=>res.end())
 router.route('/loginAdminWithEmail').post(adminController.verifyAdmin,adminController.loginWithEmail)
 router.route('/loginAdminWithMobile').post(adminController.verifyAdmin,adminController.loginWithMobile)
+router.route('/addaccessroutes').post( adminController.addAccessRoute)
 
 // GET ROUTES
 router.route('/admin').get(adminController.verifyAdmin, adminController.getAdmin)

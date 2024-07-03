@@ -7,7 +7,9 @@ import UsertestreportModel from "../model/Usertestreport.model.js";
     "header" : "Admin <token>"
 }
 body: {
-    "module_name": "React Js"
+    "module_name": "Testing ",
+    "module_description": "Don't delete it",
+    "timelimit": "60",
 }
 */
 export async function createTestModule(req, res) {

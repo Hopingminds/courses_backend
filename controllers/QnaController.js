@@ -1,6 +1,10 @@
 import QnaModel from "../model/Qna.model.js"
 import TestModuleModel from "../model/Testmodule.model.js"
 import UsertestreportModel from "../model/Usertestreport.model.js";
+import multer from 'multer';
+import path from 'path';
+import xlsx from 'xlsx';
+import fs from 'fs';
 
 /** POST: http://localhost:8080/api/addquestiontomodule
 * @param: {
@@ -227,3 +231,130 @@ function hidePhone(phone) {
 export async function updatedQuestionViaCSV(req, res) {
     
 }
+
+/** POST: http://localhost:8080/api/addquestionstomodule
+* @param: {
+    "header" : "Admin <token>"
+}
+body: {
+    "module_id":"6620b6b7a3340a8de1a70bc0",
+    "questions": "file.csv"
+}
+*/
+
+// Ensure the uploads directory exists
+const uploadDir = path.resolve('uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        const ext = path.extname(file.originalname);
+        cb(null, Date.now() + ext);
+    }
+});
+
+const fileFilter = (req, file, cb) => {
+    const allowedFileTypes = ['text/csv', 'application/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+    if (allowedFileTypes.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new Error('Only CSV files are allowed'), false);
+    }
+};
+
+export const upload = multer({ storage: storage, fileFilter: fileFilter }).single('questions');
+
+export const addQuestionsFromCSV = async (req, res) => {
+    try {
+        upload(req, res, async (err) => {
+            if (err instanceof multer.MulterError) {
+                return res.status(400).json({ message: 'File upload error', error: err.message });
+            } else if (err) {
+                return res.status(500).json({ message: 'Internal server error', error: err.message });
+            }
+
+            if (!req.file) {
+                return res.status(400).json({ message: 'No file uploaded' });
+            }
+
+            let jsonArray = [];
+            try {
+                if (req.file.mimetype === 'application/vnd.ms-excel' || req.file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+                    const workbook = xlsx.readFile(req.file.path);
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    jsonArray = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
+                } else if (req.file.mimetype === 'text/csv' || req.file.mimetype === 'application/csv') {
+                    jsonArray = await parseCSV(req.file.path); // Helper function to parse CSV
+                } else {
+                    return res.status(400).json({ message: 'Unsupported file type' });
+                }
+            } catch (error) {
+                return res.status(400).json({ message: 'Error parsing file', error: error.message });
+            }
+
+            // Assuming the first row contains headers
+            const headers = jsonArray[0];
+            const results = [];
+
+            for (let i = 1; i < jsonArray.length; i++) {
+                const row = jsonArray[i];
+                const questionData = {
+                    question: row[headers.indexOf('question')],
+                    opt_1: row[headers.indexOf('opt_1')],
+                    opt_2: row[headers.indexOf('opt_2')],
+                    opt_3: row[headers.indexOf('opt_3')],
+                    opt_4: row[headers.indexOf('opt_4')],
+                    answer: row[headers.indexOf('answer')],
+                    maxMarks: row[headers.indexOf('maxMarks')]
+                };
+
+                try {
+                    const TestModule = await TestModuleModel.findOne({ _id: req.body.module_id });
+
+                    if (!TestModule) {
+                        return res.status(404).json({ error: 'Invalid module ID' });
+                    }
+
+                    const newQuestion = new QnaModel({
+                        question: questionData.question,
+                        options: {
+                            opt_1: questionData.opt_1,
+                            opt_2: questionData.opt_2,
+                            opt_3: questionData.opt_3,
+                            opt_4: questionData.opt_4
+                        },
+                        answer: questionData.answer,
+                        maxMarks: questionData.maxMarks
+                    });
+
+                    await newQuestion.save();
+                    TestModule.questions.push(newQuestion._id);
+                    await TestModule.save();
+
+                    results.push({ message: 'Question added successfully', data: newQuestion });
+                } catch (error) {
+                    console.error('Error adding question:', error);
+                    return res.status(500).json({ message: 'Error adding question', error: error.message });
+                }
+            }
+
+            fs.unlinkSync(req.file.path);
+
+            return res.status(201).json(results);
+        });
+
+    } catch (error) {
+        console.error('Unexpected error:', error);
+        return res.status(500).json({ message: 'Internal server error', error: error.message });
+    } finally {
+        if (req.file) {
+            fs.unlinkSync(req.file.path); // Delete uploaded file
+        }
+    }
+};
