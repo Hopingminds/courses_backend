@@ -442,3 +442,39 @@ export async function getModuleTestReport(req, res) {
         return res.status(500).send({ error: 'Internal Server Error', error });
     }
 }
+
+/** PUT: http://localhost:8080/api/editmodule
+* @param: {
+    "header" : "Admin <token>"
+}
+body: {
+    "module_id": "f43qtwrfcw34erg3w4erg3w4rf34rf34fr",
+    "module_name": "Module ka naam",
+    "module_description": "Module ke descriptions",
+    "timelimit": 120
+}
+*/
+export async function editModuleDetails(req, res) {
+    try {
+        const { module_name, module_description, timelimit, module_id } = req.body;
+
+        // Find the test by ID and update the specified fields
+        const updatedTest = await TestModuleModel.findByIdAndUpdate(
+            module_id,
+            {
+                module_name,
+                module_description,
+                timelimit
+            },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedTest) {
+            return res.status(404).json({ message: 'Test not found' });
+        }
+
+        res.status(200).json(updatedTest);
+    } catch (error) {
+        return res.status(500).send({ error: 'Internal Server Error', error });
+    }
+}

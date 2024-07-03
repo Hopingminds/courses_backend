@@ -26,6 +26,7 @@ router.route('/getmoduletestreport/:module_id').get(AdminAuth, TestModuleControl
 // PUT ROUTES
 router.route('/submittestanswer').put(Auth, QnaControllers.submitAnswer);
 router.route('/submitmodule').put(Auth, TestModuleControllers.submitModule);
+router.route('/editmodule').put(AdminAuth, TestModuleControllers.editModuleDetails);
 
 // DELETE ROUTES
 router.route('/deletestudentreport').delete(TestModuleControllers.deleteStudentReport)
