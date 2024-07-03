@@ -332,3 +332,113 @@ export async function deleteStudentReport(req, res) {
     }
 }
 
+
+/** DELETE: http://localhost:8080/api/deletemodule
+    body {
+        "module_id": "7gh8h76fgbn767gh7yug67yuy7t67"
+    }
+*/
+export async function deleteModule(req, res) {
+    try {
+        const { module_id } = req.body;
+        const result = await TestModuleModel.deleteOne({ _id: module_id });
+
+        if (result.deletedCount > 0) {
+            return res.status(200).json({ success: true, message: 'Module deleted successfully.' });
+        }
+        else {
+            return res.status(404).json({ success: false, message: 'No Module found for the given module ID.' });
+        }
+    } catch (error) {
+        return res.status(500).send({ error: 'Internal Server Error', error });
+    }
+}
+
+/** GET: http://localhost:8080/api/getmoduletestreport/:module_id
+* @param: {
+    "header" : "Admin <token>",
+}
+*/
+export async function getModuleTestReport(req, res) {
+    try {
+        const moduleId = req.params.module_id; // Assuming module_id is passed in the request params
+        const allUsers = await UserModel.find({});
+        
+        const testReports = [];
+
+        for (const user of allUsers) {
+            const { _id: userID } = user;
+            let isTestCompleted = true;
+            let testReport = {
+                totalQuestion: 0,
+                attemptedQuestions: 0,
+                unAttemptedQuestions: 0,
+                correctAnswers: 0,
+                incorrectAnswers: 0,
+                totalMarks: 0,
+                obtainedMarks: 0,
+                scorePercentage: 0
+            };
+
+            if (!userID) {
+                return res.status(500).send({ error: 'User Not Found!' });
+            }
+
+            let Report = await UsertestreportModel.find({ user: userID, module: moduleId }).populate('module').populate('generatedQustionSet.question').lean();
+            if (Report.length === 0) {
+                continue;
+            }
+
+            Report.forEach((report) => {
+                if (report.isModuleCompleted === false) {
+                    isTestCompleted = false;
+                    return;
+                }
+            });
+
+            if (!isTestCompleted) {
+                testReports.push({ user: user, isTestCompleted: false, message: "Test Not Submitted Yet!" });
+                continue;
+            }
+
+            let newData = Report.map((data) => {
+                const { module, ...restData } = data;
+                const { questions, __v, ...restModule } = module;
+                const updatedQuestions = data.generatedQustionSet.map(question => {
+                    const isCorrect = question.isSubmitted ? question.submittedAnswer === question.question.answer : null;
+                    return {
+                        ...question,
+                        isCorrect
+                    };
+                });
+                return { ...restData, module: { ...restModule }, generatedQustionSet: updatedQuestions };
+            });
+
+            Report.forEach(data => {
+                data.generatedQustionSet.forEach(question => {
+                    testReport.totalQuestion++;
+                    if (question.isSubmitted) {
+                        testReport.attemptedQuestions++;
+                        if (question.submittedAnswer === question.question.answer) {
+                            testReport.correctAnswers++;
+                            testReport.obtainedMarks += question.question.maxMarks;
+                        } else {
+                            testReport.incorrectAnswers++;
+                        }
+                    } else {
+                        testReport.unAttemptedQuestions++;
+                    }
+                    testReport.totalMarks += question.question.maxMarks;
+                });
+            });
+            testReport.scorePercentage = ((testReport.obtainedMarks / testReport.totalMarks) * 100).toFixed(2);
+
+            let {password, token, purchased_courses, blocked_courses, __v, ...rest} = user.toObject()
+            testReports.push({ user:rest, isTestCompleted: true, testReport: testReport, data: newData });
+        }
+
+        return res.status(200).send({ success: true, testReports });
+    } catch (error) {
+        return res.status(500).send({ error: 'Internal Server Error', error });
+    }
+}

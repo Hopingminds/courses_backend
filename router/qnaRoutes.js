@@ -21,6 +21,7 @@ router.route('/testsubmitteduserslist').get(QnaControllers.testSubmittedUsersLis
 // admin side implementation!
 router.route('/getallmodulesadmin').get(AdminAuth,TestModuleControllers.getAllModulesAdmin);
 router.route('/getalltestreport').get(AdminAuth, TestModuleControllers.getAllTestReport)
+router.route('/getmoduletestreport/:module_id').get(AdminAuth, TestModuleControllers.getModuleTestReport)
 
 // PUT ROUTES
 router.route('/submittestanswer').put(Auth, QnaControllers.submitAnswer);
@@ -28,4 +29,6 @@ router.route('/submitmodule').put(Auth, TestModuleControllers.submitModule);
 
 // DELETE ROUTES
 router.route('/deletestudentreport').delete(TestModuleControllers.deleteStudentReport)
+router.route('/deletemodule').delete(AdminAuth, TestModuleControllers.deleteModule)
+
 export default router
