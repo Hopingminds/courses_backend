@@ -80,11 +80,11 @@ export async function updateAccessRoute(req, res) {
     }
 }
 
-/** GET: http://localhost:8080/api/verifyadminuser */
+/** GET: http://localhost:8080/api/verifyadminuser/:route */
 export async function verifyAdminUserAccess(req, res) {
     try {
         const { role } = req.admin;
-        const { route } = req.body;
+        const { route } = req.params;
 
         // Check if the role exists
         const existingRoute = await AccessRoutesModel.findOne({ role });

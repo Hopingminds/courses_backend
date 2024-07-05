@@ -17,7 +17,7 @@ router.route('/admin').get(adminController.verifyAdmin, adminController.getAdmin
 router.route('/admins').get(AdminAuth, adminController.getallAdmins)
 router.route('/getadmindashdata').get(adminController.getDashboardData)
 router.route('/getaccessroute/:role').get(AccessRouteController.getAccessRoute)
-router.route('/verifyadminuser').get(AdminAuth, AccessRouteController.verifyAdminUserAccess)
+router.route('/verifyadminuser/:route').get(AdminAuth, AccessRouteController.verifyAdminUserAccess)
 
 // PUT ROUTES
 router.route('/updateadmin').put(AdminAuth, adminController.updateAdmin)
