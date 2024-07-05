@@ -8,6 +8,13 @@ import instAuth from '../middleware/instAuth.js'
 router.route('/createbatch').post(instAuth, BatchesController.createBatch);
 
 // GET ROUTES
-router.route('/getcoursebatches').get(instAuth, BatchesController.getBatchesByCourse);
+router.route('/getcoursebatches/:courseId').get(instAuth, BatchesController.getBatchesByCourse);
+router.route('/getbatchesusers/:batchId').get(instAuth, BatchesController.getBatchesUsers);
+
+// DELETE ROUTES
+router.route('/deletebatch').delete(instAuth, BatchesController.deleteBatch);
+
+// PUT ROUTES
+router.route('/updateuserbatch').put(instAuth, BatchesController.updateUserBatch);
 
 export default router;
