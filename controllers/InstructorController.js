@@ -439,13 +439,78 @@ export async function getInstFilesFromAws(req, res) {
     }
 }
 
-/** GET: http://localhost:8080/api/instructorcourses/:instructorId */
+/** GET: http://localhost:8080/api/instructorcourses */
 export const getCoursesByInstructorId = async (req, res) => {
     try {
-        const instructorId = req.params.instructorId;
-        const courses = await CoursesModel.find({ instructor: instructorId }).populate('instructor');
+        const { instructorID } = req.instructor;
+        const courses = await CoursesModel.find({ instructor: instructorID }).populate('instructor');
         res.status(200).json(courses);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
+}
+
+/** GET: http://localhost:8080/api/instructorupcominglive
+ * @header : Bearer <instrucotr>
+ */
+export async function getUpcomingLiveClasses(req, res) {
+    try {
+        const { instructorID } = req.instructor;
+        const courses = await CoursesModel.find({ instructor: instructorID });
+
+        let upcomingLiveClasses = [];
+
+        courses.forEach(course => {
+            course.curriculum.forEach(chapter => {
+                chapter.liveClasses.forEach(liveClass => {
+                    if (!liveClass.isCompleted && new Date(liveClass.startDate) > new Date()) {
+                        upcomingLiveClasses.push({
+                            courseID: course.courseID,
+                            title: course.title,
+                            chapter_name: chapter.chapter_name,
+                            ...liveClass.toObject(),
+                        });
+                    }
+                });
+            });
+        });
+
+        // Sort upcoming live classes by start date
+        upcomingLiveClasses.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+
+        res.status(200).json(upcomingLiveClasses);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+/** GET: http://localhost:8080/api/instructorcompletedlive
+ * @header : Bearer <instrucotr>
+ */
+export async function completedClasses(req, res) {
+	try {
+		const { instructorID } = req.instructor;
+        const courses = await CoursesModel.find({ instructor: instructorID });
+
+        let completedLiveClasses = [];
+
+        courses.forEach(course => {
+            course.curriculum.forEach(chapter => {
+                chapter.liveClasses.forEach(liveClass => {
+                    if (liveClass.isCompleted && new Date(liveClass.endDate) < new Date()) {
+                        completedLiveClasses.push({
+                            courseID: course.courseID,
+                            title: course.title,
+                            chapter_name: chapter.chapter_name,
+                            ...liveClass.toObject(),
+                        });
+                    }
+                });
+            });
+        });
+
+        res.status(200).json(completedLiveClasses);
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
 }

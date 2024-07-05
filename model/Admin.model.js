@@ -17,7 +17,7 @@ export const AdminSchema = new mongoose.Schema({
     profile: { type: String },
     role: {
         type: String,
-        enum: ['superAdmin', 'admin', 'hr', 'instructor'],
+        enum: ['superAdmin', 'admin', 'hr', 'instructor', 'pap'],
         default: 'admin'
     }
 });
