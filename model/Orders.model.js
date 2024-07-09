@@ -13,7 +13,7 @@ export const OrdersSchema = new mongoose.Schema({
     
     purchasedBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Users'
+        ref: 'User'
     },
     name: { type: String },
     address: { type: String },
