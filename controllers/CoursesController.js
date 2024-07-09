@@ -1093,3 +1093,32 @@ export async function getCompletedLiveClasses(req, res) {
         res.status(500).json({ success: false, message: 'Error getting completed live classes: ' + error.message });
     }
 }
+
+export async function getAllOrders(req, res) {
+    try {
+        const orders = await OrdersModel.find().populate('purchasedBy','-password -token').populate('courses.course');
+        
+		if (!orders) {
+            return res.status(404).json({ message: 'No orders found' });
+        }
+
+        res.status(200).json(orders);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export async function getOrderByUser(req, res){
+	try {
+		const { userID } = req.user;
+		const orders = await OrdersModel.find({ purchasedBy: userID }).populate('courses.course');
+		
+		if (!orders) {
+            return res.status(404).json({ message: 'No orders found' });
+        }
+
+		res.status(200).json({success: true, data: orders});
+	} catch (error) {
+		res.status(500).json({ success: false, message: 'Error getting completed live classes: ' + error.message });
+	}
+}
