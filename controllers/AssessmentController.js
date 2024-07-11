@@ -194,10 +194,11 @@ function shuffleArray(array) {
     return array;
 }
 
-/** GET: http://localhost:8080/api/getassessment?assessmentId=6620c1a48cb4bcb50f84748f&index=1&UserId=62a5a5a5a5a5a5a5a5a5a */
+/** GET: http://localhost:8080/api/getassessment?assessmentId=6620c1a48cb4bcb50f84748f&index=1 */
 export const getAssesment = async (req, res) => {
     try {
-        const { assessmentId, index, userID } = req.query;
+        const{ userID } = req.user;
+        const { assessmentId, index } = req.query;
 
         // Validate assessmentId
         if (!mongoose.Types.ObjectId.isValid(assessmentId)) {
