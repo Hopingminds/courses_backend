@@ -64,12 +64,14 @@ export async function verifyInstructor(req, res, next) {
 			}
 			], 
 		"phone": 9814740275, 
-		"bio" : "A developer with innovative ideas 💡"
+		"bio" : ["A developer with innovative ideas 💡","A developer with innovative ideas 💡"],
+		"noOfStudents": 24,
+		"noOfLessons": 124
 	}
 */
 export async function register(req, res) {
 	try {
-		const {password, name, profile, email, experience, social_links, phone, bio } = req.body
+		const {password, name, profile, email, experience, social_links, phone, bio, noOfStudents, noOfLessons } = req.body
 
 		// check for existing email
 		const existEmail = new Promise((resolve, reject) => {
@@ -97,7 +99,7 @@ export async function register(req, res) {
 								// instructorname,
 								password: hashedPassword,
 								profile: profile || '',
-								name, email, experience, social_links, phone, bio
+								name, email, experience, social_links, phone, bio, noOfStudents, noOfLessons
 							})
 
 							// return save result as a response

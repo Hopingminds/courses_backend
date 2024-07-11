@@ -32,6 +32,7 @@ export const UserSchema = new mongoose.Schema({
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'Courses'
             },
+            courseStartDate: { type: Date },
             completed_lessons: [{type: mongoose.Schema.Types.ObjectId, default: null}],
             completed_assignments: [{type: mongoose.Schema.Types.ObjectId, default: null}]
         }

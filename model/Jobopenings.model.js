@@ -50,7 +50,7 @@ export const JobopeningsSchema = new mongoose.Schema({
         type: String,
     },
     about_company: {
-
+        type: String,
     },
     company_website_link: {
         type: String,
@@ -70,6 +70,12 @@ export const JobopeningsSchema = new mongoose.Schema({
     publishDate: {
         type: Date,
         default: Date.now
+    },
+    lastDate: {
+        type: Date,
+        default: function() {
+            return new Date(+this.publishDate + 5 * 24 * 60 * 60 * 1000); // Adding 5 days in milliseconds
+        }
     }
 })
 

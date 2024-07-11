@@ -16,7 +16,7 @@ export async function createJobopening(req, res) {
 
 export async function getAllJobOpenings(req, res) {
     try {
-        const jobOpenings = await JobopeningsModel.find({ publishStatus: "active" });
+        const jobOpenings = await JobopeningsModel.find({ publishStatus: "active" }).sort({ publishDate: -1 });;
         return res.status(200).json({ success: true, jobOpenings });
     } catch (error) {
         return res.status(500).json({ success: false, message: "Internal server error" });

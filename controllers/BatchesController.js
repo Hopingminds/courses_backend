@@ -154,3 +154,70 @@ export async function deleteBatch(req, res){
         return res.status(501).send({ success: false, msg:'Internal Server Error', error });
     }
 }
+
+/** POST: http://localhost:8080/api/deletebatch
+body {
+    "UserId": "45w5ygesrfdccg5wgefr",
+    "batchId": "7gh8h76fgbn767gh7yug67yuy7t67"
+}
+*/
+export async function addUserToBatch(req, res) {
+    try {
+        const { batchId, userId } = req.body;
+        
+        const existingBatch = await BatchModel.findById(batchId);
+        if (!existingBatch) {
+            return res.status(404).json({ error: "Batch not found" });
+        }
+
+        const existingUser = await UserModel.findById(userId);
+        if (!existingUser) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        if (existingBatch.users.includes(userId)) {
+            return res.status(400).json({ error: "User already in batch" });
+        }
+
+        existingBatch.users.push(userId);
+        await existingBatch.save();
+
+        res.status(200).json({ success: true, message: "User added to batch successfully", batch: existingBatch });
+    } catch (error) {
+        return res.status(501).send({ success: false, msg:'Internal Server Error', error });
+    }
+}
+
+/** DELETE: http://localhost:8080/api/deletebatch
+body {
+    "UserId": "45w5ygesrfdccg5wgefr",
+    "batchId": "7gh8h76fgbn767gh7yug67yuy7t67"
+}
+*/
+export async function removeUserFromBatch(req, res) {
+    try {
+        const { batchId, userId } = req.body;
+
+        const existingBatch = await BatchModel.findById(batchId);
+        if (!existingBatch) {
+            return res.status(404).json({ error: "Batch not found" });
+        }
+
+        const existingUser = await UserModel.findById(userId);
+        if (!existingUser) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        if (!existingBatch.users.includes(userId)) {
+            return res.status(400).json({ error: "User not in batch" });
+        }
+
+        existingBatch.users.pull(userId);
+        await existingBatch.save();
+
+        res.status(200).json({ success: true, message: "User removed from batch successfully", batch: existingBatch });
+    } catch (error) {
+        return res.status(501).send({ success: false, msg:'Internal Server Error', error });
+    }
+}
+

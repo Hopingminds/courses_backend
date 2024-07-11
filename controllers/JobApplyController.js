@@ -1,4 +1,5 @@
 import JobsApplyModel from "../model/JobsApply.model.js";
+import JobopeningsModel from "../model/Jobopenings.model.js";
 
 export async function applyJob(req, res) {
     try {
@@ -6,6 +7,12 @@ export async function applyJob(req, res) {
         let { jobID } = req.body
         if (!jobID) {
             return res.status(501).send({ success: false, error: 'Job is required' }) 
+        }
+
+        let job = await JobopeningsModel.findById(jobID)
+
+        if (new Date() > job.lastDate) {
+            return res.status(400).send({ success: false, error: 'Cannot apply after the last date' })
         }
 
         let isExsist = await JobsApplyModel.findOne({
