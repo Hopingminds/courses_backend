@@ -5,23 +5,28 @@ export async function applyJob(req, res) {
     try {
         let { userID } = req.user
         let { jobID } = req.body
+
         if (!jobID) {
-            return res.status(501).send({ success: false, error: 'Job is required' }) 
+            return res.status(501).send({ success: false, error: 'Job is required' })
         }
 
         let job = await JobopeningsModel.findById(jobID)
+
+        if (!job) {
+            return res.status(404).send({ success: false, error: 'Job not found' })
+        }
 
         if (new Date() > job.lastDate) {
             return res.status(400).send({ success: false, error: 'Cannot apply after the last date' })
         }
 
-        let isExsist = await JobsApplyModel.findOne({
+        let isExist = await JobsApplyModel.findOne({
             appliedBy: userID,
             jobApplied: jobID
         })
 
-        if (isExsist) {
-            return res.status(501).send({ success: false, error: 'Already Applied!', data: isExsist }) 
+        if (isExist) {
+            return res.status(501).send({ success: false, error: 'Already Applied!', data: isExist })
         }
 
         let jobApply = new JobsApplyModel({

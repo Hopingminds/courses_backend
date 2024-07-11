@@ -1,4 +1,5 @@
 import JobopeningsModel from "../model/Jobopenings.model.js";
+import JobsApplyModel from "../model/JobsApply.model.js";
 
 export async function createJobopening(req, res) {
     try {
@@ -16,8 +17,20 @@ export async function createJobopening(req, res) {
 
 export async function getAllJobOpenings(req, res) {
     try {
+        let { userID } = req.user
+
         const jobOpenings = await JobopeningsModel.find({ publishStatus: "active" }).sort({ publishDate: -1 });;
-        return res.status(200).json({ success: true, jobOpenings });
+        
+        // Fetch application status for each job
+        const jobOpeningsWithStatus = await Promise.all(jobOpenings.map(async job => {
+            const application = await JobsApplyModel.findOne({ appliedBy: userID, jobApplied: job._id });
+            return {
+                ...job.toObject(),
+                isApplied: application ? true : false
+            };
+        }));
+
+        return res.status(200).json({ success: true, jobOpenings: jobOpeningsWithStatus });
     } catch (error) {
         return res.status(500).json({ success: false, message: "Internal server error" });
     }
