@@ -12,7 +12,7 @@ on:
 jobs:
   build:
 
-    runs-on: bellboy
+    runs-on: self-hosted
 
     strategy:
       matrix:
