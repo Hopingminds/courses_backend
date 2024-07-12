@@ -49,9 +49,10 @@ export async function upload(req, res) {
         let { collegeUserID } = req.collegeUser
         let { coursesAllotted, used_coins, coins, college } = await CollegeUserModel.findById(collegeUserID)
         
-        let coursesAllottedData = coursesAllotted.map((course)=>{
-            return { course: course };
-        })
+        let coursesAllottedData = coursesAllotted.map((course) => ({
+            course: course._id,
+            allotedByCollege: true, // Set allotedByCollege to true for all courses allotted
+        }));
 
         if (usersData.length > (coins - used_coins)) {
             return res.status(500).send({success: false, msg: `Not Enough Coins left to Upload ${usersData.length} users!`})
