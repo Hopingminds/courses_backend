@@ -20,6 +20,10 @@ const QuestionResultSchema = new mongoose.Schema({
     obtainedMarks: {
         type: Number,
         required: true,
+    },
+    isSubmitted:{
+        type: Boolean,
+        default: false
     }
 });
 

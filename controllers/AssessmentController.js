@@ -398,23 +398,16 @@ export const requestForReassessment = async (req, res) => {
  * @body : {
     "assessmentID": "MongoDB ObjectId of the assessment",
     "questionID": "MongoDB ObjectId of the question",
-    "answer": "User's submitted answer",
-    UserId: "userId"
+    "answer": "User's submitted answer"
 }
 */
 export async function submitAnswerForAssessment(req, res) {
     try {
-        const { userID, assessment_id, questionID, answer } = req.body;
-
-        console.log('Received request data:', { userID, assessment_id, questionID, answer });
-
-        // Ensure the assessment_id is properly formatted
-        const formattedAssessmentId = new mongoose.Types.ObjectId(assessment_id);
+        const { userID } = req.user;
+        const { assessment_id, questionID, answer } = req.body;
 
         // Find the assessment based on assessmentID
-        const assessment = await AssessmentSchema.findById(formattedAssessmentId);
-
-        console.log('Assessment found:', assessment);
+        const assessment = await AssessmentSchema.findById(assessment_id);
 
         if (!assessment) {
             return res.status(404).send({ success: false, message: 'Assessment not found' });
@@ -430,10 +423,20 @@ export async function submitAnswerForAssessment(req, res) {
         const question = assessment.questions[questionIndex];
 
         // Check if the answer for this question is already submitted by the same user
-        const result = await ResultSchema.findOne({ assessment_id: formattedAssessmentId, userId: userID });
-        if (result) {
-            const questionResultIndex = result.questions.findIndex(q => q.questionId.toString() === questionID);
-            if (questionResultIndex !== -1) {
+        let userResult = await ResultSchema.findOne({ assessment_id: assessment_id, userId: userID });
+
+        if (!userResult) {
+            userResult = new ResultSchema({
+                assessment_id: assessment_id,
+                userId: userID,
+                questions: [],
+                score: 0,
+                totalMarks: 0,
+                isSubmitted: false
+            });
+        } else {
+            const questionResult = userResult.questions.find(q => q.questionId.toString() === questionID);
+            if (questionResult && questionResult.isSubmitted) {
                 return res.status(400).send({ success: false, message: 'Answer for this question is already submitted by this user' });
             }
         }
@@ -442,27 +445,28 @@ export async function submitAnswerForAssessment(req, res) {
         const isCorrect = question.answer === answer;
         const obtainedMarks = isCorrect ? question.maxMarks : 0;
 
-        // Find or create a result document for this assessment and user
-        let userResult = await ResultSchema.findOne({ assessment_id: formattedAssessmentId, userId: userID });
-        if (!userResult) {
-            userResult = new ResultSchema({
-                assessment_id: formattedAssessmentId,
-                userId: userID,
-                questions: [],
-                score: 0,
-                totalMarks: 0,
-                isSubmitted: false
-            });
-        }
+        // Add or update the question result in the result document
+        const questionResultIndex = userResult.questions.findIndex(q => q.questionId.toString() === questionID);
 
-        // Add the question result to the result document
-        userResult.questions.push({
-            questionId: questionID,
-            submittedAnswer: answer,
-            isCorrect: isCorrect,
-            maxMarks: question.maxMarks,
-            obtainedMarks: obtainedMarks
-        });
+        if (questionResultIndex === -1) {
+            userResult.questions.push({
+                questionId: questionID,
+                submittedAnswer: answer,
+                isCorrect: isCorrect,
+                maxMarks: question.maxMarks,
+                obtainedMarks: obtainedMarks,
+                isSubmitted: true
+            });
+        } else {
+            userResult.questions[questionResultIndex] = {
+                questionId: questionID,
+                submittedAnswer: answer,
+                isCorrect: isCorrect,
+                maxMarks: question.maxMarks,
+                obtainedMarks: obtainedMarks,
+                isSubmitted: true
+            };
+        }
 
         // Update the total score and total marks
         userResult.score += obtainedMarks;
