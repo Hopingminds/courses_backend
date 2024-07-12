@@ -35,6 +35,7 @@ export const JobopeningsSchema = new mongoose.Schema({
         from: { type: Number },
         to: { type: Number },
     },
+    salaryType:{ type: String},
     annualSalary: { 
         type: Number
     },
