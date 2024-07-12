@@ -407,31 +407,42 @@ export async function resetPassword(req,res){
     }
 }
 
+/** GET: http://localhost:8080/api/get-college-students?degree=B.Tech&degree=B.Tech&courseAccepted=false&profileComplete=false */
 export async function getAllCollegeStudents(req, res) {
 	try {
 		let { collegeUserID } = req.collegeUser
-		let { stream, degree, courseAccepted, profileComplete } = req.query
-		let collegeUser = await CollegeUserModel.findById(collegeUserID)
+		let { stream, degree, courseAccepted, profileComplete } = req.query;
+		let collegeUser = await CollegeUserModel.findById(collegeUserID);
+		
 		if (!collegeUser) {
-			return res.status(404).send({ success: false, error : "College User Not Found!"});
+			return res.status(404).send({ success: false, error: "College User Not Found!" });
+		}
+
+		let query = { college: collegeUser.college };
+
+		if (stream) {
+			if (Array.isArray(stream)) {
+				query.stream = { $in: stream };
+			} else {
+				query.stream = stream;
+			}
 		}
 		
-		let query = {}
-		if (stream) {
-			query.stream =  stream
-		}
 		if (degree) {
-			query.degree =  degree
+			if (Array.isArray(degree)) {
+				query.degree = { $in: degree };
+			} else {
+				query.degree = degree;
+			}
 		}
+		
 		if (courseAccepted) {
-			query.isCourseOpened =  courseAccepted
+			query.isCourseOpened = courseAccepted;
 		}
 		
 		if (profileComplete) {
-			query.isProfileComplete =  profileComplete
+			query.isProfileComplete = profileComplete;
 		}
-
-		query.college = collegeUser.college
 		
 		let userData = await UserModel.find(query).select('-password -token')
 		return res.status(201).send({ success: true, data: userData, length: userData.length})
