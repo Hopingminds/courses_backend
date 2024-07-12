@@ -48,6 +48,9 @@ export const JobopeningsSchema = new mongoose.Schema({
     educational_qualification: {
         type: String,
     },
+    degree:{
+        type: String
+    },
     specialization: {
         type: String,
     },
