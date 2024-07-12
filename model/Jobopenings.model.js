@@ -27,6 +27,7 @@ export const JobopeningsSchema = new mongoose.Schema({
         type: String,
     },
     work_experience: {
+        isFresher:{ type :Boolean},
         from: { type: Number },
         to: { type: Number },
     },
@@ -35,6 +36,9 @@ export const JobopeningsSchema = new mongoose.Schema({
         to: { type: Number },
     },
     annualSalary: { 
+        type: Number
+    },
+    uptoPackage:{
         type: Number
     },
     company_industry: {
