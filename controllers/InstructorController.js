@@ -71,7 +71,7 @@ export async function verifyInstructor(req, res, next) {
 */
 export async function register(req, res) {
 	try {
-		const {password, name, profile, email, experience, social_links, phone, bio, noOfStudents, noOfLessons } = req.body
+		const {password, name, profile, email, experience, social_links, phone, bio, noOfStudents, noOfLessons, experties, workExperience } = req.body
 
 		// check for existing email
 		const existEmail = new Promise((resolve, reject) => {
@@ -99,7 +99,7 @@ export async function register(req, res) {
 								// instructorname,
 								password: hashedPassword,
 								profile: profile || '',
-								name, email, experience, social_links, phone, bio, noOfStudents, noOfLessons
+								name, email, experience, social_links, phone, bio, noOfStudents, noOfLessons, experties, workExperience
 							})
 
 							// return save result as a response
