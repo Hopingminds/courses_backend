@@ -140,6 +140,7 @@ export const createAssessment = async (req, res) => {
 export const getCourseAllAssessment = async (req, res) => {
     try {
         const { coursename } = req.params;
+        const { userID } = req.user; // Assuming req.user contains authenticated user info
 
         // Find the course by slug and populate assessments
         const course = await CoursesSchema.findOne({ slug: coursename }).populate('assessments').lean();
@@ -164,11 +165,27 @@ export const getCourseAllAssessment = async (req, res) => {
             }
         };
 
-        // Populate assessments without questions
+        // Function to fetch result details for the user
+        const fetchResultDetails = async (assessmentId) => {
+            try {
+                const result = await ResultSchema.findOne({ assessment_id: assessmentId, userId: userID }).lean();
+                if (result) {
+                    const {  questions, userId, ...rest } = result;
+                    return rest;
+                }
+                return null;
+            } catch (error) {
+                console.error("Error fetching result details:", error);
+                return null;
+            }
+        };
+
+        // Populate assessments without questions and include result details
         const populatedAssessments = await Promise.all(
             course.assessments.map(async (assessment) => {
                 const detailedAssessment = await fetchAssessmentDetails(assessment._id); // Ensure this matches your schema
-                return detailedAssessment;
+                const resultDetails = await fetchResultDetails(assessment._id);
+                return { ...detailedAssessment, resultDetails };
             })
         );
 
@@ -222,9 +239,13 @@ export const getAssesment = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Assessment not found' });
         }
 
+        const totalMarks = assessment.questions.reduce((sum, question) => sum + question.maxMarks, 0);
+
         let result = await ResultSchema.findOne({ assessment_id: assessmentId, userId: userID });
         if (!result) {
-            result = new ResultSchema({ assessment_id: assessmentId, userId: userID, questions: [], score: 0, totalMarks: 0, isSuspended: false, remarks: '' });
+            result = new ResultSchema({ assessment_id: assessmentId, userId: userID, questions: [], score: 0, totalMarks: totalMarks, isSuspended: false, remarks: '' });
+        } else if (result.totalMarks !== totalMarks) {
+            result.totalMarks = totalMarks; // Update totalMarks if it differs
         }
 
         if (!result.questions.length) {
@@ -399,7 +420,7 @@ export const requestForReassessment = async (req, res) => {
     "header" : "User <token>"
 }
  * @body : {
-    "assessmentID": "MongoDB ObjectId of the assessment",
+    "assessment_id": "MongoDB ObjectId of the assessment",
     "questionID": "MongoDB ObjectId of the question",
     "answer": "User's submitted answer"
 }
@@ -473,7 +494,6 @@ export async function submitAnswerForAssessment(req, res) {
 
         // Update the total score and total marks
         userResult.score += obtainedMarks;
-        userResult.totalMarks += question.maxMarks;
 
         // Save the result document
         await userResult.save();
