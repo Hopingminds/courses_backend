@@ -51,6 +51,14 @@ const ResultSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+    isSuspended: { 
+        type: Boolean, 
+        default: false 
+    },
+    remarks: { 
+        type: String, 
+        default: '' 
+    },
     isSubmitted: {
         type: Boolean,
         default: false,

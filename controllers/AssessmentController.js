@@ -224,7 +224,7 @@ export const getAssesment = async (req, res) => {
 
         let result = await ResultSchema.findOne({ assessment_id: assessmentId, userId: userID });
         if (!result) {
-            result = new ResultSchema({ assessment_id: assessmentId, userId: userID, questions: [], score: 0, totalMarks: 0 });
+            result = new ResultSchema({ assessment_id: assessmentId, userId: userID, questions: [], score: 0, totalMarks: 0, isSuspended: false, remarks: '' });
         }
 
         if (!result.questions.length) {
@@ -482,5 +482,36 @@ export async function submitAnswerForAssessment(req, res) {
     } catch (error) {
         console.error('Error submitting answer:', error);
         return res.status(500).send({ success: false, message: 'Error submitting answer: ' + error.message });
+    }
+}
+
+/** PUT: http://localhost:8080/api/submitassessment
+* @param: {
+    "header" : "User <token>"
+}
+body: {
+    "assessment_id": "",
+    "remarks": "",
+    "status": "",
+}
+*/
+export async function finishAssessment(req, res){
+    try {
+        const { userID } = req.user;
+        const { assessment_id, remarks, status } = req.body;
+
+        const result = await ResultSchema.findOneAndUpdate(
+            { user: userID, assessment_id: assessment_id },
+            { $set: { isSubmitted: true, remarks: remarks, isSuspended: status } },
+            { new: true }
+        );
+
+        if (!result) {
+            return res.status(404).send({success: false, message: 'User Assessment not found or already completed.' });
+        }
+
+        return res.status(200).send({ success: true, message: "Assessment submitted successfully." });
+    } catch (error) {
+        return res.status(500).send({ success: false, message: 'Error submitting Assessment: ' + error.message });
     }
 }

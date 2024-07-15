@@ -17,5 +17,6 @@ router.route('/getassessment').get(Auth, AssessmentController.getAssesment);
 
 //PUT ROUTES
 router.route('/submitassessmentanswer').put(Auth, AssessmentController.submitAnswerForAssessment);
+router.route('/submitassessment').put(Auth, AssessmentController.finishAssessment);
 
 export default router;
