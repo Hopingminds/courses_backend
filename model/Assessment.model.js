@@ -18,7 +18,7 @@ const AssessmentSchema = new mongoose.Schema({
     startDate: { type: Date, default: Date.now },
     lastDate: { type: Date },
     UploadDate: { type: Date, default: Date.now },
-    timelimit: { type: Date },
+    timelimit:{type:Number, default:60},
     isProtected: { type: Boolean, default: false },
     questions: [QuestionSchema]
 });

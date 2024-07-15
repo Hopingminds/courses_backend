@@ -280,6 +280,7 @@ export const getAssesment = async (req, res) => {
         return res.status(200).json({
             success: selectedQuestion ? true : false,
             length: responseData.length,
+            timelimit: assessment.timelimit,
             data: selectedQuestion ? selectedQuestion : `Max index = ${responseData.length}`
         });
             
