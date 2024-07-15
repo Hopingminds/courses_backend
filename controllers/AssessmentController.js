@@ -233,7 +233,8 @@ export const getAssesment = async (req, res) => {
                 submittedAnswer: '',
                 isCorrect: false,
                 maxMarks: question.maxMarks,
-                obtainedMarks: 0
+                obtainedMarks: 0,
+                isSubmitted: false
             }));
             await result.save();
         }
@@ -242,22 +243,24 @@ export const getAssesment = async (req, res) => {
             .populate('questions') // Populate questionId to get question details
             .lean();
 
+        const responseData = fetchAgain.questions.map((data) => {
+            const { questionId, submittedAnswer, isSubmitted, ...rest } = data;
+            const questionDetail = assessment.questions.find(q => q._id.equals(questionId));
+            const { answer, ...questionWithoutAnswer } = questionDetail; // Omitting 'answer' field
+            return {
+                ...questionWithoutAnswer,
+                submittedAnswer,
+                isSubmitted
+            };
+        });    
+            
+        const selectedQuestion = responseData[questionIndex - 1];
 
-            const responseData = fetchAgain.questions.map((data) => {
-                const { questionId, ...rest } = data;
-                const questionDetail = assessment.questions.find(q => q._id.equals(questionId));
-                const { answer, ...questionWithoutAnswer } = questionDetail; // Omitting 'answer' field
-                return questionWithoutAnswer;
-            });
-    
-            
-            const selectedQuestion = responseData[questionIndex - 1];
-            
-            return res.status(200).json({
-                success: selectedQuestion ? true : false,
-                length: responseData.length,
-                data: selectedQuestion ? selectedQuestion : `Max index = ${responseData.length}`
-            });
+        return res.status(200).json({
+            success: selectedQuestion ? true : false,
+            length: responseData.length,
+            data: selectedQuestion ? selectedQuestion : `Max index = ${responseData.length}`
+        });
             
     } catch (error) {
         console.error(error);
