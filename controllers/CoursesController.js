@@ -5,6 +5,7 @@ import CoursesModel from '../model/Courses.model.js'
 import UserModel from '../model/User.model.js'
 import OrdersModel from '../model/Orders.model.js'
 import { populate } from 'dotenv'
+import mongoose from "mongoose";
 // helper function
 function getRandomSubset(arr, size) {
 	const shuffled = arr.sort(() => 0.5 - Math.random())
@@ -233,18 +234,21 @@ export async function updateCourse(req, res) {
                 for (const [key, value] of Object.entries(chapter)) {
                     if (key === 'lessons' && Array.isArray(value)) {
                         value.forEach((lesson, lessonIndex) => {
+                            if (!lesson._id) lesson._id = new mongoose.Types.ObjectId();
                             for (const [lessonKey, lessonValue] of Object.entries(lesson)) {
                                 updateOps[`curriculum.${chapterIndex}.lessons.${lessonIndex}.${lessonKey}`] = lessonValue;
                             }
                         });
                     } else if (key === 'project' && Array.isArray(value)) {
                         value.forEach((project, projectIndex) => {
+                            if (!project._id) project._id = new mongoose.Types.ObjectId();
                             for (const [projectKey, projectValue] of Object.entries(project)) {
                                 updateOps[`curriculum.${chapterIndex}.project.${projectIndex}.${projectKey}`] = projectValue;
                             }
                         });
                     } else if (key === 'liveClasses' && Array.isArray(value)) {
                         value.forEach((liveClass, liveClassIndex) => {
+                            if (!liveClass._id) liveClass._id = new mongoose.Types.ObjectId();
                             for (const [liveClassKey, liveClassValue] of Object.entries(liveClass)) {
                                 updateOps[`curriculum.${chapterIndex}.liveClasses.${liveClassIndex}.${liveClassKey}`] = liveClassValue;
                             }
@@ -264,7 +268,7 @@ export async function updateCourse(req, res) {
         await CoursesModel.updateOne({ _id }, { $set: updateOps }).exec();
         return res.status(200).json({ message: 'Course Updated Successfully!', success: true });
 	} catch (error) {
-		return res.status(500).json({ message: 'Internal server error', success: false, error })
+		return res.status(500).json({ success: false, message: 'Error getting completed live classes: ' + error.message });
 	}
 }
 
