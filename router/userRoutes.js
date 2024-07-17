@@ -11,14 +11,14 @@ import { apiLimiter } from '../middleware/access.limiter.js'
 router.route('/register').post(controller.register)
 router.route('/authenticate').post(Auth,(req,res)=>res.end())
 router.route('/login').post(controller.verifyUser,controller.login)
-router.route('/sendmobileotp').post(Auth, apiLimiter, OtpController.generateOtpForMobile)
+router.route('/sendmobileotp').post(apiLimiter, OtpController.generateOtpForMobile)
+router.route("/verfiynumberotp").post(OtpController.verifyOtp)
 router.route("/loginwithotp").post(OtpController.loginWithOtp)
 
 // GET ROUTES
 router.route('/user/:email').get(controller.getUser)
 router.route('/user/:email/:coursename').get(CoursesController.getUserCourseBySlug)
 router.route('/getusercompletedassignemnts/:email').get(CoursesController.getUserCompletedAssignments)
-router.route("/verfiynumberotp/:otp").get(Auth, OtpController.verifyOtp)
 
 // PUT ROUTES
 router.route('/updateuser').put(Auth, controller.updateUser)

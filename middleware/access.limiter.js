@@ -9,7 +9,7 @@ import logger from './winston.logger.js';
 
 
 export const apiLimiter = rateLimit({
-    windowMs: 30 * 1000, // 30 sec
+    windowMs: 60 * 1000, // 60 sec
     max: 1, // limit each IP to 1 request per `window` (here, per 10 seconds)
     message: { message: 'Too many login attempts from this IP, please try again after a 30 second pause' },
     handler: async (req, res, _next, options) => {

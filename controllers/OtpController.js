@@ -9,27 +9,20 @@ const generateOtp = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-/** POST: http://localhost:8080/api/createResetSession
- * @body{
+/** POST: http://localhost:8080/api/sendmobileotp
+ * User token
+ * @body {
  *  "mobileNo": "8765445678"
  * }
  */
 export async function generateOtpForMobile(req, res){
     try {
-        const { userID } = req.user;
         const { mobileNo } = req.body;
-        
-        const user = await UserModel.findById(userID);
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
-        }
-
-        const username = user.name;
 
         const key = process.env.OTP_KEY;
         const otp = generateOtp();
         const number = `${mobileNo}`;
-        const message = `Dear ${username},\n Your OTP for login to HopingMinds is ${otp}. OTP is Valid for 10 minutes. Please do not share this OTP.\n Regards,\nHopingMinds`;
+        const message = `Dear HMian,\n Your OTP for login to HopingMinds is ${otp}. OTP is Valid for 10 minutes. Please do not share this OTP.\n Regards,\nHopingMinds`;
         const senderid = process.env.SENDER_ID;
         const entityid = process.env.ENTITY_ID;
         const tempid = process.env.TEMP_ID;
@@ -42,9 +35,14 @@ export async function generateOtpForMobile(req, res){
 
             const hashedOtp = await bcrypt.hash(otp, 10);
 
+            // Find or create user
+            let user = await UserModel.findOne({ phone: mobileNo });
+            if (!user) {
+                user = new UserModel({ phone: mobileNo });
+            }
+
             // Store hashed OTP and its expiration time
             user.otp = hashedOtp;
-
             user.otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
             await user.save();
 
@@ -62,17 +60,23 @@ export async function generateOtpForMobile(req, res){
 }
 
 
+/** GET: http://localhost:8080/api/verfiynumberotp/:otp
+ * User token
+ * @param{
+ *  "mobileNo": "8765445678"
+ * }
+ */
 export async function verifyOtp(req, res) {
     try {
-        const { userID } = req.user;
-        const { otp } = req.params;
+        const { mobileNo, otp } = req.body;
 
-        const user = await UserModel.findById(userID);
+        const user = await UserModel.findOne({ phone: mobileNo });
+
         if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
+            return res.status(400).json({ success: false, message: 'User not found' });
         }
 
-        if (user.otpExpires < Date.now()) {
+        if (user.otpExpires < new Date()) {
             return res.status(400).json({ success: false, message: 'OTP has expired' });
         }
 
@@ -81,7 +85,10 @@ export async function verifyOtp(req, res) {
             return res.status(400).json({ success: false, message: 'Invalid OTP' });
         }
 
-        // OTP is valid
+        user.otp = null;
+        user.otpExpires = null;
+        await user.save();
+
         res.status(200).json({ success: true, message: 'OTP verified successfully' });
 
     } catch (error) {
@@ -94,6 +101,12 @@ export async function verifyOtp(req, res) {
 }
 
 
+/** POST: http://localhost:8080/api/loginwithotp
+ * @body {
+ *  "mobileNo": "8765445678",
+ *  "otp": "876543",
+ * }
+ */
 export async function loginWithOtp(req, res){
     try {
         const { mobileNo, otp } = req.body;

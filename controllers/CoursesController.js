@@ -878,7 +878,7 @@ export async function lessonCompleted(req, res) {
         });
 	} catch (error) {
 		console.error(error)
-		res.status(500).json({ success: false, message: 'Error getting completed live classes: ' + error.message });
+		res.status(500).json({ success: false, message: 'Internal server error: ' + error.message });
 	}
 }
 
