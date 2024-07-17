@@ -10,7 +10,7 @@ export const InstructorSchema = new mongoose.Schema({
 	experience: { type: String },
 	experties: { type: String},
 	workExperience: { type: String},
-	noOfStudents: { type: Number },
+	noOfStudents: { type: Number, default: 0 },
 	noOfLessons: { type: Number },
 	social_links: [
 		{
