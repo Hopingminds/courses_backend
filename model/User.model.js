@@ -84,11 +84,9 @@ export const UserSchema = new mongoose.Schema({
     isProfileComplete: {type: Boolean, default: false},
     otp: {
         type: String,
-        required: true,
     },
     otpExpires: {
         type: Date,
-        required: true,
     },
     token: {type: String, default: null}
 });
