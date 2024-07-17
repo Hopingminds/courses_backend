@@ -223,22 +223,48 @@ export async function getUserCourseBySlug(req, res) {
 
 /** PUT: https://localhost:8080/api/updatecourse */
 export async function updateCourse(req, res) {
-	const body = req.body
-	try {
-		CoursesModel.updateOne({ _id: body._id }, body)
-			.exec()
-			.then(()=>{
-				return res
-					.status(200)
-					.json({ message: 'Course Updated Successfully!', success: true })
-			})
-			.catch((error)=>{
-				return res
-					.status(500)
-					.json({ message: 'Internal server error', success: false, error })
-			})
+	const { _id, curriculum, ...rest } = req.body;
+    const updateOps = {};
+
+    try {
+        // Process curriculum updates
+        if (curriculum && Array.isArray(curriculum)) {
+            curriculum.forEach((chapter, chapterIndex) => {
+                for (const [key, value] of Object.entries(chapter)) {
+                    if (key === 'lessons' && Array.isArray(value)) {
+                        value.forEach((lesson, lessonIndex) => {
+                            for (const [lessonKey, lessonValue] of Object.entries(lesson)) {
+                                updateOps[`curriculum.${chapterIndex}.lessons.${lessonIndex}.${lessonKey}`] = lessonValue;
+                            }
+                        });
+                    } else if (key === 'project' && Array.isArray(value)) {
+                        value.forEach((project, projectIndex) => {
+                            for (const [projectKey, projectValue] of Object.entries(project)) {
+                                updateOps[`curriculum.${chapterIndex}.project.${projectIndex}.${projectKey}`] = projectValue;
+                            }
+                        });
+                    } else if (key === 'liveClasses' && Array.isArray(value)) {
+                        value.forEach((liveClass, liveClassIndex) => {
+                            for (const [liveClassKey, liveClassValue] of Object.entries(liveClass)) {
+                                updateOps[`curriculum.${chapterIndex}.liveClasses.${liveClassIndex}.${liveClassKey}`] = liveClassValue;
+                            }
+                        });
+                    } else {
+                        updateOps[`curriculum.${chapterIndex}.${key}`] = value;
+                    }
+                }
+            });
+        }
+
+        // Add other fields to updateOps
+        for (const [key, value] of Object.entries(rest)) {
+            updateOps[key] = value;
+        }
+
+        await CoursesModel.updateOne({ _id }, { $set: updateOps }).exec();
+        return res.status(200).json({ message: 'Course Updated Successfully!', success: true });
 	} catch (error) {
-		
+		return res.status(500).json({ message: 'Internal server error', success: false, error })
 	}
 }
 

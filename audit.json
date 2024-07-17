@@ -1,0 +1,16 @@
+{
+    "keepSettings": {
+        "type": 2,
+        "amount": 10
+    },
+    "auditFilename": "audit.json",
+    "hashType": "md5",
+    "extension": "",
+    "files": [
+        {
+            "date": 1721103073191,
+            "name": "D:\\Course\\courses_backend\\logs\\limiter\\api-limiter-2024-07-16.log",
+            "hash": "71fa6aa1430ad86886caecd7a1d8a34d"
+        }
+    ]
+}

@@ -13,6 +13,7 @@ export const UserSchema = new mongoose.Schema({
     },
     phone: {
         type: Number,
+        unique: true,
     },
     name: { type: String},
     profile: { type: String},
@@ -81,6 +82,14 @@ export const UserSchema = new mongoose.Schema({
     },
     isCourseOpened: {type: Boolean, default: false},
     isProfileComplete: {type: Boolean, default: false},
+    otp: {
+        type: String,
+        required: true,
+    },
+    otpExpires: {
+        type: Date,
+        required: true,
+    },
     token: {type: String, default: null}
 });
 
