@@ -513,9 +513,14 @@ export async function addToCart(req, res) {
 		const existingCartIndex = cart.courses.findIndex((p) =>
 			p.course.equals(course._id)
 		)
-		if (existingCartIndex == -1) {
-			cart.courses.push({ course: courseid })
+		if (existingCartIndex !== -1) {
+			return res.status(400).json({
+				success: false,
+				msg: 'Course already exists in cart',
+			});
 		}
+
+		cart.courses.push({ course: courseid });
 
 		await cart.save()
 

@@ -8,12 +8,13 @@ import Auth from '../middleware/auth.js'
 import { apiLimiter } from '../middleware/access.limiter.js'
 
 // POST ROUTES
-router.route('/register').post(controller.register)
+router.route('/register').put(controller.register)
 router.route('/authenticate').post(Auth,(req,res)=>res.end())
 router.route('/login').post(controller.verifyUser,controller.login)
 router.route('/sendmobileotp').post(apiLimiter, OtpController.generateOtpForMobile)
 router.route("/verfiynumberotp").post(OtpController.verifyOtp)
 router.route("/loginwithotp").post(OtpController.loginWithOtp)
+router.route('/validatevalues').post(controller.validateFields)
 
 // GET ROUTES
 router.route('/user/:email').get(controller.getUser)
