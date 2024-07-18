@@ -34,6 +34,13 @@ export async function register(req, res) {
 	try {
 		const {password, name, profile, email, college, stream , yearofpass, phone, degree } = req.body
 
+		if(!email){
+			return res.status(400).send({error: "Email is required!"})
+		}
+		if(!password){
+			return res.status(400).send({error: "Password is required!"})
+		}
+
 		// check for existing email
 		const existEmail = new Promise((resolve, reject) => {
 			UserModel.findOne({ email })

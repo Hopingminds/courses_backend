@@ -10,7 +10,6 @@ const generateOtp = () => {
 };
 
 /** POST: http://localhost:8080/api/sendmobileotp
- * User token
  * @body {
  *  "mobileNo": "8765445678"
  * }
@@ -60,10 +59,10 @@ export async function generateOtpForMobile(req, res){
 }
 
 
-/** GET: http://localhost:8080/api/verfiynumberotp/:otp
- * User token
- * @param{
- *  "mobileNo": "8765445678"
+/** POST: http://localhost:8080/api/verfiynumberotp
+ * @body {
+ *  "mobileNo": "8765445678",
+ *  "otp": "876543",
  * }
  */
 export async function verifyOtp(req, res) {
