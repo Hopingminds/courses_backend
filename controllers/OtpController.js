@@ -150,3 +150,44 @@ export async function loginWithOtp(req, res){
         });
     }
 }
+
+// update the password when we have valid session
+/** PUT: http://localhost:8080/api/resetPasswordwithMobile
+ * body:{
+	mobileNo: "email@emaple.com",
+	newPassword: "password"
+	otp: "876543"
+}
+*/
+export async function resetPasswordWithMobile(req, res){
+    try {
+        if(!req.app.locals.resetSession) return res.status(440).send({error : "Session expired!"});
+
+        const {mobileNo, otp, newPassword } = req.body;
+
+        const user = await UserModel.findOne({ phone: mobileNo });
+        if (!user) {
+            return res.status(404).send({ error: 'User not Found' });
+        }
+        if (user.otpExpires < Date.now()) {
+            return res.status(400).json({ success: false, message: 'OTP has expired'})
+        }
+
+        const otpCheck = await bcrypt.compare(otp, user.otp);
+        if (!otpCheck) {
+            return res.status(400).send({ error: 'OTP does not match' });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+
+        // Clear OTP and expiration time
+        user.otp = undefined;
+        user.otpExpires = undefined;
+
+        await user.save();
+        res.status(200).json({ success: true, message: 'Password reset successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message || 'Internal server error' });
+    }
+}

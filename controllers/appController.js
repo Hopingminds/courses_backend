@@ -19,8 +19,8 @@ export async function verifyUser(req, res, next) {
 	}
 }
 
-/** POST: http://localhost:8080/api/register 
-* @param : {
+/** PUT: http://localhost:8080/api/register 
+* @body : {
 	"name": "Sahil Kumar"
 	"password" : "admin123",
     "email": "example@gmail.com",
@@ -57,67 +57,79 @@ export async function register(req, res) {
 				})
 		})
 
-		Promise.all([existEmail])
-			.then(() => {
-				if (password) {
-					bcrypt
-						.hash(password, 10)
-						.then((hashedPassword) => {
-							const user = new UserModel({
-								// username,
-								password: hashedPassword,
-								profile: profile || '',
-								email,
-								phone,
-								college, 
-								stream , 
-								degree,
-								name,
-								yearofpass
-							})
+		// Check for existing phone and associated email
+        const existPhone = new Promise((resolve, reject) => {
+            UserModel.findOne({ phone })
+                .exec()
+                .then((user) => {
+                    if (user && user.email && user.email !== email) {
+                        reject({ error: 'This phone number is already associated with another email!' });
+                    } else {
+                        resolve(user);
+                    }
+                })
+                .catch((err) => {
+                    reject(new Error(err));
+                });
+        });
 
-							// return save result as a response
-							user.save()
-								.then((user) =>{
-									const token = jwt.sign(
-										{
-											userID: user._id,
-											email: user.email,
-											role: user.role,
-										},
-										process.env.JWT_SECRET,
-										{ expiresIn: '7d' }
-									)
-									
-									UserModel.updateOne({ email:user.email }, { token })
-									.exec()
-									.then(()=>{
-										return res.status(201).send({
-											msg: 'User Register Successfully',
-											email: user.email,
-											role: user.role,
-											token,
-										})
-									})
-									.catch((error)=>{
-										return res.status(200).json({ success: false, message: 'Internal Server Error - Error Saving Token', error});
-									})
-								}
-								)
-								.catch((error) =>
-									res.status(500).send({ error })
-								)
-						})
-						.catch((error) => {
-							return res.status(500).send({
-								error: 'Enable to hashed password',
-							})
-						})
-				}
-			})
-			.catch((error) => {
-				return res.status(500).send({ error })
-			})
+		Promise.all([existEmail, existPhone])
+            .then(([_, user]) => {
+                bcrypt
+                    .hash(password, 10)
+                    .then((hashedPassword) => {
+                        const updateUser = {
+                            password: hashedPassword,
+                            profile: profile || '',
+                            email,
+                            college,
+                            stream,
+                            degree,
+                            name,
+                            yearofpass
+                        };
+
+                        UserModel.findOneAndUpdate(
+                            { phone },
+                            updateUser,
+                            { new: true, upsert: false } // upsert option creates the object if it doesn't exist
+                        )
+                        .then((user) => {
+                            const token = jwt.sign(
+                                {
+                                    userID: user._id,
+                                    email: user.email,
+                                    role: user.role,
+                                },
+                                process.env.JWT_SECRET,
+                                { expiresIn: '7d' }
+                            );
+
+                            UserModel.updateOne({ email: user.email }, { token })
+                                .exec()
+                                .then(() => {
+                                    return res.status(201).send({
+                                        msg: 'User Registered/Updated Successfully',
+                                        email: user.email,
+                                        role: user.role,
+                                        token,
+                                    });
+                                })
+                                .catch((error) => {
+                                    return res.status(500).json({ success: false, message: 'Internal Server Error - Error Saving Token', error });
+                                });
+                        })
+                        .catch((error) => res.status(400).send({error: "Verify the Mobile Number First!!"}));
+                    })
+                    .catch((error) => {
+                        return res.status(500).send({
+                            error: 'Unable to hash password',
+                        });
+                    });
+            })
+            .catch((error) => {
+                return res.status(500).send({ error });
+            });
 	} catch (error) {
 		return res.status(500).json({ success: false, message: 'Internal server error' });
 	}
