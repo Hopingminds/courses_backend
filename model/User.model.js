@@ -9,6 +9,7 @@ export const UserSchema = new mongoose.Schema({
     },
     phone: {
         type: Number,
+        unique: true,
     },
     name: { type: String},
     profile: { type: String},
