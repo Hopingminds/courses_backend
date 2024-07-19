@@ -3,15 +3,12 @@ import mongoose from "mongoose";
 export const UserSchema = new mongoose.Schema({
     password: {
         type: String,
-        unique : false,
     },
     email: {
         type: String,
-        unique: true,
     },
     phone: {
         type: Number,
-        unique: true,
     },
     name: { type: String},
     profile: { type: String},
