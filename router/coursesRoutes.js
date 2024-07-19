@@ -24,6 +24,7 @@ router.route('/search').get(CoursesController.courseSearch)
 router.route('/completedliveclasses').get(CoursesController.getCompletedLiveClasses)
 router.route('/getallorders').get(AdminAuth, CoursesController.getAllOrders)
 router.route('/getuserorders').get(Auth, CoursesController.getOrderByUser)
+router.route('/iscourseincart/:courseId').get(Auth, CoursesController.isCourseInCart)
 
 // PUT ROUTES
 router.route('/purchasecourse').put(Auth,CoursesController.purchasedCourse)

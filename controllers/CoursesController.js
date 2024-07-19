@@ -1151,3 +1151,27 @@ export async function getOrderByUser(req, res){
 		res.status(500).json({ success: false, message: 'Error getting completed live classes: ' + error.message });
 	}
 }
+
+/** GET: http://localhost:8080/api/iscourseincart/:courseId */
+export async function isCourseInCart(req, res) {
+	try {
+		const { courseId } = req.params;
+		const { userID } = req.user;
+
+		const cart = await cartModel.findOne({ _id: userID }).populate('courses.course'); 
+		
+		if (!cart) {
+			return res.json({ success: false });
+		}
+
+		const courseExists = cart.courses.some(item => item.course._id.toString() === courseId);
+
+		if (courseExists) {
+			return res.json({ success: true, message: 'Course exists in the cart' });
+		} else {
+			return res.json({ success: false, message: 'Course does not exist in the cart' });
+		}
+	} catch (error) {
+		res.status(500).json({ success: false, message: 'Internal server error' + error.message });
+	}
+}

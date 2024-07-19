@@ -21,14 +21,14 @@ export async function generateOtpForMobile(req, res){
         const key = process.env.OTP_KEY;
         const otp = generateOtp();
         const number = `${mobileNo}`;
-        const message = `Dear HMian,\n Your OTP for login to HopingMinds is ${otp}. OTP is Valid for 10 minutes. Please do not share this OTP.\n Regards,\nHopingMinds`;
+        const message = `Dear HMian, Your OTP for login to HopingMinds is ${otp}. OTP is Valid for 10 minutes. Please do not share this OTP. Regards,HopingMinds`;
         const senderid = process.env.SENDER_ID;
         const entityid = process.env.ENTITY_ID;
         const tempid = process.env.TEMP_ID;
         const accusage = 1;
 
         const url = `http://foxxsms.net/sms/submitsms.jsp?user=HMians&key=${key}&mobile=${number}&message=${message}&senderid=${senderid}&accusage=${accusage}&entityid=${entityid}&tempid=${tempid}`;
-
+        // console.log(url)
         try {
             const response = await axios.get(url);
 
