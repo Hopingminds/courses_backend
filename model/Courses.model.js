@@ -17,6 +17,7 @@ export const CoursesSchema = new mongoose.Schema({
     discount_percentage:{type: Number},
     rating:{type: Number},
     overview:{type: String},
+    courseStartDate: {type: Date, default: Date.now()},
     whatWillILearn:[
         {
             type: String
