@@ -3,6 +3,7 @@ import UserModel from '../model/User.model.js';
 import axios from 'axios';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken'
+import OtpModel from '../model/Otp.model.js';
 
 const generateOtp = () => {
     // Function to generate a random 6-digit OTP
@@ -35,15 +36,15 @@ export async function generateOtpForMobile(req, res){
             const hashedOtp = await bcrypt.hash(otp, 10);
 
             // Find or create user
-            let user = await UserModel.findOne({ phone: mobileNo });
-            if (!user) {
-                user = new UserModel({ phone: mobileNo });
+            let otpuser = await OtpModel.findOne({ phone: mobileNo });
+            if (!otpuser) {
+                otpuser = new OtpModel({ phone: mobileNo });
             }
 
             // Store hashed OTP and its expiration time
-            user.otp = hashedOtp;
-            user.otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
-            await user.save();
+            otpuser.otp = hashedOtp;
+            otpuser.otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+            await otpuser.save();
 
             res.status(200).json({ success: true, message: 'OTP sent successfully', data: response.data });
         } catch (error) {
@@ -69,24 +70,26 @@ export async function verifyOtp(req, res) {
     try {
         const { mobileNo, otp } = req.body;
 
-        const user = await UserModel.findOne({ phone: mobileNo });
+        const otpuser = await OtpModel.findOne({ phone: mobileNo });
 
-        if (!user) {
+        if (!otpuser) {
             return res.status(400).json({ success: false, message: 'User not found' });
         }
 
-        if (user.otpExpires < new Date()) {
+        if (otpuser.otpExpires < new Date()) {
             return res.status(400).json({ success: false, message: 'OTP has expired' });
         }
 
-        const isMatch = await bcrypt.compare(otp, user.otp);
+        const isMatch = await bcrypt.compare(otp, otpuser.otp);
         if (!isMatch) {
             return res.status(400).json({ success: false, message: 'Invalid OTP' });
         }
 
-        user.otp = null;
-        user.otpExpires = null;
-        await user.save();
+        otpuser.otp = null;
+        otpuser.otpExpires = null;
+        await otpuser.save();
+
+        await OtpModel.deleteOne({ phone: mobileNo });
 
         res.status(200).json({ success: true, message: 'OTP verified successfully' });
 
