@@ -77,12 +77,12 @@ export async function verifyOtp(req, res) {
         }
 
         if (otpuser.otpExpires < new Date()) {
-            return res.status(400).json({ success: false, message: 'OTP has expired' });
+            return res.status(400).json({ success: false, message: 'OTP has expired', expiredotp: true });
         }
 
         const isMatch = await bcrypt.compare(otp, otpuser.otp);
         if (!isMatch) {
-            return res.status(400).json({ success: false, message: 'Invalid OTP' });
+            return res.status(400).json({ success: false, message: 'Invalid OTP', validotp: false });
         }
 
         otpuser.otp = null;
