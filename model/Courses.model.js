@@ -37,9 +37,9 @@ export const CoursesSchema = new mongoose.Schema({
                     assignmentName: {type:  String},
                     isLiveClass: {type:Boolean, default:false},
                     liveClass:{
-                        startDate: {type: Date},
-                        endDate: {type: Date},
-                        meetingLink: {type: String},
+                        startDate: {type: Date, default: Date.now()},
+                        endDate: {type: Date, default: Date.now()},
+                        meetingLink: {type: String, default: ""},
                         isCompleted : {type: Boolean, default: false}
                     }
                 },
