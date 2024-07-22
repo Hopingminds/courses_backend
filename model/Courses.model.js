@@ -46,20 +46,11 @@ export const CoursesSchema = new mongoose.Schema({
             ],
             project:[
                 {
-                    lesson_name:{type: String},
-                    duration: {type: String},
-                    video: {type: String},
-                    notes: {type:  String},
-                    notesName: {type:  String},
-                    assignment: {type:  String},
-                    assignmentName: {type:  String},
-                    isLiveClass: {type:Boolean, default:false},
-                    liveClass:{
-                        startDate: {type: Date, default: Date.now()},
-                        endDate: {type: Date, default: Date.now()},
-                        meetingLink: {type: String, default: ""},
-                        isCompleted : {type: Boolean, default: false}
-                    }
+                    title: {type: String},
+                    startDate: {type: Date},
+                    endDate: {type: Date},
+                    projectInfoPdf: {type: String},
+                    duration: {type: Number},
                 }
             ],
             liveClasses:[
