@@ -21,7 +21,7 @@ let MailGenerator = new Mailgen({
     theme: 'default',
     product: {
         name: 'Hoping Minds',
-        link: 'https://hopingminds.in/',
+        link: 'https://hopingminds.com/',
     },
 });
 
