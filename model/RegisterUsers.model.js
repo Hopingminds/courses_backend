@@ -7,7 +7,6 @@ export const RegisterUserSchema = new mongoose.Schema({
     },
     phone: {
         type: Number,
-        unique: true,
     },
     name: { type: String},
     college: {type:String},
