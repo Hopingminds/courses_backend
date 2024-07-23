@@ -135,7 +135,7 @@ export async function uploaduserprofiletoaws(req, res) {
             return res.status(200).json({ success: true, message: 'User profile updated successfully.', url: req.file.location });
         })
         .catch((error)=>{
-            return res.status(200).json({ success: false, message: 'Internal Server Error', error});
+            return res.status(200).json({ success: false, message: 'Internal Server Error!', error});
         })
     } else {
         return res.status(200).json({ success: false, message: 'Internal Server Error -  AWS'});
