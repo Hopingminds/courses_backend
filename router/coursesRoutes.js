@@ -28,6 +28,7 @@ router.route('/getallorders').get(AdminAuth, CoursesController.getAllOrders)
 router.route('/getuserorders').get(Auth, CoursesController.getOrderByUser)
 router.route('/iscourseincart/:courseId').get(Auth, CoursesController.isCourseInCart)
 router.route('/getallpromocode').get(Auth, PromoCodeController.getAllPromos)
+router.route('/getallpromocodeadmin').get(AdminAuth, PromoCodeController.getAllPromos)
 router.route('/ispromocodevalid/:promoCode').get(Auth, PromoCodeController.isPromoValid)
 
 // PUT ROUTES
