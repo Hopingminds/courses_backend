@@ -1,10 +1,6 @@
 import mongoose from "mongoose";
 
 export const RegisterUserSchema = new mongoose.Schema({
-    password: {
-        type: String,
-        unique : false,
-    },
     email: {
         type: String,
         unique: true,
