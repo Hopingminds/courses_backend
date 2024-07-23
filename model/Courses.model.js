@@ -6,7 +6,7 @@ export const CoursesSchema = new mongoose.Schema({
     slug:{type: String},
     featured_image:{type: String},
     featured_video:{type: String},
-    duration: {type: String},
+    duration: {type: Number, default:0},
     enrollments: {type: Number},
     level: {type: String, default: "Beginner"},
     total_lessons: {type: Number},
