@@ -118,15 +118,15 @@ export async function isPromoValid(req, res){
 		// Validate promo code
 		const currentDate = new Date();
 		if (promo.validTill < currentDate) {
-			return res.status(400).json({ success: false, message: 'Promo code has expired' });
+			return res.status(400).json({ success: false, message: 'Promo code has expired', expired: true });
 		}
 
 		if (promo.forCollege && promo.forCollege !== user.college) {
-			return res.status(400).json({ success: false, message: 'Promo code not valid for your college' });
+			return res.status(400).json({ success: false, message: 'Promo code not valid for your college', validForCollege: false });
 		}
 
 		if (promo.quantity <= 0) {
-			return res.status(400).json({ success: false, message: 'Promo code quantity exceeded' });
+			return res.status(400).json({ success: false, message: 'Promo code quantity exceeded', quantityExceeded: false });
 		}
 
 		// If all validations pass
