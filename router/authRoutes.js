@@ -4,7 +4,7 @@ const router = Router()
 
 
 const constructRedirectUrl = (baseUrl, redirect) => {
-    return redirect ? `${baseUrl}?redirect=${redirect}` : baseUrl;
+    return redirect ? `${baseUrl}${redirect}` : baseUrl;
 };
 
 router.get("/login/success", (req, res) => {
