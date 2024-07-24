@@ -3,6 +3,10 @@ import {Router} from 'express'
 const router = Router()
 
 
+const constructRedirectUrl = (baseUrl, redirect) => {
+    return redirect ? `${baseUrl}?redirect=${redirect}` : baseUrl;
+};
+
 router.get("/login/success", (req, res) => {
 	if (req.user) {
 		res.status(200).json({
@@ -22,24 +26,41 @@ router.get("/login/failed", (req, res) => {
 	});
 });
 
-router.get("/google", passport.authenticate("google", {scope:["profile","email"]}));
+router.get("/google", (req, res, next) => {
+    const redirect = req.query.redirect;
+    passport.authenticate("google", {
+        scope: ["profile", "email"],
+        state: redirect
+    })(req, res, next);
+});
 
 router.get(
     "/google/callback",
-	passport.authenticate("google", {
-        successRedirect: process.env.CLIENT_BASE_URL,
-		failureRedirect: "/auth/login/failed",
-	})
+    passport.authenticate("google", {
+        failureRedirect: "/auth/login/failed",
+    }),
+    (req, res) => {
+        const redirectUrl = req.query.state;
+        res.redirect(constructRedirectUrl(process.env.CLIENT_BASE_URL, redirectUrl));
+    }
 );
 
-router.get("/linkedin", passport.authenticate("linkedin"));
+router.get("/linkedin", (req, res, next) => {
+    const redirect = req.query.redirect;
+    passport.authenticate("linkedin", {
+        state: redirect
+    })(req, res, next);
+});
 
 router.get(
     "/linkedin/callback",
-	passport.authenticate("linkedin", {
-        successRedirect: process.env.CLIENT_BASE_URL,
-		failureRedirect: "/auth/login/failed",
-	})
+    passport.authenticate("linkedin", {
+        failureRedirect: "/auth/login/failed",
+    }),
+    (req, res) => {
+        const redirectUrl = req.query.state;
+        res.redirect(constructRedirectUrl(process.env.CLIENT_BASE_URL, redirectUrl));
+    }
 );
 
 
