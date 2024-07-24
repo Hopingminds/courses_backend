@@ -106,13 +106,13 @@ export async function isPromoValid(req, res){
 		// Fetch user details
 		const user = await UserModel.findById(userID);
 		if (!user) {
-			return res.status(404).json({ success: false, message: 'User not found' });
+			return res.status(404).json({ success: false, message: 'User not found', userNotFound: true });
 		}
 
 		// Fetch promo code details
 		const promo = await PromoModel.findOne({ promocode: promoCode });
 		if (!promo) {
-			return res.status(404).json({ success: false, message: 'Promo code not found' });
+			return res.status(404).json({ success: false, message: 'Promo code not found', promoNotFound: true });
 		}
 
 		// Validate promo code
