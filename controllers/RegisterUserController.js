@@ -12,19 +12,23 @@ export async function registerUserforHm(req, res){
         // Check if email already exists
         const existingRegisterUser = await RegisterUsersModel.findOne({ email });
         if (existingRegisterUser) {
-            return res.status(400).send({ success: false, message: 'Email already in use' });
+            return res.status(400).send({ success: false, message: 'Email already in use', emailExists: true });
         }
 
-        
+        const existingRegisterUserPhone = await RegisterUsersModel.findOne({ phone });
+        if (existingRegisterUserPhone) {
+            return res.status(400).send({ success: false, message: 'Phone already in use', phoneExists: true });
+        }
+
         // Check if seats are available for the course
         const courseForDegree = await CoursesForDegreeModel.findOne({ course: courseId });
         if (!courseForDegree || courseForDegree.seats <= 0) {
-            return res.status(400).send({ success: false, message: 'No seats available for this course' });
+            return res.status(400).send({ success: false, message: 'No seats available for this course', noSeats: true });
         }
         
         const existingUser = await UserModel.findOne({ email });
         if (existingUser) {
-            return res.status(400).send({ success: false, message: 'Email already in use in Hoping Minds' });
+            return res.status(400).send({ success: false, message: 'Email already in use in Hoping Minds', registerdinHM: true });
         }
 
         const generatedPassword = Math.random().toString(36).slice(-8); 
