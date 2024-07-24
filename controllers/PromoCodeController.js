@@ -106,27 +106,27 @@ export async function isPromoValid(req, res){
 		// Fetch user details
 		const user = await UserModel.findById(userID);
 		if (!user) {
-			return res.status(404).json({ success: false, message: 'User not found' });
+			return res.status(404).json({ success: false, message: 'User not found', userNotFound: true });
 		}
 
 		// Fetch promo code details
 		const promo = await PromoModel.findOne({ promocode: promoCode });
 		if (!promo) {
-			return res.status(404).json({ success: false, message: 'Promo code not found' });
+			return res.status(404).json({ success: false, message: 'Promo code not found', promoNotFound: true });
 		}
 
 		// Validate promo code
 		const currentDate = new Date();
 		if (promo.validTill < currentDate) {
-			return res.status(400).json({ success: false, message: 'Promo code has expired' });
+			return res.status(400).json({ success: false, message: 'Promo code has expired', expired: true });
 		}
 
 		if (promo.forCollege && promo.forCollege !== user.college) {
-			return res.status(400).json({ success: false, message: 'Promo code not valid for your college' });
+			return res.status(400).json({ success: false, message: 'Promo code not valid for your college', validForCollege: false });
 		}
 
 		if (promo.quantity <= 0) {
-			return res.status(400).json({ success: false, message: 'Promo code quantity exceeded' });
+			return res.status(400).json({ success: false, message: 'Promo code quantity exceeded', quantityExceeded: false });
 		}
 
 		// If all validations pass

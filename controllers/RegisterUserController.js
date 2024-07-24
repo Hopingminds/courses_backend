@@ -1,3 +1,4 @@
+import UserModel from '../model/User.model.js'
 import bcrypt from 'bcrypt'
 import RegisterUsersModel from '../model/RegisterUsers.model.js';
 import { registerMail } from './mailer.js';
@@ -6,13 +7,41 @@ import CoursesForDegreeModel from '../model/CoursesForDegree.model.js';
 
 export async function registerUserforHm(req, res){
     try {
-        const { password, email, phone, name, college, degree, courseId } = req.body;
+        const { email, phone, name, college, degree, courseId } = req.body;
 
         // Check if email already exists
-        const existingUser = await RegisterUsersModel.findOne({ email });
-        if (existingUser) {
+        const existingRegisterUser = await RegisterUsersModel.findOne({ email });
+        if (existingRegisterUser) {
             return res.status(400).send({ success: false, message: 'Email already in use' });
         }
+
+        
+        // Check if seats are available for the course
+        const courseForDegree = await CoursesForDegreeModel.findOne({ course: courseId });
+        if (!courseForDegree || courseForDegree.seats <= 0) {
+            return res.status(400).send({ success: false, message: 'No seats available for this course' });
+        }
+        
+        const existingUser = await UserModel.findOne({ email });
+        if (existingUser) {
+            return res.status(400).send({ success: false, message: 'Email already in use in Hoping Minds' });
+        }
+
+        const generatedPassword = Math.random().toString(36).slice(-8); 
+        
+        console.log(generatedPassword);
+
+        const hashedPassword = await bcrypt.hash(generatedPassword, 10);
+        
+        const user = new UserModel({
+            email,
+            password: hashedPassword,
+            name,
+            phone,
+            college,
+            degree,
+        })
+        
 
         const newUser = new RegisterUsersModel({
             email,
@@ -37,6 +66,9 @@ export async function registerUserforHm(req, res){
                     I hope this message finds you well! I'm thrilled to see your interest in our ${course.title} course. By taking this step, you're not only investing in your education but also moving closer to assured placement opportunities.</br></br>
                     To help you get started, please find below the link to our course site where you can explore more details about the curriculum, instructors, and the benefits of joining our program:</br></br>
                     https://hopingminds.com/detailcourse/${course.slug}</br></br>
+                    Login with:</br></br>
+                    Email: ${email}</br></br>
+                    Password: ${generatedPassword}</br></br>
                     Feel free to explore the information available, and if you have any questions or need further assistance, please don't hesitate to reach out. We're here to support you every step of the way.</br></br>
                     Congratulations again on taking this important step towards your future success in ${course.title}. We look forward to welcoming you to our community and helping you achieve your career goals.</br></br>
                     Best regards,</br></br>
@@ -56,6 +88,14 @@ export async function registerUserforHm(req, res){
 
         if (mailSent) {
             const savedUser = await newUser.save();
+
+            await user.save();
+
+            await CoursesForDegreeModel.findOneAndUpdate(
+                { course: courseId },
+                { $inc: { seats: -1 } }
+            );
+
             return res.status(201).send({ success: true, message: 'User registered successfully', data: savedUser });
         } else {
             return res.status(500).send({ success: false, message: 'Failed to send registration email' });
