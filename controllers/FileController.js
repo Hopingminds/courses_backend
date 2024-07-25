@@ -106,5 +106,5 @@ export async function acceptCourse(req, res) {
     let { email } = req.params
     await UserModel.findOneAndUpdate(
         { email }, { isCourseOpened:true })
-    res.redirect(`${process.env.CLIENT_BASE_URL}/login`);
+    res.redirect(`${process.env.CLIENT_BASE_URL}/login-2`);
 }
