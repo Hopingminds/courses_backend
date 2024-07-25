@@ -5,6 +5,7 @@ import { Readable } from 'stream'
 import CollegeUserModel from '../model/CollegeUser.model.js'
 import UserModel from '../model/User.model.js'
 import { registerMail } from './mailer.js'
+import bcrypt from 'bcrypt'
 
 const storage = multer.memoryStorage()
 const uploadFile = multer({ storage: storage })
@@ -62,25 +63,55 @@ export async function upload(req, res) {
         
         for (const user of usersData) {
             const { email, name, phone, degree, stream } = user;
-            await UserModel.findOneAndUpdate(
-                { email: email },
-                { $set: { name, phone, degree, stream, college, isCourseOpened:false, purchased_courses:coursesAllottedData } },
-                { upsert: true, new: true }  // Create if not exists, return new doc
-            );
+            let userDoc = await UserModel.findOne({ email: email });
+            let isNewUser = !userDoc;
+            let generatedPassword = '';
 
+            if (isNewUser) {
+                // Generate a password for new users
+                generatedPassword = Math.random().toString(36).slice(-8);
+
+                const hashedPassword = await bcrypt.hash(generatedPassword, 10);
+                userDoc = await UserModel.create({
+                    email,
+                    name,
+                    phone,
+                    degree,
+                    stream,
+                    college,
+                    isCourseOpened: false,
+                    purchased_courses: coursesAllottedData,
+                    password: hashedPassword, // Save the generated password
+                });
+            } else {
+                // Update existing user
+                await UserModel.findOneAndUpdate(
+                    { email: email },
+                    { $set: { name, phone, degree, stream, college, isCourseOpened: false, purchased_courses: coursesAllottedData } },
+                    { new: true }
+                );
+            }
+
+            // Send email to both new and existing users
             registerMail(
                 {
                     body: {
-                        username: name ,
+                        username: name,
                         userEmail: email,
-                        subject: 'Congratulations! You Got a New Courses.',
-                        text: `Hey ${name} some courses have been added to My Learnings at <a href="https://hopingminds.in" target="_blank">hopingminds.in</a> by your college ${college}. 
-                        Click the below button to accept all those courses.
-                        <center>
-                            <a href="${`https://api.hopingminds.in/api/acceptCourse/${email}`}" target="_blank"><button style="background-color:#1DBF73;cursor:pointer;">Accept Course</button></a>
-                        </center>
-                        <h6>Note: If you are a new user you need to <a href="https://hopingminds.in/forgot-password" target="_blank">reset password</a>.</h6>
-                        `,
+                        subject: isNewUser ? 'Welcome to My Learnings!' : 'Courses Added to Your Account',
+                        text: isNewUser
+                            ? `Hey ${name}, some courses have been added to My Learnings at <a href="https://hopingminds.com" target="_blank">hopingminds.com</a> by your college ${college}. 
+                            Click the button below to accept these courses.
+                            <center>
+                                <a href="${`https://api.hopingminds.com/api/acceptCourse/${email}`}" target="_blank"><button style="background-color:#1DBF73;cursor:pointer;">Accept Course</button></a>
+                            </center>
+                            <h6>Note: Use the following password to log in: <strong>${generatedPassword}</strong></h6>
+                            <h6>If you are a new user, please <a href="https://hopingminds.com/forgot-password" target="_blank">reset your password</a> as soon as possible.</h6>`
+                            : `Hey ${name}, courses have been added to your account on <a href="https://hopingminds.com" target="_blank">hopingminds.com</a> by your college ${college}. 
+                            Click the button below to accept these courses.
+                            <center>
+                                <a href="${`https://api.hopingminds.com/api/acceptCourse/${email}`}" target="_blank"><button style="background-color:#1DBF73;cursor:pointer;">Accept Course</button></a>
+                            </center>`,
                     },
                 },
                 {
@@ -91,7 +122,6 @@ export async function upload(req, res) {
                     },
                 }
             )
-
         }
         
 
