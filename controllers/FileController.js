@@ -67,7 +67,7 @@ export async function upload(req, res) {
         let duplicateEmails = []; // To collect duplicate email errors
         let duplicatePhones = []; // To collect duplicate phone errors
         let validUsersProcessed = 0; // Counter for valid users processed
-
+        let newUsers = 0;
 
         for (const user of usersData) {
             const { email, name, phone, degree, stream } = user;
@@ -110,6 +110,7 @@ export async function upload(req, res) {
             if (isNewUser) {
                 // Generate a password for new users
                 generatedPassword = Math.random().toString(36).slice(-8);
+                newUsers++;
 
                 const hashedPassword = await bcrypt.hash(generatedPassword, 10);
                 userDoc = await UserModel.create({
@@ -189,7 +190,7 @@ export async function upload(req, res) {
             validUsersProcessed++;
         }
 
-        await CollegeUserModel.findByIdAndUpdate(collegeUserID, { used_coins: used_coins + validUsersProcessed});
+        await CollegeUserModel.findByIdAndUpdate(collegeUserID, { used_coins: used_coins + newUsers});
 
         // Return response with errors and summary of valid users processed
         if (emailErrors.length > 0 || phoneErrors.length > 0 || duplicateEmails.length > 0 || duplicatePhones.length > 0) {
