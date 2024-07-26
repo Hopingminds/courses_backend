@@ -180,85 +180,21 @@ export async function getCourseBySlug(req, res) {
 
 export async function getUserCourseBySlug(req, res) {
 	function getCourseDataBySlug(data, slug) {
-        if (!data || !data.purchased_courses) {
-            console.error('Data or purchased_courses is undefined');
-            return null;
-        }
-
-        for (let course of data.purchased_courses) {
-            if (!course || !course.course) {
-                console.error('Course or course.course is undefined');
-                continue;
-            }
-
-            if (course.course.slug === slug) {
-                if (!course.course.curriculum) {
-                    console.error('Curriculum is undefined');
-                    return null;
-                }
-
-                const formatLesson = (lesson, isFullData) => ({
-                    lesson_name: lesson.lesson_name,
-                    duration: lesson.duration,
-                    video: isFullData ? lesson.video : undefined,
-                    notes: isFullData ? lesson.notes : undefined,
-                    assignment: isFullData ? lesson.assignment : undefined,
-                    assignmentName: isFullData ? lesson.assignmentName : undefined,
-                    isLiveClass: isFullData ? lesson.isLiveClass : undefined,
-                    liveClass: isFullData ? lesson.liveClass : undefined
-                });
-
-                const formatChapter = (chapter, isFullDataForFirstTwoLessons) => {
-                    const [firstTwoLessons, remainingLessons] = [
-                        chapter.lessons.slice(0, 2),
-                        chapter.lessons.slice(2)
-                    ];
-
-                    return {
-                        chapter_name: chapter.chapter_name,
-                        lessons: [
-                            ...firstTwoLessons.map(lesson => formatLesson(lesson, isFullDataForFirstTwoLessons)),
-                            ...remainingLessons.map(lesson => formatLesson(lesson, false))
-                        ],
-                        project: chapter.project.map(project => ({
-                            title: project.title,
-                            startDate: project.startDate,
-                            endDate: project.endDate,
-                            projectInfoPdf: project.projectInfoPdf, // Limiting data for projectInfoPdf
-                            duration: project.duration
-                        })),
-                        liveClasses: chapter.liveClasses.map(liveClass => ({
-                            topic: liveClass.topic,
-                            startDate: liveClass.startDate,
-                            endDate: liveClass.endDate,
-                            meetingLink: liveClass.meetingLink, // Limiting data for meetingLink
-                            duration: liveClass.duration,
-                            isCompleted: liveClass.isCompleted
-                        }))
-                    };
-                };
-
-                // Determine if the first chapter exists
-                const firstChapter = course.course.curriculum[0];
-                const isFirstChapterWithFullDataForTwoLessons = firstChapter ? true : false;
-
-                // Format all chapters
-                const formattedChapters = course.course.curriculum.map((chapter, index) =>
-                    formatChapter(chapter, index === 0 && isFirstChapterWithFullDataForTwoLessons)
-                );
-
-                return {
-                    course: {
-                        ...course.course.toObject(),
-                        curriculum: formattedChapters
-                    },
-                    completed_lessons: course.completed_lessons,
-                    completed_assignments: course.completed_assignments,
-                };
-            }
-        }
-        return null;
-    }
+		// Loop through the purchased_courses array
+		for (let course of data.purchased_courses) {
+			// Check if the course slug matches the one we're looking for
+			if (course.course.slug === slug) {
+				// Return the matching course data
+				return {
+					course: course.course,
+					completed_lessons: course.completed_lessons,
+					completed_assignments: course.completed_assignments,
+				}
+			}
+		}
+		// If no course matches, return null or an appropriate message
+		return null
+	}
 
 	try {
 		const { email } = req.params
