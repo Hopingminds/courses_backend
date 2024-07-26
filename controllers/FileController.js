@@ -60,8 +60,6 @@ export async function upload(req, res) {
             return res.status(500).send({success: false, msg: `Not Enough Coins left to Upload ${usersData.length} users!`})
         }
 
-        await CollegeUserModel.findByIdAndUpdate(collegeUserID, { used_coins: used_coins+usersData.length});
-        
         let processedEmails = new Set(); // To track processed emails
         let processedPhones = new Set(); // To track processed phone numbers
         let emailErrors = []; // To collect email errors
@@ -191,11 +189,14 @@ export async function upload(req, res) {
             validUsersProcessed++;
         }
 
+        await CollegeUserModel.findByIdAndUpdate(collegeUserID, { used_coins: used_coins + validUsersProcessed});
+
         // Return response with errors and summary of valid users processed
         if (emailErrors.length > 0 || phoneErrors.length > 0 || duplicateEmails.length > 0 || duplicatePhones.length > 0) {
             return res.status(400).send({ 
                 success: false, 
-                msg: "Some users have invalid data or duplicates", 
+                msg: `Some users have invalid data or duplicates! (${validUsersProcessed} valid users processed)`, 
+                validationError: true,
                 emailErrors, 
                 phoneErrors, 
                 duplicateEmails, 
