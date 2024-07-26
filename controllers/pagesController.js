@@ -35,8 +35,19 @@ export async function addCareerForm(req, res) {
 export async function hideFromUsForm(req, res) {
     try {
         const body = req.body
-        
-        let hire = new HirefromusModel(body)
+
+        const { email, phone } = req.body;
+		const useremail = await HirefromusModel.findOne({ email });
+		if (useremail) {
+			return res.status(400).json({ success: false, message: 'Email already exists'});
+		}
+
+		const userphone = await HirefromusModel.findOne({ phone });
+		if (userphone) {
+			return res.status(400).json({ success: false, message: 'Phone Number already exists'});
+		}
+		
+		let hire = new HirefromusModel(body)
         await hire.save()
         
         return res.status(200).json({ success: true, message: 'Record Saved Successfully!'});
