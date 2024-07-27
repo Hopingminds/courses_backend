@@ -22,7 +22,14 @@ export const OrdersSchema = new mongoose.Schema({
     state: { type: String },
     gstNumber: {type:  String},
     payemntData: {type: Object},
-    courses: {type: Object},
+    courses: [
+        {
+            course:{
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Courses'
+            }
+        }
+    ],
     transactionAmount: {type: Number},
     basePrice: {type: Number},
     discountedAmount: {type: Number},
