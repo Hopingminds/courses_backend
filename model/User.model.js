@@ -87,6 +87,6 @@ export const UserSchema = new mongoose.Schema({
         type: Date,
     },
     token: {type: String, default: null}
-});
+}, { timestamps: true });
 
 export default mongoose.model.Users || mongoose.model('User', UserSchema);

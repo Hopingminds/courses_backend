@@ -25,5 +25,6 @@ router.route('/resetadminPassword').put(adminController.verifyAdmin, adminContro
 router.route('/updateaccess').put(AccessRouteController.updateAccessRoute)
 
 // DELETE ROUTES
+router.route('/deletehmuser').delete(AdminAuth, adminController.deleteHMUser)
 
 export default router

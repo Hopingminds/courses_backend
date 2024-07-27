@@ -392,3 +392,29 @@ export async function getDashboardData(req, res) {
 		return res.status(401).send({ success: false, msg:'Internal Server Error', error })
 	}
 }
+
+/** DELETE: http://localhost:8080/api/deletehmuser
+ * @param: {
+    	"header" : "Admin <token>"
+	}
+	@body { 
+    	"email": "example@gmail.com",
+	}
+ */
+export async function deleteHMUser(req, res) {
+	try {
+		const { email } = req.body;
+
+		const user = await UserModel.findOne({ email });
+
+		if (!user) {
+			return res.status(404).send({ success: false, msg: 'User not found'	});
+		}
+
+		await user.deleteOne();
+
+		return res.status(200).send({ success: true, msg: 'User deleted successfully'});
+	} catch (error) {
+		return res.status(500).send({ success: false, msg:'Internal Server Error', error });
+	}
+}
