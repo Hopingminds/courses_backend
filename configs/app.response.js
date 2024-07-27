@@ -29,6 +29,7 @@ export const successResponse = (resultCode, title, message, data, maintenance) =
 export const errorResponse = (resultCode, title, error, maintenance) => ({
   result_code: resultCode,
   time: currentDateTime(),
+  message: title,
   maintenance_info: maintenance || null,
   result: {
     title, error
