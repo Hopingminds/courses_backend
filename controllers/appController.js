@@ -167,7 +167,7 @@ export async function login(req, res) {
 					})
 			})
 			.catch((error) => {
-				return res.status(404).send({ error: 'Email not Found' })
+				return res.status(401).send({ error: 'Email not Found' })
 			})
 	} catch (error) {
 		return res.status(500).send(error)

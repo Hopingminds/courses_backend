@@ -33,20 +33,25 @@ export async function generateOtpForMobile(req, res){
         try {
             const response = await axios.get(url);
 
-            const hashedOtp = await bcrypt.hash(otp, 10);
+            // Check if the response indicates success (adjust based on actual API response)
+            if (response.data.includes('success')) { // Example check
+                const hashedOtp = await bcrypt.hash(otp, 10);
 
-            // Find or create user
-            let otpuser = await OtpModel.findOne({ phone: mobileNo });
-            if (!otpuser) {
-                otpuser = new OtpModel({ phone: mobileNo });
+                // Find or create user
+                let otpuser = await OtpModel.findOne({ phone: mobileNo });
+                if (!otpuser) {
+                    otpuser = new OtpModel({ phone: mobileNo });
+                }
+
+                // Store hashed OTP and its expiration time
+                otpuser.otp = hashedOtp;
+                otpuser.otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+                await otpuser.save();
+
+                return res.status(200).json({ success: true, message: 'OTP sent successfully' });
+            } else {
+                return res.status(500).json({ success: false, message: 'Invalid mobile number' });
             }
-
-            // Store hashed OTP and its expiration time
-            otpuser.otp = hashedOtp;
-            otpuser.otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
-            await otpuser.save();
-
-            res.status(200).json({ success: true, message: 'OTP sent successfully', data: response.data });
         } catch (error) {
             res.status(500).json({ success: false, message: 'Failed to send OTP', error: error.message });
         }
