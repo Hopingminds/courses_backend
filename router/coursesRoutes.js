@@ -30,6 +30,7 @@ router.route('/iscourseincart/:courseId').get(Auth, CoursesController.isCourseIn
 router.route('/getallpromocode').get(Auth, PromoCodeController.getAllPromos)
 router.route('/getallpromocodeadmin').get(AdminAuth, PromoCodeController.getAllPromos)
 router.route('/ispromocodevalid/:promoCode').get(Auth, PromoCodeController.isPromoValid)
+router.route('/iscourseinwishlist/:courseId').get(Auth, CoursesController.isCourseInWishlist)
 
 // PUT ROUTES
 router.route('/purchasecourse').put(Auth,CoursesController.purchasedCourse)

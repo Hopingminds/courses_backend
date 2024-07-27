@@ -1175,3 +1175,27 @@ export async function isCourseInCart(req, res) {
 		res.status(500).json({ success: false, message: 'Internal server error' + error.message });
 	}
 }
+
+/** GET: http://localhost:8080/api/iscourseinwishlist/:courseId */
+export async function isCourseInWishlist(req, res) {
+	try {
+		const { courseId } = req.params;
+		const { userID } = req.user;
+
+		const wishlist = await wishlistModel.findOne({ _id: userID }).populate('courses.course'); 
+		
+		if (!wishlist) {
+			return res.json({ success: false });
+		}
+
+		const courseExists = wishlist.courses.some(item => item.course._id.toString() === courseId);
+
+		if (courseExists) {
+			return res.json({ success: true, message: 'Course exists in the wishlist' });
+		} else {
+			return res.json({ success: false, message: 'Course does not exist in the wishlist' });
+		}
+	} catch (error) {
+		res.status(500).json({ success: false, message: 'Internal server error' + error.message });
+	}
+}
