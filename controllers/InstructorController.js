@@ -470,7 +470,7 @@ export async function getUpcomingLiveClasses(req, res) {
                             title: course.title,
                             courseID: course._id,
                             chapter_name: chapter.chapter_name,
-                            ...lesson.liveClass.toObject(),
+                            ...lesson.toObject(),
                         });
                     }
                 });
@@ -504,7 +504,7 @@ export async function completedClasses(req, res) {
 							title: course.title,
                             courseID: course._id,
                             chapter_name: chapter.chapter_name,
-                            ...lesson.liveClass.toObject(),
+                            ...lesson.toObject(),
                         });
                     }
                 });
