@@ -465,7 +465,7 @@ export async function getUpcomingLiveClasses(req, res) {
         courses.forEach(course => {
             course.curriculum.forEach(chapter => {
                 chapter.lessons.forEach(lesson => {
-                    if (!lesson.isLiveClass && new Date(lesson.liveClass.startDate) > new Date()) {
+                    if (lesson.isLiveClass && new Date(lesson.liveClass.startDate) > new Date()) {
                         upcomingLiveClasses.push({
                             title: course.title,
                             courseID: course._id,
@@ -499,7 +499,7 @@ export async function completedClasses(req, res) {
         courses.forEach(course => {
             course.curriculum.forEach(chapter => {
                 chapter.lessons.forEach(lesson => {
-                    if (!lesson.isLiveClass && new Date(lesson.liveClass.startDate) < new Date()) {
+                    if (lesson.isLiveClass && new Date(lesson.liveClass.startDate) < new Date()) {
                         completedLiveClasses .push({
 							title: course.title,
                             courseID: course._id,
