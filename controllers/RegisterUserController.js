@@ -165,3 +165,34 @@ export const addCoursesForDegrees = async (req, res) => {
         res.status(500).json({ message: "Failed to add courses for degrees" });
     }
 };
+
+export async function validateUser(req, res){
+    try {
+        const { email, phone } = req.body;
+
+        // Check if email already exists
+        const existingRegisterUser = await RegisterUsersModel.findOne({ email });
+        if (existingRegisterUser) {
+            return res.status(400).send({ success: false, message: 'Email already in use', emailExists: true });
+        }
+        
+        const existingUser = await UserModel.findOne({ email });
+        if (existingUser) {
+            return res.status(400).send({ success: false, message: 'Email already in use in Hoping Minds', registerdEmailinHM: true });
+        }
+
+        const existingRegisterUserPhone = await RegisterUsersModel.findOne({ phone });
+        if (existingRegisterUserPhone) {
+            return res.status(400).send({ success: false, message: 'Phone already in use', phoneExists: true });
+        }
+        
+        const existingUserPhone = await UserModel.findOne({ phone });
+        if (existingUserPhone) {
+            return res.status(400).send({ success: false, message: 'Phone already in use in Hoping Minds', registerdPhoneinHM: true });
+        }
+
+        return res.status(200).send({ success: true, message: 'Continue registration' });
+    } catch (error) {
+        return res.status(501).send({ success: false, message:'Internal Server Error', error })
+    }
+}
