@@ -4,6 +4,7 @@ import RegisterUsersModel from '../model/RegisterUsers.model.js';
 import { registerMail } from './mailer.js';
 import CoursesModel from '../model/Courses.model.js';
 import CoursesForDegreeModel from '../model/CoursesForDegree.model.js';
+import CourseByCategoriesModel from '../model/CourseByCategories.model.js';
 
 export async function registerUserforHm(req, res){
     try {
@@ -168,30 +169,50 @@ export const addCoursesForDegrees = async (req, res) => {
 
 export async function validateUser(req, res){
     try {
-        const { email, phone } = req.body;
+        const { email, phone } = req.query;
 
         // Check if email already exists
         const existingRegisterUser = await RegisterUsersModel.findOne({ email });
         if (existingRegisterUser) {
             return res.status(400).send({ success: false, message: 'Email already in use', emailExists: true });
         }
-        
-        const existingUser = await UserModel.findOne({ email });
-        if (existingUser) {
-            return res.status(400).send({ success: false, message: 'Email already in use in Hoping Minds', registerdEmailinHM: true });
-        }
 
         const existingRegisterUserPhone = await RegisterUsersModel.findOne({ phone });
         if (existingRegisterUserPhone) {
             return res.status(400).send({ success: false, message: 'Phone already in use', phoneExists: true });
         }
-        
-        const existingUserPhone = await UserModel.findOne({ phone });
-        if (existingUserPhone) {
-            return res.status(400).send({ success: false, message: 'Phone already in use in Hoping Minds', registerdPhoneinHM: true });
-        }
 
         return res.status(200).send({ success: true, message: 'Continue registration' });
+    } catch (error) {
+        return res.status(501).send({ success: false, message:'Internal Server Error', error })
+    }
+}
+
+export async function createCoursesByCategorie(req, res){
+    try {
+        const categoryData = req.body;
+
+        let course = new CourseByCategoriesModel(categoryData);
+        await course.save();
+
+        res.status(201).json({
+			success: true,
+			msg: 'Course added successfully for category',
+		})
+    } catch (error) {
+        return res.status(501).send({ success: false, message:'Internal Server Error', error })
+    }
+}
+
+export async function getCoursesByCategorie(req, res){
+    try {
+        const data = await CourseByCategoriesModel.find();
+        res.status(200).json({
+            success: true,
+            msg: 'Courses by category',
+            data: data
+        });
+
     } catch (error) {
         return res.status(501).send({ success: false, message:'Internal Server Error', error })
     }
