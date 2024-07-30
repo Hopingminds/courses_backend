@@ -4,7 +4,6 @@ import RegisterUsersModel from '../model/RegisterUsers.model.js';
 import { registerMail } from './mailer.js';
 import CoursesModel from '../model/Courses.model.js';
 import CoursesForDegreeModel from '../model/CoursesForDegree.model.js';
-import CourseByCategoriesModel from '../model/CourseByCategories.model.js';
 
 export async function registerUserforHm(req, res){
     try {
@@ -183,36 +182,6 @@ export async function validateUser(req, res){
         }
 
         return res.status(200).send({ success: true, message: 'Continue registration' });
-    } catch (error) {
-        return res.status(501).send({ success: false, message:'Internal Server Error', error })
-    }
-}
-
-export async function createCoursesByCategorie(req, res){
-    try {
-        const categoryData = req.body;
-
-        let course = new CourseByCategoriesModel(categoryData);
-        await course.save();
-
-        res.status(201).json({
-			success: true,
-			msg: 'Course added successfully for category',
-		})
-    } catch (error) {
-        return res.status(501).send({ success: false, message:'Internal Server Error', error })
-    }
-}
-
-export async function getCoursesByCategorie(req, res){
-    try {
-        const data = await CourseByCategoriesModel.find();
-        res.status(200).json({
-            success: true,
-            msg: 'Courses by category',
-            data: data
-        });
-
     } catch (error) {
         return res.status(501).send({ success: false, message:'Internal Server Error', error })
     }
