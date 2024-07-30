@@ -7,7 +7,7 @@ import CoursesForDegreeModel from '../model/CoursesForDegree.model.js';
 
 export async function registerUserforHm(req, res){
     try {
-        const { email, phone, name, college, degree, courseId } = req.body;
+        const { email, phone, name, college, degree, yearOfPassing, courseId } = req.body;
 
         // Check if email already exists
         const existingRegisterUser = await RegisterUsersModel.findOne({ email });
@@ -44,6 +44,7 @@ export async function registerUserforHm(req, res){
             phone,
             college,
             degree,
+            yearofpass: yearOfPassing
         })
         
 
@@ -53,6 +54,7 @@ export async function registerUserforHm(req, res){
             name,
             college,
             degree,
+            yearOfPassing,
             course: courseId
         });
 

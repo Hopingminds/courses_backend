@@ -12,6 +12,7 @@ export const RegisterUserSchema = new mongoose.Schema({
     college: {type:String},
     degree: {type:String},
     stream: {type:String},
+    yearOfPassing: {type: Number},
     course:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Courses'
