@@ -13,10 +13,10 @@ export const RegisterUserSchema = new mongoose.Schema({
     degree: {type:String},
     stream: {type:String},
     yearOfPassing: {type: Number},
-    course:{
+    chosenCategory: { 
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Courses'
+        ref: 'CoursesByCategorie'
     },
-});
+}, { timestamps: true });
 
 export default mongoose.model.RegisterUsers || mongoose.model('RegisterUser', RegisterUserSchema);
