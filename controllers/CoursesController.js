@@ -921,6 +921,7 @@ export async function assignmentCompleted(req, res) {
 			return res
 				.status(400)
 				.json({
+					success: false,
 					message: 'User ID, lesson ID, and course ID are required',
 				})
 		}
@@ -950,6 +951,7 @@ export async function assignmentCompleted(req, res) {
 			return res
 				.status(400)
 				.json({
+					success: false,
 					message: 'Assignemnt already completed for this course',
 					data,
 				})
@@ -969,13 +971,14 @@ export async function assignmentCompleted(req, res) {
 		return res
 			.status(200)
 			.json({
+				success: true,
 				message:
 					'Assignemnt completed successfully for the specified course',
 				data: data,
 			})
 	} catch (error) {
 		console.error(error)
-		return res.status(500).json({ message: 'Internal server error' })
+		return res.status(500).json({ success: false, message: 'Internal server error' })
 	}
 }
 
