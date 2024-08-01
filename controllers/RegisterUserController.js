@@ -10,7 +10,6 @@ import CartModel from '../model/Cart.model.js';
 export async function addCoursesToCart(userID, courses) {
     try {
         // Find the cart for the user
-        console.log(userID)
         let cart = await CartModel.findOne({ _id: userID }).populate('courses.course');
 
         // If the user has no cart, create a new one
@@ -29,7 +28,6 @@ export async function addCoursesToCart(userID, courses) {
         }
 
         await cart.save();
-        console.log(cart);
 
         return { success: true, cart };
     } catch (error) {
@@ -84,7 +82,6 @@ export async function registerUserforHm(req, res){
 
         const generatedPassword = Math.random().toString(36).slice(-8); 
         
-        console.log(generatedPassword);
 
         const hashedPassword = await bcrypt.hash(generatedPassword, 10);
         
@@ -147,8 +144,6 @@ export async function registerUserforHm(req, res){
             
             await user.save();
             const savedUserId = await user._id;
-
-            console.log(savedUserId)
 
             // Decrease the number of seats for the course category
             courseCategory.seats -= 1;
@@ -302,6 +297,66 @@ export async function getCoursesByCategorie(req, res){
             data: data
         });
 
+    } catch (error) {
+        return res.status(501).send({ success: false, message:'Internal Server Error', error })
+    }
+}
+
+/** PUT: https://localhost:8080/api/updatecourse
+@body : {
+    "_id": "66a9e56261cf3aa508ce8e6e",
+    "categoryName": "Web Development",
+    "courses": [
+        {
+            "course": "66a9e56261cf3aa508ce8e6e"
+        },
+    ],
+    "packages": {
+        "from": 12,
+        "to": 24
+    },
+    "whatWillYouLearn": [
+        "whatWillYouLearn1",
+        "whatWillYouLearn2",
+        "whatWillYouLearn3"
+    ],
+    "companies": [
+        "companies1",
+        "companies2"
+    ],
+    "seats": 23
+}
+ */
+export async function editCoursesByCategorie(req, res){
+    const { _id, ...updates } = req.body;
+    try {
+        // Ensure id is provided
+        if (!_id) {
+            return res.status(400).json({ 
+                message: 'Category ID is required', 
+                success: false 
+            });
+        }
+        
+        // Update the category by ID with the provided data
+        const updatedCategory = await CourseByCategoriesModel.findByIdAndUpdate(
+            _id,
+            updates,
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedCategory) {
+            return res.status(404).json({
+                message: 'Category not found',
+                success: false
+            });
+        }
+
+        return res.status(200).json({ 
+            message: 'Category Updated Successfully!', 
+            success: true,
+            data: updatedCategory
+        });
     } catch (error) {
         return res.status(501).send({ success: false, message:'Internal Server Error', error })
     }

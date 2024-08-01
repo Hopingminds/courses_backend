@@ -33,6 +33,7 @@ router.route('/updateuser').put(Auth, controller.updateUser)
 router.route('/resetPassword').put(controller.verifyUser, controller.resetPassword)
 router.route('/lessoncompleted').put( Auth,CoursesController.lessonCompleted)
 router.route('/assignmentcompleted').put( Auth,CoursesController.assignmentCompleted)
+router.route('/editcoursecategory').put(AdminAuth, RegisterUserController.editCoursesByCategorie)
 
 // DELETE ROUTES
 
