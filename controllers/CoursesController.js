@@ -1002,7 +1002,9 @@ export async function getUserCompletedAssignments(req, res) {
 						chapter_name: chapter.chapter_name, 
 						lesson_name:lesson.lesson_name, 
 						assignmentUrl:  `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/assignments/${lesson._id}`, 
-						iscompleted: true})
+						iscompleted: true,
+						course: course.course.title
+					})
 				}
 			})
 		})
