@@ -9,6 +9,7 @@ import instAuth from '../middleware/instAuth.js'
 router.route('/instregister').post(AdminAuth, instructorController.register)
 router.route('/instlogin').post(instructorController.verifyInstructor,instructorController.login)
 router.route('/uploadinsmediatoaws').post(instAuth, instructorController.uploadInstructormedia.single('file'), instructorController.uploadInstMediatoAws);
+router.route('/createlivestream').post(instAuth, instructorController.createLiveStream);
 
 // GET ROUTES
 router.route('/inst/:email').get(instructorController.getInstructor)

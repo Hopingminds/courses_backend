@@ -18,6 +18,7 @@ export const InstructorSchema = new mongoose.Schema({
 			profile_url: { type: String },
 		},
 	],
+	StreamIds: [{type: String}],
 	token: {type: String}
 })
 

@@ -6,6 +6,7 @@ import 'dotenv/config'
 import aws from 'aws-sdk'
 import multer from 'multer'
 import multerS3 from 'multer-s3'
+import { v4 as uuidv4 } from 'uuid';
 
 aws.config.update({
 	secretAccessKey: process.env.AWS_ACCESS_SECRET,
@@ -516,3 +517,56 @@ export async function completedClasses(req, res) {
 		res.status(500).json({ message: error.message });
 	}
 }
+
+/** POST: http://localhost:8080/api/uploadfiletoaws
+@body :{
+	"courseId": "66a9ffd361cf3aa508d3e322",
+	"lessonId": "66a9ffd361cf3aa508d3e324",
+	"startDate": "2024-08-10T12:00:00.000+00:00"
+}
+**/
+export async function createLiveStream(req, res){
+	try {
+		const { instructorID } = req.instructor;
+		const { courseId , lessonId, startDate } = req.body;
+		
+		const course = await CoursesModel.findById(courseId).populate('instructor');
+		
+		if(!course){
+			return res.status(404).json({ message: 'Course not found' });
+		}
+
+		const instructor  = await InstructorModel.findById(instructorID)
+
+		let foundLesson = null;
+        course.curriculum.forEach(chapter => {
+            chapter.lessons.forEach(lesson => {
+                if (lesson._id.toString() === lessonId) {
+                    foundLesson = lesson;
+                }
+            });
+        });
+		
+		if (!foundLesson) {
+            return res.status(404).json({ message: 'Lesson not found in the course curriculum' });
+        }
+
+		const streamKey = uuidv4();
+		foundLesson.liveClass.streamKey = streamKey;
+		foundLesson.liveClass.startDate = startDate;
+		
+		await course.save();
+
+		if (!instructor.StreamIds) {
+            instructor.StreamIds = [];
+        }
+        instructor.StreamIds.push(streamKey);
+        await instructor.save();
+
+        // Return success response
+        res.status(200).json({ success: true, message: 'Stream key generated and saved successfully', streamKey });
+	} catch (error) {
+		res.status(500).json({ success: false, message: 'Internal server error' + error.message });
+	}
+}
+

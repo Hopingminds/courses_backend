@@ -1204,3 +1204,51 @@ export async function isCourseInWishlist(req, res) {
 		res.status(500).json({ success: false, message: 'Internal server error' + error.message });
 	}
 }
+
+/** GET: http://localhost:8080/api/iscoursecompleted/:courseId
+@param: {
+    "header" : "Bearer <token>"
+}
+ */
+export async function isCourseCompleted(req, res) {
+	try {
+		const { userID } = req.user;
+        const { courseId } = req.params;
+        
+        // Find the course by courseId
+        const course = await CoursesModel.findById(courseId).populate('instructor');
+
+        // Find the user by userID and populate purchased_courses
+        const user = await UserModel.findById(userID).populate({
+            path: 'purchased_courses.course',
+            populate: { path: 'instructor', select: '-token -password' }
+        });
+
+        if (!user || !course) {
+            return res.status(404).json({ success: false, message: 'User or course not found' });
+        }
+
+        // Check if the course is among the purchased courses of the user
+        const purchasedCourse = user.purchased_courses.find(pc => pc.course._id.toString() === courseId);
+
+        if (!purchasedCourse) {
+            return res.status(403).json({ success: false, message: 'User has not purchased this course' });
+        }
+
+        // Calculate completed lessons for the course by the user
+        const completedLessons = purchasedCourse.completed_lessons.length;
+
+        // Compare with total lessons in the course curriculum
+        const totalLessons = course.curriculum.reduce((total, chapter) => {
+            return total + chapter.lessons.length;
+        }, 0);
+		console.log("completedLessons ",completedLessons)
+		console.log("totalLessons ",totalLessons)
+
+        const isCompleted = completedLessons >= totalLessons;
+
+        res.json({ success: true, isCompleted, course });
+	} catch (error) {
+		res.status(500).json({ success: false, message: 'Internal server error' + error.message });
+	}
+}
