@@ -27,7 +27,7 @@ router.route('/getusercompletedassignemnts/:email').get(CoursesController.getUse
 router.route('/getcoursesfordegree').get(RegisterUserController.getCoursesforDegree)
 router.route('/validateuserfields').get(RegisterUserController.validateUser)
 router.route('/getcoursesbycategorie').get(RegisterUserController.getCoursesByCategorie)
-router.route('/iscoursecompleted/:courseId').get(Auth, CoursesController.isCourseCompleted)
+router.route('/completedcourse').get(Auth, CoursesController.CompletedCourses)
 
 // PUT ROUTES
 router.route('/updateuser').put(Auth, controller.updateUser)
