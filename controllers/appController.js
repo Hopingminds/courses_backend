@@ -182,33 +182,42 @@ export async function getUser(req, res) {
 		if (!email)
 			return res.status(501).send({ error: 'Invalid Email' })
 
-		const checkUser = new Promise((resolve, reject) => {
-			UserModel.findOne({ email }).populate({
-				path: 'purchased_courses.course',
-				populate: { path: 'instructor', select: '-token -password' }
-			})
-				.exec()
-				.then((user) => {
-					if (!user) {
-						reject({ error: "Couldn't Find the User" })
-					} else {
-						// Remove sensitive information (e.g., password) before resolving the promise
-						const { password, token, ...rest } = user.toObject()
-						resolve(rest)
-					}
-				})
-				.catch((err) => {
-					reject(new Error(err))
-				})
-		})
+		// Find the user by email and populate purchased_courses and instructor details
+        const user = await UserModel.findOne({ email }).populate({
+            path: 'purchased_courses.course',
+            populate: { path: 'instructor', select: '-token -password' }
+        }).exec();
 
-		Promise.all([checkUser])
-			.then((userDetails) => {
-				return res.status(200).send({userDetails:userDetails[0]})
-			})
-			.catch((error) => {
-				return res.status(500).send({ error: error.message })
-			})
+        if (!user) {
+            return res.status(404).send({ error: "Couldn't Find the User" });
+        }
+
+        // Calculate total lessons for each course
+        const updatedPurchasedCourses = user.purchased_courses.map(purchasedCourse => {
+            const course = purchasedCourse.course;
+            if (!course) return purchasedCourse;
+
+            const totalLessons = course.curriculum.reduce((total, chapter) => {
+                return total + chapter.lessons.length;
+            }, 0);
+
+			course.total_lessons = totalLessons;
+            
+			return {
+                ...purchasedCourse.toObject(),
+            };
+        });
+
+        // Remove sensitive information
+        const { password, token, ...rest } = user.toObject();
+        
+        // Add the updated purchased courses to the user details
+        const userDetails = {
+            ...rest,
+            purchased_courses: updatedPurchasedCourses
+        };
+
+		return res.status(200).send({ userDetails });
 	} catch (error) {
 		return res.status(404).send({ error: 'Cannot Find User Data' })
 	}
