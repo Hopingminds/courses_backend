@@ -168,7 +168,11 @@ export async function getCourseBySlug(req, res) {
 			return course
 		}
 
-		res.status(200).json({ success: true, course:filterData(course) })
+		const totalLessons = course.curriculum.reduce((total, chapter) => {
+			return total + chapter.lessons.length;
+		}, 0);
+
+		res.status(200).json({ success: true, course:filterData(course), totalLessons })
 	} catch (error) {
 		console.error(error)
 		res.status(500).json({
@@ -212,7 +216,11 @@ export async function getUserCourseBySlug(req, res) {
 
 		const courseData = getCourseDataBySlug(user, coursename)
 
-		res.status(200).json({ success: true, data: courseData })
+		const totalLessons = courseData.course.curriculum.reduce((total, chapter) => {
+			return total + chapter.lessons.length;
+		}, 0);
+
+		res.status(200).json({ success: true, data: courseData, totalLessons })
 	} catch (error) {
 		console.error(error)
 		res.status(500).json({
