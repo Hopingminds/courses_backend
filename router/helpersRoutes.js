@@ -4,6 +4,7 @@ const router = Router()
 import * as controller from '../controllers/appController.js'
 import * as helperController from '../controllers/HelpersController.js'
 import * as awsController from '../controllers/AwsController.js'
+import * as NotificationController from '../controllers/NotificationController.js'
 import { registerMail } from '../controllers/mailer.js'
 import {upload, uploadUserProfile, uploadInstructorProfile, uploadassignment, uploadCompanyLogo} from '../controllers/AwsController.js'
 import { getBotResponse } from '../controllers/ChatBotController.js'
@@ -19,6 +20,7 @@ router.route('/uploaduserprofiletoaws').post(Auth,uploadUserProfile.single('file
 router.route('/uploadinsprofiletoaws').post(AdminAuth,uploadInstructorProfile.single('file'), awsController.uploadinsprofiletoaws)
 router.route('/uploadassignmenttoaws/:assignmentID').post(Auth, uploadassignment.single('file'), awsController.uploadassignmenttoaws)
 router.route('/uploadcoursefiletoaws/:slug').post(AdminAuth, awsController.uploadCoursemedia.single('file'), awsController.uploadCourseMediatoAws)
+router.route('/sendNotification').post(NotificationController.createNotification)
 
 // GET ROUTES
 router.route('/generateOTP').get(controller.verifyUser, localVariables, controller.generateOTP)

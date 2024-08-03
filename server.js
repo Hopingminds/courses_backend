@@ -23,6 +23,14 @@ import * as ServerStatus from './middleware/helper.js'
 const app = express()
 import './middleware/passport.js'
 import passport from 'passport'
+import http from 'http';
+import { initSocket } from './socket/socket.js';
+
+const server = http.createServer(app);
+
+// Initialize Socket.io
+initSocket(server);
+
 // middlewares
 app.use(
     session({
@@ -91,7 +99,7 @@ app.use((err, req, res, next) => {
 // start server only when we have valid connection
 connect().then(() => {
     try {
-        app.listen(port, () => {
+        server.listen(port, () => {
             ServerStatus.captureStartTime()
             console.log(`Server connected to  http://localhost:${port}`)
         })
