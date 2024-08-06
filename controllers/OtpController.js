@@ -123,15 +123,26 @@ export async function loginWithOtp(req, res){
             return res.status(404).send({ error: 'User not Found' });
         }
 
-        if (user.otpExpires < Date.now()) {
-            return res.status(400).json({ success: false, message: 'OTP has expired' });
+        const otpuser = await OtpModel.findOne({ phone: mobileNo });
+
+        if (!otpuser) {
+            return res.status(400).json({ success: false, message: 'Request for OTP' });
         }
 
-        const otpCheck = await bcrypt.compare(otp, user.otp);
-
-        if (!otpCheck) {
-            return res.status(400).send({ error: 'OTP does not match' });
+        if (otpuser.otpExpires < new Date()) {
+            return res.status(400).json({ success: false, message: 'OTP has expired', expiredotp: true });
         }
+
+        const isMatch = await bcrypt.compare(otp, otpuser.otp);
+        if (!isMatch) {
+            return res.status(400).json({ success: false, message: 'Invalid OTP', validotp: false });
+        }
+
+        otpuser.otp = null;
+        otpuser.otpExpires = null;
+        await otpuser.save();
+
+        await OtpModel.deleteOne({ phone: mobileNo });
 
         const token = jwt.sign(
             {
@@ -143,7 +154,7 @@ export async function loginWithOtp(req, res){
             { expiresIn: '7d' }
         );
 
-        await UserModel.updateOne({ mobileNo }, { token });
+        await UserModel.updateOne({ phone: mobileNo }, { token });
 
         return res.status(200).send({
             msg: 'Login Successful',
