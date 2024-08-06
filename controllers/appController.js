@@ -391,7 +391,7 @@ export async function validateFields(req, res) {
 	try {
 		const { email, phone } = req.body;
 
-		if (!email && !phone) {
+		if (!email || !phone) {
 		return res.status(400).send({ success: false, error: "Email or phone must be provided" });
 		}
 
