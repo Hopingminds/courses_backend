@@ -28,6 +28,8 @@ router.route('/getcoursesfordegree').get(RegisterUserController.getCoursesforDeg
 router.route('/validateuserfields').get(RegisterUserController.validateUser)
 router.route('/getcoursesbycategorie').get(RegisterUserController.getCoursesByCategorie)
 router.route('/completedcourse').get(Auth, CoursesController.CompletedCourses)
+router.route('/generateemailloginOTP').get(controller.verifyUser, localVariables, controller.getEmailLoginOTP)
+router.route('/verifyemailOTP').get(controller.verifyEmailOTP)
 
 // PUT ROUTES
 router.route('/updateuser').put(Auth, controller.updateUser)

@@ -420,3 +420,81 @@ export async function validateFields(req, res) {
 		return res.status(500).send({ msg: "Internal Server Error!" });
 	}
 }
+
+/** GET: http://localhost:8080/api/generateemailloginOTP?email=example@gmail.com */
+export async function getEmailLoginOTP(req, res) {
+	req.app.locals.OTP = await otpGenerator.generate(6, {lowerCaseAlphabets: false, upperCaseAlphabets:false, specialChars:false})
+    let userID = req.userID
+	let data = await UserModel.findOne({ _id: userID })
+	registerMail(
+		{
+			body: {
+				username: data.username ,
+				userEmail: data.email,
+				subject: 'Login With Email - OTP',
+				text: `You one time OTP is ${req.app.locals.OTP}`,
+			},
+		},
+		{
+			status(status) {
+				if (status === 200) {
+					return res.status(200).json({
+						success: true,
+						msg: 'OTP mail sent',
+					})
+				} else {
+					return res.status(500).json({
+						success: false,
+						msg: 'OTP mail not sent',
+						mail:  data.email,
+					})
+				}
+			},
+		}
+	)
+}
+
+/** GET: http://localhost:8080/api/verifyemailOTP?email=anshulkaryal5349@gmail.com&code=387462 */
+export async function verifyEmailOTP(req, res) {
+	try {
+		const { code, email} = req.query;
+		const user = await UserModel.findOne({ email });
+		
+		if (!user) {
+			return res.status(404).send({ error: 'User not Found' });
+		}
+		if(parseInt(req.app.locals.OTP)!== parseInt(code)){
+			return res.status(400).send({ error: "Invalid OTP"});
+		}
+		// Reset OTP and initialize session
+		req.app.locals.OTP = null;
+		req.app.locals.resetSession = true;
+
+		// Generate JWT token
+		const token = jwt.sign(
+			{
+				userID: user._id,
+				email: user.email,
+				role: user.role,
+			},
+			process.env.JWT_SECRET,
+			{ expiresIn: '7d' }
+		);
+
+		// Update user document with token
+		await UserModel.updateOne({ email }, { token });
+
+		// Respond with success
+		return res.status(200).json({
+			message: 'Login Successful',
+			email: user.email,
+			role: user.role,
+			token,
+		});
+	} catch (error) {
+		res.status(500).json({
+            success: false,
+            message: error.message || 'Internal server error',
+        });
+	}
+}
