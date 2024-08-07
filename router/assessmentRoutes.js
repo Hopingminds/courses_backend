@@ -18,5 +18,9 @@ router.route('/getassessment').get(Auth, AssessmentController.getAssesment);
 //PUT ROUTES
 router.route('/submitassessmentanswer').put(Auth, AssessmentController.submitAnswerForAssessment);
 router.route('/submitassessment').put(Auth, AssessmentController.finishAssessment);
+router.route('/updateassessment').put(AdminAuth, AssessmentController.updateAssessment);
+
+//DELETE ROUTES
+router.route('/deleteassessment').delete(AdminAuth, AssessmentController.deleteAssessment)
 
 export default router;

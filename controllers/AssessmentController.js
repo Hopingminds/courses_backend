@@ -536,3 +536,45 @@ export async function finishAssessment(req, res){
         return res.status(500).send({ success: false, message: 'Error submitting Assessment: ' + error.message });
     }
 }
+
+export async function updateAssessment(req, res) {
+    const { assessment_id, ...updates } = req.body; // Extract assessment_id and other updates from the body
+
+    try {
+        if (!assessment_id) {
+            return res.status(400).json({ message: 'Assessment ID is required' });
+        }
+
+        const updatedAssessment = await AssessmentSchema.findOneAndUpdate(
+            { _id: assessment_id },
+            { $set: updates },
+            { new: true } // Return the updated document
+        );
+
+        if (!updatedAssessment) {
+            return res.status(404).json({ message: 'Assessment not found' });
+        }
+
+        res.status(200).json({ success: true, message: 'Assessment Updated', updatedAssessment });
+    } catch (error) {
+        return res.status(500).send({ success: false, message: 'Internal Server Error' + error.message });
+    }
+}
+
+export async function deleteAssessment(req, res) {
+    try {
+        const { assessment_id } = req.body; 
+
+        // Find and delete the assessment by assessment_id
+        const result = await AssessmentSchema.findOneAndDelete({ _id: assessment_id });
+
+        // Check if an assessment was found and deleted
+        if (!result) {
+            return res.status(404).json({ success: false, message: 'Assessment not found' });
+        }
+
+        res.status(201).json({ success: true, message: 'Assessment deleted successfully.' });
+    } catch (error) {
+        return res.status(500).send({ success: false, message: 'Internal Server Error' + error.message });
+    }
+}
