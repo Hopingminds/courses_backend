@@ -157,6 +157,7 @@ export async function loginWithOtp(req, res){
         await UserModel.updateOne({ phone: mobileNo }, { token });
 
         return res.status(200).send({
+            success: true,
             msg: 'Login Successful',
             email: user.email,
             role: user.role,
