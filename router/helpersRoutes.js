@@ -21,6 +21,7 @@ router.route('/uploadinsprofiletoaws').post(AdminAuth,uploadInstructorProfile.si
 router.route('/uploadassignmenttoaws/:assignmentID').post(Auth, uploadassignment.single('file'), awsController.uploadassignmenttoaws)
 router.route('/uploadcoursefiletoaws/:slug').post(AdminAuth, awsController.uploadCoursemedia.single('file'), awsController.uploadCourseMediatoAws)
 router.route('/sendNotification').post(NotificationController.createNotification)
+router.route('/maketeacherchatavailable').post(helperController.makeTeacherChatAvailable)
 
 // GET ROUTES
 router.route('/generateOTP').get(controller.verifyUser, localVariables, controller.generateOTP)
@@ -32,6 +33,7 @@ router.route('/getfilefromaws/:filename').get(awsController.getfilefromaws)
 router.route('/getcoursemedia/:slug').get(AdminAuth, awsController.getCourseFilesFromAws)
 
 router.route('/getcolleges').get(helperController.getColleges)
+router.route('/isteacherchatavailable').get(Auth, helperController.isTeacherChatAvailable)
 
 // PUT ROUTES
 router.route('/get-bot-response').post(getBotResponse)
