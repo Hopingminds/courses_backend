@@ -7,7 +7,7 @@ export async function applyJob(req, res) {
         let { jobID } = req.body
 
         if (!jobID) {
-            return res.status(501).send({ success: false, msg: 'Job is required' })
+            return res.status(404).send({ success: false, msg: 'Job is required' })
         }
 
         let job = await JobopeningsModel.findById(jobID)
@@ -26,7 +26,7 @@ export async function applyJob(req, res) {
         })
 
         if (isExist) {
-            return res.status(501).send({ success: false, msg: 'Already Applied!', data: isExist })
+            return res.status(400).send({ success: false, msg: 'Already Applied!', data: isExist })
         }
 
         let jobApply = new JobsApplyModel({
@@ -37,7 +37,7 @@ export async function applyJob(req, res) {
         await jobApply.save()
         return res.status(200).send({ success: true, msg: 'Successfully applied to the job!' })
     } catch (error) {
-        return res.status(404).send({ success: false, error })
+        return res.status(500).send({ success: false, msg: 'Internal server error', error: error.message });
     }
 }
 
