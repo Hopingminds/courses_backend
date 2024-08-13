@@ -596,7 +596,7 @@ export async function removeFromCart(req, res) {
 
 		res.status(200).json({
 			success: true,
-			message: 'Operation successful',
+			message: 'Course removed from cart successfully',
 			data: cart.courses,
 		})
 	} catch (error) {
