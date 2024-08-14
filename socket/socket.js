@@ -1,7 +1,9 @@
 import { Server as SocketIoServer } from 'socket.io';
 import CorsConfig from '../cors.config.js';
+import UserModel from '../model/User.model.js';
 
 let io;
+const userGroups = {}; // Keeps track of users in each group
 
 export function initSocket(server) {
     io = new SocketIoServer(server, {
@@ -13,8 +15,65 @@ export function initSocket(server) {
 
     io.on('connection', (socket) => {
         // Join a group
-        socket.on('join group', (groupId) => {
+        socket.on('join group', async (data) => {
+            const { groupId, studentId } = data;
+
+            // Add user to the group
             socket.join(groupId);
+
+            // Initialize the group entry if not present
+            if (!userGroups[groupId]) {
+                userGroups[groupId] = [];
+            }
+
+            if (!userGroups[groupId].includes(studentId)) {
+                // Add the user to the group list
+                userGroups[groupId].push(studentId);
+        
+                // Fetch user details for all users in the group
+                const userDetails = await Promise.all(
+                    userGroups[groupId].map(async id => {
+                        const user = await UserModel.findById(id).select('name'); // Fetch only the 'name' field
+                        return { id, name: user ? user.name : 'Unknown' };
+                    })
+                );
+        
+                // Send the list of users in the group to the newly joined user
+                socket.to(groupId).emit('group users', userDetails);
+        
+                // Optionally, send a notification to other users in the group
+                socket.to(groupId).emit('student joined', { id: studentId });
+            } else{
+                // Fetch user details for all users in the group
+                const userDetails = await Promise.all(
+                    userGroups[groupId].map(async id => {
+                        const user = await UserModel.findById(id).select('name'); // Fetch only the 'name' field
+                        return { id, name: user ? user.name : 'Unknown' };
+                    })
+                );
+        
+                // Send the list of users in the group to the newly joined user
+                socket.to(groupId).emit('group users', userDetails);
+            }
+        });
+
+        // Handle leaving a group
+        socket.on('leave group', async (data) => {
+            const { groupId, studentId } = data;
+
+            // Remove the user from the group
+            socket.leave(groupId);
+
+            if (userGroups[groupId]) {
+                // Fetch the user's name before removing them from the group
+                const user = await UserModel.findById(studentId).select('name');
+
+                // Remove user from the group list
+                userGroups[groupId] = userGroups[groupId].filter(id => id.studentId !== studentId);
+
+                // Optionally, send a notification to other users in the group
+                socket.to(groupId).emit('student left', { studentId, name: user ? user.name : 'Unknown' });
+            }
         });
 
         // Handle incoming messages for live chat
@@ -53,6 +112,17 @@ export function initSocket(server) {
 
             // Optionally, send a confirmation to the sender
             socket.emit('private message', messageData);
+        });
+
+        // Handle disconnection
+        socket.on('disconnect', () => {
+            // Remove user from all groups they were in
+            for (const groupId in userGroups) {
+                userGroups[groupId] = userGroups[groupId].filter(id => id !== socket.id);
+                if (userGroups[groupId].length === 0) {
+                    delete userGroups[groupId];
+                }
+            }
         });
     });
 }
