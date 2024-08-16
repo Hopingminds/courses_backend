@@ -30,31 +30,19 @@ export function initSocket(server) {
                 // Add the user to the group list
                 userGroups[groupId].push(studentId);
         
-                // Fetch user details for all users in the group
-                const userDetails = await Promise.all(
-                    userGroups[groupId].map(async id => {
-                        const user = await UserModel.findById(id).select('name'); // Fetch only the 'name' field
-                        return { id, name: user ? user.name : 'Unknown' };
-                    })
-                );
-        
-                // Send the list of users in the group to the newly joined user
-                socket.to(groupId).emit('group users', userDetails);
-        
                 // Optionally, send a notification to other users in the group
                 socket.to(groupId).emit('student joined', { id: studentId });
-            } else{
-                // Fetch user details for all users in the group
-                const userDetails = await Promise.all(
-                    userGroups[groupId].map(async id => {
-                        const user = await UserModel.findById(id).select('name'); // Fetch only the 'name' field
-                        return { id, name: user ? user.name : 'Unknown' };
-                    })
-                );
-        
-                // Send the list of users in the group to the newly joined user
-                socket.to(groupId).emit('group users', userDetails);
             }
+            
+            // Fetch user details for all users in the group
+            const userDetails = await Promise.all(
+                userGroups[groupId].map(async id => {
+                    const user = await UserModel.findById(id).select('name'); // Fetch only the 'name' field
+                    return { id, name: user ? user.name : 'Unknown' };
+                })
+            );
+            // Send the list of users in the group to the newly joined user
+            socket.emit('group users', userDetails);
         });
 
         // Handle leaving a group
