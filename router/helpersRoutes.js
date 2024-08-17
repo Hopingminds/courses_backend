@@ -11,6 +11,7 @@ import { getBotResponse } from '../controllers/ChatBotController.js'
 import Auth, { localVariables } from '../middleware/auth.js'
 import AdminAuth from '../middleware/adminauth.js'
 import RecAuth from '../middleware/recauth.js'
+import instAuth from '../middleware/instAuth.js'
 // POST ROUTES
 router.route('/registerMail').post(registerMail) 
 
@@ -34,6 +35,7 @@ router.route('/getcoursemedia/:slug').get(AdminAuth, awsController.getCourseFile
 
 router.route('/getcolleges').get(helperController.getColleges)
 router.route('/isteacherchatavailable').get(Auth, helperController.isTeacherChatAvailable)
+router.route('/isteacherchatavailableforinst').get(instAuth, helperController.isTeacherChatAvailable)
 
 // PUT ROUTES
 router.route('/get-bot-response').post(getBotResponse)

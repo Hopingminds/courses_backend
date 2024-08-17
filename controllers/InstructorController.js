@@ -518,7 +518,7 @@ export async function completedClasses(req, res) {
 	}
 }
 
-/** POST: http://localhost:8080/api/uploadfiletoaws
+/** POST: http://localhost:8080/api/createlivestream
 @body :{
 	"courseId": "66a9ffd361cf3aa508d3e322",
 	"lessonId": "66a9ffd361cf3aa508d3e324",
