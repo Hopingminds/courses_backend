@@ -1,6 +1,7 @@
 import { Server as SocketIoServer } from 'socket.io';
 import CorsConfig from '../cors.config.js';
 import UserModel from '../model/User.model.js';
+import InstructorModel from '../model/Instructor.model.js'
 
 let io;
 const userGroups = {}; // Keeps track of users in each group
@@ -38,6 +39,10 @@ export function initSocket(server) {
             const userDetails = await Promise.all(
                 userGroups[groupId].map(async id => {
                     const user = await UserModel.findById(id).select('name'); // Fetch only the 'name' field
+                    if(!user){
+                        const instructor = await InstructorModel.findById(id).select('name');
+                        return { id, name: instructor ? instructor.name : 'Unknown' };
+                    }
                     return { id, name: user ? user.name : 'Unknown' };
                 })
             );
