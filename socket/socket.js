@@ -41,7 +41,7 @@ export function initSocket(server) {
                     const user = await UserModel.findById(id).select('name'); // Fetch only the 'name' field
                     if(!user){
                         const instructor = await InstructorModel.findById(id).select('name');
-                        return { id, name: instructor ? instructor.name : 'Unknown' };
+                        return { id, name: instructor ? instructor.name + " (Instructor)" : 'Unknown' };
                     }
                     return { id, name: user ? user.name : 'Unknown' };
                 })
