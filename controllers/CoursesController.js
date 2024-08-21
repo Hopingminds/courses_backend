@@ -47,7 +47,7 @@ export async function getCourses(req, res) {
 		type
 	} = req.query
 	try {
-		let query = {}
+		let query = { display: { $ne: false } }; // Ensure only displayed courses are fetched
 
 		// Add category and subcategory to the query if provided
 		if (category) {
@@ -62,7 +62,6 @@ export async function getCourses(req, res) {
 		if (minordegree) {
 			query.IsMinorDegreeCourse = minordegree
 		}
-		
 		if (credits) {
 			query.credits = credits
 		}
@@ -76,10 +75,6 @@ export async function getCourses(req, res) {
 			query.base_price = { $lte: price_max }
 		}
 
-		if (search) {
-			query.title = { $regex: search, $options: 'i' }
-		}
-
 		// Handle courseType logic
 		if (type === 'internship') {
 			query.courseType = 'internship'
@@ -90,27 +85,41 @@ export async function getCourses(req, res) {
 		}
 
 		// Build the sort object based on the 'sort' parameter
-		let sortObj = {}
-		sortObj.display = -1
-		query.display = { $ne: false};
+		let sortObj = { display: -1 }; // Default sorting by display status
 		if (sort === 'price_asc') {
 			sortObj.base_price = 1
 		} else if (sort === 'price_desc') {
 			sortObj.base_price = -1
 		}
 		sortObj.courseCategory = -1;
-		const courses = await CoursesModel.find(query)
+
+		// Query the database with the search criteria
+		let courses = await CoursesModel.find(query)
 			.sort(sortObj)
-			.populate('instructor').lean()
-		let filterData = courses.map((course)=>{
+			.populate('instructor')
+			.lean();
+
+		// In-memory filtering based on the search field
+		if (search) {
+			const regex = new RegExp(search, 'i');
+			courses = courses.filter(course =>
+				regex.test(course.title) ||
+				regex.test(course.category) ||
+				(course.instructor && regex.test(course.instructor.name))
+			);
+		}
+
+		// Remove sensitive fields from the instructor object
+		let filterData = courses.map(course => {
 			if (course.instructor) {
 				let {instructor, ...rest} = course
 				let {password, token, ...insRest} = instructor
 				return {...rest, instructor:insRest}
 			}
-			return course
-		})
-		res.status(200).send({ success: true, courses:filterData, })
+			return course;
+		});
+
+		res.status(200).send({ success: true, courses: filterData })
 	} catch (err) {
 		console.log(err)
 		res.status(500).send({success: false, message: 'Internal Server Error'})
