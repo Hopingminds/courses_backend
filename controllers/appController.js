@@ -193,20 +193,19 @@ export async function getUser(req, res) {
         }
 
         // Calculate total lessons for each course
-        const updatedPurchasedCourses = user.purchased_courses.map(purchasedCourse => {
-            const course = purchasedCourse.course;
-            if (!course) return purchasedCourse;
+        const updatedPurchasedCourses = user.purchased_courses
+            .filter(purchasedCourse => purchasedCourse.course) // Only include courses that exist
+            .map(purchasedCourse => {
+                const course = purchasedCourse.course;
 
-            const totalLessons = course.curriculum.reduce((total, chapter) => {
-                return total + chapter.lessons.length;
-            }, 0);
+                const totalLessons = course.curriculum.reduce((total, chapter) => {
+                    return total + chapter.lessons.length;
+                }, 0);
 
-			course.total_lessons = totalLessons;
-            
-			return {
-                ...purchasedCourse.toObject(),
-            };
-        });
+                course.total_lessons = totalLessons;
+
+                return purchasedCourse.toObject();
+            });
 
         // Remove sensitive information
         const { password, token, ...rest } = user.toObject();
