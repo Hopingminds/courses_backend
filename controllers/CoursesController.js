@@ -1032,30 +1032,37 @@ export async function getUserCompletedAssignments(req, res) {
 export async function courseSearch(req,res) {
 	try {
 		const { title, category } = req.query;
-        
-        // Build the search criteria object
-        let searchCriteria = {};
+
+        // Build the initial search criteria
+        let searchCriteria = { display: true };
+
+        if (category) {
+            // Add category filter to search criteria
+            searchCriteria.category = category;
+        } else {
+            searchCriteria.category = { $ne: 'internship' }; // Exclude 'internship' category if not specified
+        }
+
+        // Query the database with the search criteria and populate the instructor field
+        let courses = await CoursesModel.find(searchCriteria).populate('instructor');
 
         if (title) {
-            // Match titles containing the given keyword anywhere in the title (case-insensitive)
-            searchCriteria.title = { $regex: new RegExp(title, 'i') };
-        }
+            // Create a regex pattern for case-insensitive search
+            const regex = new RegExp(title, 'i');
 
-		if (category) {
-            // Add category filter to search criteria
-            searchCriteria.courseType = category;
+            // Filter the results based on the title, category, and instructor.name fields
+            courses = courses.filter(course =>
+                regex.test(course.title) ||
+                regex.test(course.category) ||
+                (course.instructor && regex.test(course.instructor.name))
+            );
         }
-		else{
-			searchCriteria.courseType = {$ne : 'internship'}
-		}
-
-        const courses = await CoursesModel.find({ display: true }).find(searchCriteria).populate('instructor');
 
         if (courses.length === 0) {
             return res.status(404).json({ message: 'No courses found' });
         }
 
-		res.status(200).json({ success: true, courses: courses });
+        res.status(200).json({ success: true, courses: courses });
 	} catch (error) {
 		console.error('Error getting course:', error);
         return res.status(500).send({ success: false, message: 'Error getting course: ' + error.message });
