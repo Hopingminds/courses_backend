@@ -186,13 +186,16 @@ export async function getUserCourseBySlug(req, res) {
 	function getCourseDataBySlug(data, slug) {
 		// Loop through the purchased_courses array
 		for (let course of data.purchased_courses) {
-			// Check if the course slug matches the one we're looking for
-			if (course.course.slug === slug) {
-				// Return the matching course data
-				return {
-					course: course.course,
-					completed_lessons: course.completed_lessons,
-					completed_assignments: course.completed_assignments,
+			// Check if course and course.slug are defined
+			if (course && course.course && course.course.slug) {
+				// Check if the course slug matches the one we're looking for
+				if (course.course.slug === slug) {
+					// Return the matching course data
+					return {
+						course: course.course,
+						completed_lessons: course.completed_lessons,
+						completed_assignments: course.completed_assignments,
+					};
 				}
 			}
 		}
@@ -216,6 +219,11 @@ export async function getUserCourseBySlug(req, res) {
 
 		const courseData = getCourseDataBySlug(user, coursename)
 
+		if (!courseData) {
+			// If courseData is null, return a 404 error or a similar response
+			return res.status(404).json({ success: false, message: 'Course not found' });
+		}
+		
 		const totalLessons = courseData.course.curriculum.reduce((total, chapter) => {
 			return total + chapter.lessons.length;
 		}, 0);
