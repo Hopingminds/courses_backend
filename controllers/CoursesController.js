@@ -1038,9 +1038,9 @@ export async function courseSearch(req,res) {
 
         if (category) {
             // Add category filter to search criteria
-            searchCriteria.category = category;
+            searchCriteria.courseType = category;
         } else {
-            searchCriteria.category = { $ne: 'internship' }; // Exclude 'internship' category if not specified
+            searchCriteria.courseType = { $ne: 'internship' }; // Exclude 'internship' category if not specified
         }
 
         // Query the database with the search criteria and populate the instructor field
