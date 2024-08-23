@@ -1,6 +1,6 @@
 const CorsConfig = [
     "http://localhost:3000",
-    "http://localhost:3001",
+    "http://192.168.0.160:3000",
     "https://hopingminds.com",
     "https://courses-admin-gules.vercel.app",
     "https://hmcodelab.com",
