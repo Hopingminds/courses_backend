@@ -31,8 +31,14 @@ export function initSocket(server) {
                 // Add the user to the group list
                 userGroups[groupId].push(studentId);
         
+                const user = await UserModel.findById(studentId).select('name'); // Fetch only the 'name' field
+                if(!user){
+                    const instructor = await InstructorModel.findById(studentId).select('name');
+                    socket.to(groupId).emit('student joined', { id: studentId, name: instructor ? instructor.name + " (Instructor)" : 'Unknown' });
+                }
+
                 // Optionally, send a notification to other users in the group
-                socket.to(groupId).emit('student joined', { id: studentId });
+                socket.to(groupId).emit('student joined', { id: studentId, name: user ? user.name : 'Unknown' });
             }
             
             // Fetch user details for all users in the group
