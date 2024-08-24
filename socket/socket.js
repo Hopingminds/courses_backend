@@ -32,22 +32,32 @@ export function initSocket(server) {
                 userGroups[groupId].push(studentId);
             }
             // Fetch user or instructor details
-            const user = await UserModel.findById(studentId).select('name') || 
-                            await InstructorModel.findById(studentId).select('name');
-    
-            const name = user ? user.name : 'Unknown';
-            const suffix = user && user.modelName === 'Instructor' ? ' (Instructor)' : '';
-    
-            socket.to(groupId).emit('student joined', { studentId, name: name + suffix });
+            let user = await UserModel.findById(studentId).select('name');
+            let isInstructor = false;
+
+            if (!user) {
+                user = await InstructorModel.findById(studentId).select('name');
+                isInstructor = true;
+            }
+
+            const name = user ? (isInstructor ? user.name + " (Instructor)" : user.name) : 'Unknown';
+
+            // Notify other users in the group
+            socket.to(groupId).emit('student joined', { studentId, name });
         
             // Fetch user details for all users in the group
             const userDetails = await Promise.all(
                 userGroups[groupId].map(async id => {
-                    const user = await UserModel.findById(id).select('name') || 
-                                 await InstructorModel.findById(id).select('name');
-                    const name = user ? user.name : 'Unknown';
-                    const suffix = user && user.modelName === 'Instructor' ? ' (Instructor)' : '';
-                    return { studentId: id, name: name + suffix };
+                    let user = await UserModel.findById(id).select('name');
+                    let isInstructor = false;
+
+                    if (!user) {
+                        user = await InstructorModel.findById(id).select('name');
+                        isInstructor = true;
+                    }
+
+                    const name = user ? (isInstructor ? user.name + " (Instructor)" : user.name) : 'Unknown';
+                    return { studentId: id, name };
                 })
             );
             // Send the list of users in the group to the newly joined user
@@ -63,17 +73,21 @@ export function initSocket(server) {
 
             if (userGroups[groupId]) {
                 // Fetch user or instructor details
-                const user = await UserModel.findById(studentId).select('name') || 
-                             await InstructorModel.findById(studentId).select('name');
-        
-                const name = user ? user.name : 'Unknown';
-                const suffix = user && user.modelName === 'Instructor' ? ' (Instructor)' : '';
+                let user = await UserModel.findById(studentId).select('name');
+                let isInstructor = false;
+
+                if (!user) {
+                    user = await InstructorModel.findById(studentId).select('name');
+                    isInstructor = true;
+                }
+
+                const name = user ? (isInstructor ? user.name + " (Instructor)" : user.name) : 'Unknown';
         
                 // Remove user from the group list
                 userGroups[groupId] = userGroups[groupId].filter(id => id.studentId !== studentId);
         
                 // Optionally, send a notification to other users in the group
-                socket.to(groupId).emit('student left', { studentId, name: name + suffix });
+                socket.to(groupId).emit('student left', { studentId, name });
             }        
         });
 
