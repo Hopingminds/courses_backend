@@ -30,26 +30,24 @@ export function initSocket(server) {
             if (!userGroups[groupId].includes(studentId)) {
                 // Add the user to the group list
                 userGroups[groupId].push(studentId);
-        
-                const user = await UserModel.findById(studentId).select('name'); // Fetch only the 'name' field
-                if(!user){
-                    const instructor = await InstructorModel.findById(studentId).select('name');
-                    socket.to(groupId).emit('student joined', { id: studentId, name: instructor ? instructor.name + " (Instructor)" : 'Unknown' });
-                }
-
-                // Optionally, send a notification to other users in the group
-                socket.to(groupId).emit('student joined', { id: studentId, name: user ? user.name : 'Unknown' });
             }
-            
+            // Fetch user or instructor details
+            const user = await UserModel.findById(studentId).select('name') || 
+                            await InstructorModel.findById(studentId).select('name');
+    
+            const name = user ? user.name : 'Unknown';
+            const suffix = user && user.modelName === 'Instructor' ? ' (Instructor)' : '';
+    
+            socket.to(groupId).emit('student joined', { studentId, name: name + suffix });
+        
             // Fetch user details for all users in the group
             const userDetails = await Promise.all(
                 userGroups[groupId].map(async id => {
-                    const user = await UserModel.findById(id).select('name'); // Fetch only the 'name' field
-                    if(!user){
-                        const instructor = await InstructorModel.findById(id).select('name');
-                        return { id, name: instructor ? instructor.name + " (Instructor)" : 'Unknown' };
-                    }
-                    return { id, name: user ? user.name : 'Unknown' };
+                    const user = await UserModel.findById(id).select('name') || 
+                                 await InstructorModel.findById(id).select('name');
+                    const name = user ? user.name : 'Unknown';
+                    const suffix = user && user.modelName === 'Instructor' ? ' (Instructor)' : '';
+                    return { studentId: id, name: name + suffix };
                 })
             );
             // Send the list of users in the group to the newly joined user
@@ -64,15 +62,19 @@ export function initSocket(server) {
             socket.leave(groupId);
 
             if (userGroups[groupId]) {
-                // Fetch the user's name before removing them from the group
-                const user = await UserModel.findById(studentId).select('name');
-
+                // Fetch user or instructor details
+                const user = await UserModel.findById(studentId).select('name') || 
+                             await InstructorModel.findById(studentId).select('name');
+        
+                const name = user ? user.name : 'Unknown';
+                const suffix = user && user.modelName === 'Instructor' ? ' (Instructor)' : '';
+        
                 // Remove user from the group list
                 userGroups[groupId] = userGroups[groupId].filter(id => id.studentId !== studentId);
-
+        
                 // Optionally, send a notification to other users in the group
-                socket.to(groupId).emit('student left', { studentId, name: user ? user.name : 'Unknown' });
-            }
+                socket.to(groupId).emit('student left', { studentId, name: name + suffix });
+            }        
         });
 
         // Handle incoming messages for live chat
