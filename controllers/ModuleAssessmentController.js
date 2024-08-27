@@ -1,0 +1,442 @@
+import multer from 'multer';
+import path from 'path';
+import xlsx from 'xlsx';
+import fs from 'fs';
+import csv from 'csv-parser';
+import ModuleAssessmentModel from '../model/ModuleAssessment.model.js';
+import AssessmentModuleModel from '../model/AssessmentModule.model.js';
+import QnaModel from '../model/Qna.model.js';
+
+/** POST: http://localhost:8080/api/createmoduleassessment
+* @param: {
+    "header" : "Admin <token>"
+}
+body: {
+    "assessment_id": 54321,
+    "assessmentName": "Midterm Exam",
+    "maxMarks": 50,
+    "startDate": "2024-10-01T09:00:00Z",
+    "lastDate": "2024-10-10T18:00:00Z",
+    "timelimit": 90,
+    "isProtected": false,
+    "ProctoringFor": {
+        "mic": {
+            "inUse": true,
+            "maxRating": 4
+        },
+        "webcam": {
+            "inUse": true,
+            "maxRating": 5
+        },
+        "TabSwitch": {
+            "inUse": true
+        },
+        "multiplePersonInFrame": {
+            "inUse": false
+        },
+        "PhoneinFrame": {
+            "inUse": true
+        },
+        "SoundCaptured": {
+            "inUse": true,
+            "maxRating": 3
+        }
+    },
+    "Assessmentmodules": [
+        {
+            "module_id": 101,
+            "moduleName": "Module 1",
+            "timelimit": 60
+        }
+    ]
+}
+*/
+export async function createModuleAssessment(req, res) {
+	try {
+		const { 
+            assessment_id, 
+            assessmentName, 
+            maxMarks, 
+            startDate, 
+            lastDate, 
+            timelimit, 
+            isProtected, 
+            ProctoringFor, 
+            Assessmentmodules 
+        } = req.body;
+
+        let populatedModules = [];
+
+        // Check if Assessmentmodules is provided and not empty
+        if (Assessmentmodules && Assessmentmodules.length > 0) {
+            populatedModules = await Promise.all(
+                Assessmentmodules.map(async (module) => {
+                    const newModule = new AssessmentModuleModel({
+                        module_id: module.module_id,
+                        moduleName: module.moduleName,
+                        timelimit: module.timelimit,
+                    });
+
+                    await newModule.save();
+                    return { module: newModule._id };
+                })
+            );
+        }
+
+        // Create the ModuleAssessment document
+        const moduleAssessment = new ModuleAssessmentModel({
+            assessment_id,
+            assessmentName,
+            maxMarks,
+            startDate,
+            lastDate,
+            timelimit,
+            isProtected,
+            ProctoringFor,
+            Assessmentmodules: populatedModules,
+        });
+
+        // Save the ModuleAssessment document to the database
+        await moduleAssessment.save();
+
+        return res.status(201).json({ success: true, data: moduleAssessment });
+	} catch (error) {
+		return res.status(500).json({ error: 'Internal server error' })
+	}
+}
+
+// Ensure the uploads directory exists
+const uploadDir = path.resolve('uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, uploadDir); // Define upload directory using absolute path
+    },
+    filename: function (req, file, cb) {
+        const ext = path.extname(file.originalname);
+        cb(null, Date.now() + ext); // Define filename (timestamp + original extension)
+    }
+});
+
+const fileFilter = (req, file, cb) => {
+    const allowedFileTypes = ['text/csv', 'application/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+    if (allowedFileTypes.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new Error('Only CSV or Excel files are allowed'), false);
+    }
+};
+
+export function parseCSV(filePath) {
+    return new Promise((resolve, reject) => {
+        const results = [];
+        fs.createReadStream(filePath)
+            .pipe(csv())
+            .on('data', (data) => results.push(data))
+            .on('end', () => {
+                resolve(results);
+            })
+            .on('error', (error) => {
+                reject(error);
+            });
+    });
+}
+
+export const upload = multer({ storage: storage, fileFilter: fileFilter }).single('questions');
+
+/** POST: http://localhost:8080/api/addquestionstoassessmentmodule
+* @param: {
+    "header" : "Admin <token>"
+}
+body: {
+    "moduleAssessmentid":"6620b6b7a3340a8de1a70bc0",
+    "moduleId":"6620b6b7a3340a8de1a70bc0",
+    "questions": "file.csv"
+}
+*/
+export async function addQuestionsToModuleAssessment(req, res) {
+    upload(req, res, async (err) => {
+        if (err instanceof multer.MulterError) {
+            return res.status(400).json({ message: 'File upload error', error: err.message });
+        } else if (err) {
+            return res.status(500).json({ message: 'Internal server error', error: err.message });
+        }
+
+        const { moduleId, moduleAssessmentid } = req.body;
+
+        if (!moduleId || !moduleAssessmentid) {
+            return res.status(400).json({ message: 'Module ID and ModuleAssessment ID are required' });
+        }
+
+        try {
+            const moduleAssessment = await ModuleAssessmentModel.findById(moduleAssessmentid);
+            if (!moduleAssessment) {
+                return res.status(404).json({ error: 'ModuleAssessment not found' });
+            }
+
+            const isModuleInAssessment = moduleAssessment.Assessmentmodules.some(
+                (module) => module.module.toString() === moduleId
+            );
+            if (!isModuleInAssessment) {
+                return res.status(404).json({ error: 'Module is not associated with the given ModuleAssessment' });
+            }
+
+            const AssessmentModule = await AssessmentModuleModel.findById(moduleId);
+            if (!AssessmentModule) {
+                return res.status(404).json({ error: 'Invalid module ID' });
+            }
+
+            if (!req.file) {
+                return res.status(400).json({ message: 'No file uploaded' });
+            }
+
+            let jsonArray = [];
+            try {
+                if (req.file.mimetype === 'application/vnd.ms-excel' || req.file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+                    const workbook = xlsx.readFile(req.file.path);
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    jsonArray = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
+                } else if (req.file.mimetype === 'text/csv' || req.file.mimetype === 'application/csv') {
+                    jsonArray = await parseCSV(req.file.path);
+                } else {
+                    return res.status(400).json({ message: 'Unsupported file type' });
+                }
+            } catch (error) {
+                return res.status(400).json({ message: 'Error parsing file', error: error.message });
+            }
+
+            if (!Array.isArray(jsonArray) || jsonArray.length === 0) {
+                return res.status(400).json({ message: 'Invalid file content' });
+            }
+
+            const headers = Array.isArray(jsonArray[0]) ? jsonArray[0] : Object.keys(jsonArray[0]);
+            const results = [];
+
+            for (let i = 1; i < jsonArray.length; i++) {
+                const row = jsonArray[i];
+                const questionData = {
+                    question: row[headers.indexOf('question')],
+                    opt_1: row[headers.indexOf('opt_1')],
+                    opt_2: row[headers.indexOf('opt_2')],
+                    opt_3: row[headers.indexOf('opt_3')],
+                    opt_4: row[headers.indexOf('opt_4')],
+                    answer: row[headers.indexOf('answer')],
+                    maxMarks: row[headers.indexOf('maxMarks')]
+                };
+
+                try {
+                    const newQuestion = new QnaModel({
+                        question: questionData.question,
+                        options: {
+                            opt_1: questionData.opt_1,
+                            opt_2: questionData.opt_2,
+                            opt_3: questionData.opt_3,
+                            opt_4: questionData.opt_4
+                        },
+                        answer: questionData.answer,
+                        maxMarks: questionData.maxMarks
+                    });
+
+                    await newQuestion.save();
+                    AssessmentModule.questions.push(newQuestion._id);
+                    await AssessmentModule.save();
+
+                    results.push({ message: 'Question added successfully', data: newQuestion });
+                } catch (error) {
+                    console.error('Error adding question:', error);
+                    return res.status(500).json({ message: 'Error adding question', error: error.message, questionAt: i+1 });
+                }
+            }
+            return res.status(201).json(results);
+        } catch (error) {
+            console.error('Unexpected error:', error);
+            return res.status(500).json({ message: 'Internal server error', error: error.message });
+        } finally {
+            if (req.file) {
+                fs.unlinkSync(req.file.path);
+            }
+        }
+    });
+}
+
+/** GET: http://localhost:8080/api/getmoduleassessment/:moduleAssessmentid
+* @param: {
+    "header" : "<token>"
+}
+*/
+export async function getModuleAssessment(req, res) {
+    const { moduleAssessmentid } = req.params;
+
+    if (!moduleAssessmentid) {
+        return res.status(400).json({ message: 'ModuleAssessment ID is required' });
+    }
+
+    try {
+        // Find the ModuleAssessment by ID
+        const moduleAssessment = await ModuleAssessmentModel.findById(moduleAssessmentid)
+            .populate({
+                path: 'Assessmentmodules.module',
+                populate: {
+                    path: 'questions',
+                    model: 'Qna' // Replace with the actual model name for questions
+                }
+            });
+
+        if (!moduleAssessment) {
+            return res.status(404).json({ message: 'ModuleAssessment not found' });
+        }
+
+        return res.status(200).json({ data: moduleAssessment });
+    } catch (error) {
+        console.error('Error fetching ModuleAssessment:', error);
+        return res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+}
+
+/** PUT: http://localhost:8080/api/updatemoduleassessment/:moduleAssessmentid
+* @param: {
+    "header" : "Admin <token>"
+}
+body: {
+    assessmentData with all the ids
+}
+*/
+export async function editModuleAssessment(req, res) {
+    const { moduleAssessmentid } = req.params;
+    const updates = req.body;
+
+    if (!moduleAssessmentid) {
+        return res.status(400).json({ message: 'ModuleAssessment ID is required' });
+    }
+
+    try {
+        // Find the existing ModuleAssessment
+        const existingModuleAssessment = await ModuleAssessmentModel.findById(moduleAssessmentid)
+            .populate('Assessmentmodules.module');
+
+        if (!existingModuleAssessment) {
+            return res.status(404).json({ message: 'ModuleAssessment not found' });
+        }
+
+        // Extract existing module IDs
+        const existingModuleIds = existingModuleAssessment.Assessmentmodules.map(mod => mod.module._id.toString());
+
+        // Arrays to hold the valid, new, and invalid modules
+        const validModules = [];
+        const newModules = [];
+        const invalidModules = [];
+
+        // Loop through each updated module
+        for (const mod of updates.Assessmentmodules) {
+            if (mod.module && mod.module._id) {
+                const moduleId = mod.module._id.toString();
+                if (existingModuleIds.includes(moduleId)) {
+                    // Update the existing module data in the database
+                    await AssessmentModuleModel.findByIdAndUpdate(
+                        moduleId,
+                        { ...mod.module },
+                        { new: true, runValidators: true }
+                    );
+                    validModules.push(mod);
+                } else {
+                    invalidModules.push(mod);
+                }
+            } else {
+                // It's a new module, create it in the database
+                const createdModule = await AssessmentModuleModel.create(mod.module);
+                validModules.push({ module: createdModule._id });
+            }
+        }
+
+
+        if (invalidModules.length > 0) {
+            return res.status(400).json({ 
+                message: 'Some modules are not valid for update',
+                invalidModules
+            });
+        }
+
+        // Handle the new modules: create them in the database first
+        for (let newModule of newModules) {
+            const createdModule = await AssessmentModuleModel.create(newModule.module);
+            validModules.push({ module: createdModule._id });
+        }
+
+        // Proceed with the update by setting the updated Assessmentmodules
+        updates.Assessmentmodules = validModules;
+
+        const updatedModuleAssessment = await ModuleAssessmentModel.findByIdAndUpdate(
+            moduleAssessmentid,
+            { ...updates },
+            { new: true, runValidators: true }
+        ).populate({
+            path: 'Assessmentmodules.module',
+            populate: {
+                path: 'questions',
+                model: 'Qna'
+            }
+        });
+
+        return res.status(200).json({ data: updatedModuleAssessment });
+    } catch (error) {
+        console.error('Error updating ModuleAssessment:', error);
+        return res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+
+}
+
+/** DELETE: http://localhost:8080/api/deletemodulefromassessment
+* @param: {
+    "header" : "Admin <token>"
+}
+body: {
+    "moduleAssessmentid":"66cda03e48671d0f30160493",
+    "moduleid":"66cda0af48671d0f30160556"
+}
+*/
+export async function deleteModuleFromAssessment(req, res) {
+    const { moduleAssessmentid, moduleid } = req.body;
+
+    if (!moduleAssessmentid || !moduleid) {
+        return res.status(400).json({ message: 'ModuleAssessment ID and Module ID are required' });
+    }
+
+    try {
+        // Find the existing ModuleAssessment
+        const existingModuleAssessment = await ModuleAssessmentModel.findById(moduleAssessmentid);
+
+        if (!existingModuleAssessment) {
+            return res.status(404).json({ message: 'ModuleAssessment not found' });
+        }
+
+        // Filter out the module to be deleted
+        const updatedModules = existingModuleAssessment.Assessmentmodules.filter(
+            mod => mod.module._id.toString() !== moduleid
+        );
+
+        if (updatedModules.length === existingModuleAssessment.Assessmentmodules.length) {
+            return res.status(404).json({ message: 'Module not found in this assessment' });
+        }
+
+        // Update the ModuleAssessment with the remaining modules
+        existingModuleAssessment.Assessmentmodules = updatedModules;
+
+        await existingModuleAssessment.save();
+
+        // Delete the module from the AssessmentModuleModel
+        const deletedModule = await AssessmentModuleModel.findByIdAndDelete(moduleid);
+
+        if (!deletedModule) {
+            return res.status(404).json({ message: 'Module not found in AssessmentModule collection' });
+        }
+
+        return res.status(200).json({ message: 'Module deleted successfully', data: existingModuleAssessment });
+    } catch (error) {
+        console.error('Error deleting module from ModuleAssessment:', error);
+        return res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+}
