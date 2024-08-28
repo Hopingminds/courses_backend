@@ -8,6 +8,7 @@ const ProctoringOptionSchema = new mongoose.Schema({
 const ModuleAssessmentSchema = new mongoose.Schema({
     assessment_id: { type: Number },
     assessmentName: { type: String },
+    assessmentDesc: {type: String },
     maxMarks: { type: Number },
     startDate: { type: Date, default: Date.now },
     lastDate: { type: Date },

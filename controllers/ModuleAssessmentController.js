@@ -63,6 +63,7 @@ export async function createModuleAssessment(req, res) {
             timelimit, 
             isProtected, 
             ProctoringFor, 
+            assessmentDesc,
             Assessmentmodules 
         } = req.body;
 
@@ -94,6 +95,7 @@ export async function createModuleAssessment(req, res) {
             timelimit,
             isProtected,
             ProctoringFor,
+            assessmentDesc,
             Assessmentmodules: populatedModules,
         });
 
@@ -610,6 +612,13 @@ export async function getUserModuleAssessment(req, res){
     }
 }
 
+function calculateProgress(module) {
+    const submittedCount = module.generatedQustionSet.filter(question => question.isSubmitted).length;
+    const totalQuestions = module.generatedQustionSet.length;
+    console.log(submittedCount)
+    return totalQuestions === 0 ? 0 : (submittedCount / totalQuestions) * 100;
+}
+
 /** GET: http://localhost:8080/api/getallusermoduleassessment
 * @param: {
     "header" : "User <token>"
@@ -617,14 +626,50 @@ export async function getUserModuleAssessment(req, res){
 */
 export async function getAllModuleAssessment(req, res) {
     try {
-        const moduleAssessment = await ModuleAssessmentModel.find().populate({ path: 'Assessmentmodules.module' });
+        const { userID } = req.user;
 
-        if (!moduleAssessment) {
-            return res.status(404).json({ message: 'No Assessment found' });
+        // Fetch the user's assessment report
+        const userTestReport = await UserModuleAssessmentReportModel.findOne({
+            user: userID
+        });
+
+        // Fetch all module assessments with populated Assessmentmodules and their related modules
+        const moduleAssessments = await ModuleAssessmentModel.find()
+            .populate({ path: 'Assessmentmodules.module' });
+
+        if (!moduleAssessments || moduleAssessments.length === 0) {
+            return res.status(404).json({ message: 'No Assessments found' });
         }
 
-        return res.status(200).json({ data: moduleAssessment });
+        // Calculate total progress for each module assessment
+        const moduleAssessmentsWithProgress = moduleAssessments.map(moduleAssessment => {
+            // Aggregate progress for each module
+            const modulesWithProgress = moduleAssessment.Assessmentmodules.map(({ module }) => {
+                // Find the corresponding report for this module
+                const userModuleReport = userTestReport?.generatedModules.find(
+                    report => report.module.modueleInfo.toString() === module._id.toString()
+                );
+
+                // Calculate progress if module is found in user's report
+                return {
+                    module,
+                    progress: userModuleReport ? calculateProgress(userModuleReport.module) : 0
+                };
+            });
+
+            // Calculate overall progress for all modules in this assessment
+            const totalProgress = modulesWithProgress.reduce((sum, mod) => sum + mod.progress, 0) / modulesWithProgress.length || 0;
+
+            return {
+                ...moduleAssessment.toObject(),
+                Assessmentmodules: modulesWithProgress,
+                totalProgress // Add total progress for this assessment
+            };
+        });
+
+        return res.status(200).json({ data: moduleAssessmentsWithProgress });
+
     } catch (error) {
-        
+        return res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 }

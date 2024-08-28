@@ -12,7 +12,7 @@ router.route('/createcourseassessment').post(AdminAuth, upload.single('questions
 router.route('/submitassessment').post(Auth, AssessmentController.submitAssessment);
 router.route('/resetassessment').post(Auth, AssessmentController.requestForReassessment);
 router.route('/createmoduleassessment').post(AdminAuth, ModuleAssessmentController.createModuleAssessment);
-router.route('/addquestionstoassessmentmodule').post(AdminAuth, ModuleAssessmentController.addQuestionsToModuleAssessment);
+router.route('/addquestionstoassessmentmodule').post( ModuleAssessmentController.addQuestionsToModuleAssessment);
 router.route('/startmoduleassessment').post(Auth, ModuleAssessmentController.StartAssessment);
 
 // GET ROUTES
