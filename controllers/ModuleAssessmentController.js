@@ -104,7 +104,7 @@ export async function createModuleAssessment(req, res) {
 
         return res.status(201).json({ success: true, data: moduleAssessment });
 	} catch (error) {
-		return res.status(500).json({ error: 'Internal server error' })
+		return res.status(500).json({ success: false, error: 'Internal server error' })
 	}
 }
 
@@ -163,37 +163,37 @@ body: {
 export async function addQuestionsToModuleAssessment(req, res) {
     upload(req, res, async (err) => {
         if (err instanceof multer.MulterError) {
-            return res.status(400).json({ message: 'File upload error', error: err.message });
+            return res.status(400).json({ success: true, message: 'File upload error', error: err.message });
         } else if (err) {
-            return res.status(500).json({ message: 'Internal server error', error: err.message });
+            return res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
         }
 
         const { moduleId, moduleAssessmentid } = req.body;
 
         if (!moduleId || !moduleAssessmentid) {
-            return res.status(400).json({ message: 'Module ID and ModuleAssessment ID are required' });
+            return res.status(400).json({ success: false, message: 'Module ID and ModuleAssessment ID are required' });
         }
 
         try {
             const moduleAssessment = await ModuleAssessmentModel.findById(moduleAssessmentid);
             if (!moduleAssessment) {
-                return res.status(404).json({ error: 'ModuleAssessment not found' });
+                return res.status(404).json({ success: false, message: 'ModuleAssessment not found' });
             }
 
             const isModuleInAssessment = moduleAssessment.Assessmentmodules.some(
                 (module) => module.module.toString() === moduleId
             );
             if (!isModuleInAssessment) {
-                return res.status(404).json({ error: 'Module is not associated with the given ModuleAssessment' });
+                return res.status(404).json({ success: false, message: 'Module is not associated with the given ModuleAssessment' });
             }
 
             const AssessmentModule = await AssessmentModuleModel.findById(moduleId);
             if (!AssessmentModule) {
-                return res.status(404).json({ error: 'Invalid module ID' });
+                return res.status(404).json({ success: false, message: 'Invalid module ID' });
             }
 
             if (!req.file) {
-                return res.status(400).json({ message: 'No file uploaded' });
+                return res.status(400).json({ success: false, message: 'No file uploaded' });
             }
 
             let jsonArray = [];
@@ -206,14 +206,14 @@ export async function addQuestionsToModuleAssessment(req, res) {
                 } else if (req.file.mimetype === 'text/csv' || req.file.mimetype === 'application/csv') {
                     jsonArray = await parseCSV(req.file.path);
                 } else {
-                    return res.status(400).json({ message: 'Unsupported file type' });
+                    return res.status(400).json({ success: false, message: 'Unsupported file type' });
                 }
             } catch (error) {
-                return res.status(400).json({ message: 'Error parsing file', error: error.message });
+                return res.status(400).json({ success: false, message: 'Error parsing file', error: error.message });
             }
 
             if (!Array.isArray(jsonArray) || jsonArray.length === 0) {
-                return res.status(400).json({ message: 'Invalid file content' });
+                return res.status(400).json({ success: false, message: 'Invalid file content' });
             }
 
             const headers = Array.isArray(jsonArray[0]) ? jsonArray[0] : Object.keys(jsonArray[0]);
@@ -248,16 +248,16 @@ export async function addQuestionsToModuleAssessment(req, res) {
                     AssessmentModule.questions.push(newQuestion._id);
                     await AssessmentModule.save();
 
-                    results.push({ message: 'Question added successfully', data: newQuestion });
+                    results.push({ success: true, message: 'Question added successfully', data: newQuestion });
                 } catch (error) {
                     console.error('Error adding question:', error);
-                    return res.status(500).json({ message: 'Error adding question', error: error.message, questionAt: i+1 });
+                    return res.status(500).json({ success: false, message: 'Error adding question', error: error.message, questionAt: i+1 });
                 }
             }
-            return res.status(201).json(results);
+            return res.status(201).json({ success: true, results });
         } catch (error) {
             console.error('Unexpected error:', error);
-            return res.status(500).json({ message: 'Internal server error', error: error.message });
+            return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
         } finally {
             if (req.file) {
                 fs.unlinkSync(req.file.path);
@@ -275,7 +275,7 @@ export async function getModuleAssessment(req, res) {
     const { moduleAssessmentid } = req.params;
 
     if (!moduleAssessmentid) {
-        return res.status(400).json({ message: 'ModuleAssessment ID is required' });
+        return res.status(400).json({ success: false, message: 'ModuleAssessment ID is required' });
     }
 
     try {
@@ -290,13 +290,13 @@ export async function getModuleAssessment(req, res) {
             });
 
         if (!moduleAssessment) {
-            return res.status(404).json({ message: 'ModuleAssessment not found' });
+            return res.status(404).json({ success: false, message: 'ModuleAssessment not found' });
         }
 
-        return res.status(200).json({ data: moduleAssessment });
+        return res.status(200).json({ success: true, data: moduleAssessment });
     } catch (error) {
         console.error('Error fetching ModuleAssessment:', error);
-        return res.status(500).json({ message: 'Internal server error', error: error.message });
+        return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
     }
 }
 
@@ -313,7 +313,7 @@ export async function editModuleAssessment(req, res) {
     const updates = req.body;
 
     if (!moduleAssessmentid) {
-        return res.status(400).json({ message: 'ModuleAssessment ID is required' });
+        return res.status(400).json({ success: false, message: 'ModuleAssessment ID is required' });
     }
 
     try {
@@ -322,7 +322,7 @@ export async function editModuleAssessment(req, res) {
             .populate('Assessmentmodules.module');
 
         if (!existingModuleAssessment) {
-            return res.status(404).json({ message: 'ModuleAssessment not found' });
+            return res.status(404).json({ success: false, message: 'ModuleAssessment not found' });
         }
 
         // Extract existing module IDs
@@ -358,6 +358,7 @@ export async function editModuleAssessment(req, res) {
 
         if (invalidModules.length > 0) {
             return res.status(400).json({ 
+                success: false,
                 message: 'Some modules are not valid for update',
                 invalidModules
             });
@@ -384,10 +385,10 @@ export async function editModuleAssessment(req, res) {
             }
         });
 
-        return res.status(200).json({ data: updatedModuleAssessment });
+        return res.status(200).json({ success: true, data: updatedModuleAssessment });
     } catch (error) {
         console.error('Error updating ModuleAssessment:', error);
-        return res.status(500).json({ message: 'Internal server error', error: error.message });
+        return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
     }
 
 }
@@ -538,7 +539,7 @@ export async function getAssesmentQuestion(req, res) {
         });
 
         if (!userModuleAssessmentReport) {
-            return res.status(404).json({ message: 'User Assessment not found' });
+            return res.status(404).json({ success: false, message: 'User Assessment not found' });
         }
 
         // Find the specific module in the generatedModules
@@ -547,7 +548,7 @@ export async function getAssesmentQuestion(req, res) {
         );
 
         if (!moduleReport) {
-            return res.status(404).json({ message: 'Module not found in the user assessment' });
+            return res.status(404).json({ success: false, message: 'Module not found in the user assessment' });
         }
 
         // Get the specific question using the provided index
@@ -556,18 +557,19 @@ export async function getAssesmentQuestion(req, res) {
 
         console.log("questionSet",questionEntry.question)
         if (!questionEntry) {
-            return res.status(404).json({ message: 'Question not found' });
+            return res.status(404).json({ success: false, message: 'Question not found' });
         }
 
         // Fetch the full question details excluding the answer
         const question = await QnaModel.findById(questionEntry.question._id, 'question options maxMarks');
 
         if (!question) {
-            return res.status(404).json({ message: 'Question not found in the Qna collection' });
+            return res.status(404).json({ success: false, message: 'Question not found in the Qna collection' });
         }
 
         // Return the question details without the answer
         return res.status(200).json({
+            success: true,
             message: 'Question retrieved successfully',
             question: {
                 question: question.question,
@@ -578,7 +580,7 @@ export async function getAssesmentQuestion(req, res) {
             submittedAnswer: questionEntry.submittedAnswer
         });
     } catch (error) {
-        return res.status(500).json({ message: 'Internal server error', error: error.message });
+        return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
     }
 }
 
@@ -591,7 +593,7 @@ export async function getUserModuleAssessment(req, res){
     const { moduleAssessmentid } = req.params;
 
     if (!moduleAssessmentid) {
-        return res.status(400).json({ message: 'ModuleAssessment ID is required' });
+        return res.status(400).json({ success: false, message: 'ModuleAssessment ID is required' });
     }
 
     try {
@@ -602,13 +604,13 @@ export async function getUserModuleAssessment(req, res){
             });
 
         if (!moduleAssessment) {
-            return res.status(404).json({ message: 'ModuleAssessment not found' });
+            return res.status(404).json({ success: false, message: 'ModuleAssessment not found' });
         }
 
-        return res.status(200).json({ data: moduleAssessment });
+        return res.status(200).json({ success: true, data: moduleAssessment });
     } catch (error) {
         console.error('Error fetching ModuleAssessment:', error);
-        return res.status(500).json({ message: 'Internal server error', error: error.message });
+        return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
     }
 }
 
@@ -637,7 +639,7 @@ export async function getAllModuleAssessment(req, res) {
             .populate({ path: 'Assessmentmodules.module' });
 
         if (!moduleAssessments || moduleAssessments.length === 0) {
-            return res.status(404).json({ message: 'No Assessments found' });
+            return res.status(404).json({ success: false, message: 'No Assessments found' });
         }
 
         // Calculate total progress for each module assessment
@@ -675,9 +677,9 @@ export async function getAllModuleAssessment(req, res) {
             };
         });
 
-        return res.status(200).json({ data: moduleAssessmentsWithProgress });
+        return res.status(200).json({ success: true, data: moduleAssessmentsWithProgress });
 
     } catch (error) {
-        return res.status(500).json({ message: 'Internal server error', error: error.message });
+        return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
     }
 }
