@@ -615,7 +615,6 @@ export async function getUserModuleAssessment(req, res){
 function calculateProgress(module) {
     const submittedCount = module.generatedQustionSet.filter(question => question.isSubmitted).length;
     const totalQuestions = module.generatedQustionSet.length;
-    console.log(submittedCount)
     return totalQuestions === 0 ? 0 : (submittedCount / totalQuestions) * 100;
 }
 
@@ -660,10 +659,19 @@ export async function getAllModuleAssessment(req, res) {
             // Calculate overall progress for all modules in this assessment
             const totalProgress = modulesWithProgress.reduce((sum, mod) => sum + mod.progress, 0) / modulesWithProgress.length || 0;
 
+            // Extract additional fields from the user's report, if available
+            const assessmentReport = userTestReport?.generatedModules.find(
+                report => report.module.modueleInfo.toString() === moduleAssessment._id.toString()
+            );
+            const isAssessmentCompleted = assessmentReport ? assessmentReport.isAssessmentCompleted : false;
+            const isSuspended = assessmentReport ? assessmentReport.isSuspended : false;
+
             return {
                 ...moduleAssessment.toObject(),
                 Assessmentmodules: modulesWithProgress,
-                totalProgress // Add total progress for this assessment
+                totalProgress, // Add total progress for this assessment
+                isAssessmentCompleted, // Add completion status
+                isSuspended // Add suspension status
             };
         });
 
