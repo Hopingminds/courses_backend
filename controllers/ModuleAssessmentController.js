@@ -6,6 +6,7 @@ import csv from 'csv-parser';
 import ModuleAssessmentModel from '../model/ModuleAssessment.model.js';
 import AssessmentModuleModel from '../model/AssessmentModule.model.js';
 import QnaModel from '../model/Qna.model.js';
+import UserModuleAssessmentReportModel from '../model/UserModuleAssessmentReport.model.js';
 
 /** POST: http://localhost:8080/api/createmoduleassessment
 * @param: {
@@ -402,7 +403,7 @@ export async function deleteModuleFromAssessment(req, res) {
     const { moduleAssessmentid, moduleid } = req.body;
 
     if (!moduleAssessmentid || !moduleid) {
-        return res.status(400).json({ message: 'ModuleAssessment ID and Module ID are required' });
+        return res.status(400).json({ success: false, message: 'ModuleAssessment ID and Module ID are required' });
     }
 
     try {
@@ -410,7 +411,7 @@ export async function deleteModuleFromAssessment(req, res) {
         const existingModuleAssessment = await ModuleAssessmentModel.findById(moduleAssessmentid);
 
         if (!existingModuleAssessment) {
-            return res.status(404).json({ message: 'ModuleAssessment not found' });
+            return res.status(404).json({ success: false, message: 'ModuleAssessment not found' });
         }
 
         // Filter out the module to be deleted
@@ -419,7 +420,7 @@ export async function deleteModuleFromAssessment(req, res) {
         );
 
         if (updatedModules.length === existingModuleAssessment.Assessmentmodules.length) {
-            return res.status(404).json({ message: 'Module not found in this assessment' });
+            return res.status(404).json({ success: false, message: 'Module not found in this assessment' });
         }
 
         // Update the ModuleAssessment with the remaining modules
@@ -431,12 +432,188 @@ export async function deleteModuleFromAssessment(req, res) {
         const deletedModule = await AssessmentModuleModel.findByIdAndDelete(moduleid);
 
         if (!deletedModule) {
-            return res.status(404).json({ message: 'Module not found in AssessmentModule collection' });
+            return res.status(404).json({ success: false, message: 'Module not found in AssessmentModule collection' });
         }
 
-        return res.status(200).json({ message: 'Module deleted successfully', data: existingModuleAssessment });
+        return res.status(200).json({ success: true, message: 'Module deleted successfully', data: existingModuleAssessment });
     } catch (error) {
         console.error('Error deleting module from ModuleAssessment:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    }
+}
+
+// Function to shuffle an array
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+/** POST: http://localhost:8080/api/startmoduleassessment
+* @param: {
+    "header" : "User <token>"
+}
+body: {
+    "moduleAssessmentid":"6620b6b7a3340a8de1a70bc0"
+}
+*/
+export async function StartAssessment(req, res) {
+    try {
+        const { userID } = req.user;
+        const { moduleAssessmentid } = req.body;
+
+        const moduleAssessment = await ModuleAssessmentModel.findById(moduleAssessmentid).populate('Assessmentmodules.module');
+
+        if (!moduleAssessment) {
+            return res.status(404).json({ success: false, message: 'Module Assessment not found' });
+        }
+
+        // Find the UserModuleAssessmentReport for this user and module assessment
+        let userModuleAssessmentReport = await UserModuleAssessmentReportModel.findOne({
+            user: userID,
+            moduleAssessment: moduleAssessmentid
+        });
+
+        // Check if the assessment has already been completed
+        if (userModuleAssessmentReport && userModuleAssessmentReport.isAssessmentCompleted) {
+            return res.status(400).json({ success: false, message: 'Assessment has already been completed' });
+        }
+
+        // Prepare generatedModules structure
+        const generatedModules = moduleAssessment.Assessmentmodules.map(({ module }) => {
+            // Shuffle questions before saving them
+            const shuffledQuestions = shuffleArray(module.questions.map(question => ({
+                question: question._id,
+                isSubmitted: false,
+                submittedAnswer: ''
+            })));
+
+            return {
+                module: {
+                    modueleInfo: module._id,
+                    generatedQustionSet: shuffledQuestions
+                }
+            };
+        });
+
+        if (userModuleAssessmentReport) {
+            // If the report exists and assessment is not completed, update it
+            userModuleAssessmentReport.generatedModules = generatedModules;
+        } else {
+            // If the report doesn't exist, create a new one
+            userModuleAssessmentReport = new UserModuleAssessmentReportModel({
+                user: userID,
+                moduleAssessment: moduleAssessmentid,
+                generatedModules,
+            });
+        }
+
+        // Save the report
+        await userModuleAssessmentReport.save();
+
+        return res.status(200).json({ success: true, message: 'Assessment started successfully', report: userModuleAssessmentReport });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    }
+}
+
+/** GET: http://localhost:8080/api/getmodulequestions?module_id=6620c1a48cb4bcb50f84748f&moduleid=6620c1a48cb4bcb50f84748f&index=1 
+* @param: {
+    "header" : "User <token>"
+}
+*/ 
+export async function getAssesmentQuestion(req, res) {
+    try {
+        const { userID } = req.user;
+        const { moduleAssessmentid, moduleid, index } = req.query;
+
+        // Find the UserModuleAssessmentReport for this user and module assessment
+        const userModuleAssessmentReport = await UserModuleAssessmentReportModel.findOne({
+            user: userID,
+            moduleAssessment: moduleAssessmentid
+        });
+
+        if (!userModuleAssessmentReport) {
+            return res.status(404).json({ message: 'User Assessment not found' });
+        }
+
+        // Find the specific module in the generatedModules
+        const moduleReport = userModuleAssessmentReport.generatedModules.find(
+            module => module.module.modueleInfo.toString() === moduleid
+        );
+
+        if (!moduleReport) {
+            return res.status(404).json({ message: 'Module not found in the user assessment' });
+        }
+
+        // Get the specific question using the provided index
+        const questionSet = moduleReport.module.generatedQustionSet;
+        const questionEntry = questionSet[index];
+
+        if (!questionEntry) {
+            return res.status(404).json({ message: 'Question not found' });
+        }
+
+        // Fetch the full question details excluding the answer
+        const question = await QnaModel.findById(questionEntry._id, 'question options maxMarks');
+
+        if (!question) {
+            return res.status(404).json({ message: 'Question not found in the Qna collection' });
+        }
+
+        // Return the question details without the answer
+        return res.status(200).json({
+            message: 'Question retrieved successfully',
+            question: {
+                question: question.question,
+                options: question.options,
+                maxMarks: question.maxMarks
+            },
+            isSubmitted: questionEntry.isSubmitted,
+            submittedAnswer: questionEntry.submittedAnswer
+        });
+    } catch (error) {
         return res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+}
+
+export async function getUserModuleAssessment(req, res){
+    const { moduleAssessmentid } = req.params;
+
+    if (!moduleAssessmentid) {
+        return res.status(400).json({ message: 'ModuleAssessment ID is required' });
+    }
+
+    try {
+        // Find the ModuleAssessment by ID
+        const moduleAssessment = await ModuleAssessmentModel.findById(moduleAssessmentid)
+            .populate({
+                path: 'Assessmentmodules.module'
+            });
+
+        if (!moduleAssessment) {
+            return res.status(404).json({ message: 'ModuleAssessment not found' });
+        }
+
+        return res.status(200).json({ data: moduleAssessment });
+    } catch (error) {
+        console.error('Error fetching ModuleAssessment:', error);
+        return res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+}
+
+export async function getAllModuleAssessment(req, res) {
+    try {
+        const moduleAssessment = await ModuleAssessmentModel.find().populate({ path: 'Assessmentmodules.module' });
+
+        if (!moduleAssessment) {
+            return res.status(404).json({ message: 'No Assessment found' });
+        }
+
+        return res.status(200).json({ data: moduleAssessment });
+    } catch (error) {
+        
     }
 }

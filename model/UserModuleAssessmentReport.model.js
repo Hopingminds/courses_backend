@@ -7,7 +7,7 @@ export const UserModuleAssessmentReportSchema = new mongoose.Schema({
     },
     moduleAssessment: { 
         type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Test' 
+        ref: 'ModuleAssessment' 
     },
     isAssessmentCompleted: { 
         type: Boolean, 
@@ -25,14 +25,24 @@ export const UserModuleAssessmentReportSchema = new mongoose.Schema({
         PhoneinFrame: { type: Number },
         SoundCaptured: { type: Number },
     },
-    generatedQustionSet: [
+    generatedModules: [
         {
-            question: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Qna'
-            },
-            isSubmitted: { type: Boolean, default: false },
-            submittedAnswer: { type: String }
+            module: {
+                modueleInfo: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "AssessmentModule",
+                },
+                generatedQustionSet: [
+                    {
+                        question: {
+                            type: mongoose.Schema.Types.ObjectId,
+                            ref: 'Qna'
+                        },
+                        isSubmitted: { type: Boolean, default: false },
+                        submittedAnswer: { type: String }
+                    }
+                ]
+            }
         }
     ],
     remarks: { type: String }

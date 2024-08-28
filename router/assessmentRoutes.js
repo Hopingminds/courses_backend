@@ -13,11 +13,14 @@ router.route('/submitassessment').post(Auth, AssessmentController.submitAssessme
 router.route('/resetassessment').post(Auth, AssessmentController.requestForReassessment);
 router.route('/createmoduleassessment').post(AdminAuth, ModuleAssessmentController.createModuleAssessment);
 router.route('/addquestionstoassessmentmodule').post(AdminAuth, ModuleAssessmentController.addQuestionsToModuleAssessment);
+router.route('/startmoduleassessment').post(Auth, ModuleAssessmentController.StartAssessment);
 
 // GET ROUTES
 router.route('/courseassessments/:coursename').get(Auth, AssessmentController.getCourseAllAssessment);
 router.route('/getassessment').get(Auth, AssessmentController.getAssesment);
 router.route('/getmoduleassessment/:moduleAssessmentid').get(AdminAuth, ModuleAssessmentController.getModuleAssessment);
+router.route('/getallusermoduleassessment').get(Auth, ModuleAssessmentController.getAllModuleAssessment);
+router.route('/getusermoduleassessment/:moduleAssessmentid').get(Auth, ModuleAssessmentController.getUserModuleAssessment);
 
 //PUT ROUTES
 router.route('/submitassessmentanswer').put(Auth, AssessmentController.submitAnswerForAssessment);
