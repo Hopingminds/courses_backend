@@ -519,7 +519,7 @@ export async function StartAssessment(req, res) {
     }
 }
 
-/** GET: http://localhost:8080/api/getmodulequestions?module_id=6620c1a48cb4bcb50f84748f&moduleid=6620c1a48cb4bcb50f84748f&index=1 
+/** GET: http://localhost:8080/api/getassesmentquestion?moduleAssessmentid=6620c1a48cb4bcb50f84748f&moduleid=6620c1a48cb4bcb50f84748f&index=1 
 * @param: {
     "header" : "User <token>"
 }
@@ -552,12 +552,13 @@ export async function getAssesmentQuestion(req, res) {
         const questionSet = moduleReport.module.generatedQustionSet;
         const questionEntry = questionSet[index];
 
+        console.log("questionSet",questionEntry.question)
         if (!questionEntry) {
             return res.status(404).json({ message: 'Question not found' });
         }
 
         // Fetch the full question details excluding the answer
-        const question = await QnaModel.findById(questionEntry._id, 'question options maxMarks');
+        const question = await QnaModel.findById(questionEntry.question._id, 'question options maxMarks');
 
         if (!question) {
             return res.status(404).json({ message: 'Question not found in the Qna collection' });
@@ -579,6 +580,11 @@ export async function getAssesmentQuestion(req, res) {
     }
 }
 
+/** GET: http://localhost:8080/api/getusermoduleassessment/:moduleAssessmentid
+* @param: {
+    "header" : "User <token>"
+}
+*/
 export async function getUserModuleAssessment(req, res){
     const { moduleAssessmentid } = req.params;
 
@@ -604,6 +610,11 @@ export async function getUserModuleAssessment(req, res){
     }
 }
 
+/** GET: http://localhost:8080/api/getallusermoduleassessment
+* @param: {
+    "header" : "User <token>"
+}
+*/
 export async function getAllModuleAssessment(req, res) {
     try {
         const moduleAssessment = await ModuleAssessmentModel.find().populate({ path: 'Assessmentmodules.module' });

@@ -19,6 +19,7 @@ router.route('/startmoduleassessment').post(Auth, ModuleAssessmentController.Sta
 router.route('/courseassessments/:coursename').get(Auth, AssessmentController.getCourseAllAssessment);
 router.route('/getassessment').get(Auth, AssessmentController.getAssesment);
 router.route('/getmoduleassessment/:moduleAssessmentid').get(AdminAuth, ModuleAssessmentController.getModuleAssessment);
+router.route('/getassesmentquestion').get(Auth, ModuleAssessmentController.getAssesmentQuestion);
 router.route('/getallusermoduleassessment').get(Auth, ModuleAssessmentController.getAllModuleAssessment);
 router.route('/getusermoduleassessment/:moduleAssessmentid').get(Auth, ModuleAssessmentController.getUserModuleAssessment);
 
