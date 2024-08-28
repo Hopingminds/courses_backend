@@ -572,6 +572,7 @@ export async function getAssesmentQuestion(req, res) {
             success: true,
             message: 'Question retrieved successfully',
             question: {
+                _id: question._id,
                 question: question.question,
                 options: question.options,
                 maxMarks: question.maxMarks
@@ -679,6 +680,59 @@ export async function getAllModuleAssessment(req, res) {
 
         return res.status(200).json({ success: true, data: moduleAssessmentsWithProgress });
 
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    }
+}
+
+/** PUT: http://localhost:8080/api/submitanswerformoduleassessment
+* @param: {
+    "header" : "User <token>"
+}
+body: {
+    "moduleAssessmentid": "MongoDB ObjectId of the assessment",
+    "moduleid": "MongoDB ObjectId of the module",
+    "questionId": "MongoDB ObjectId of the question submitting",
+    "answer": "Array of answers corresponding to the assessment questions"
+}
+*/
+export async function submitAnswerForModuleAssessment(req, res) {
+    try {
+        const { userID } = req.user;
+        const { moduleAssessmentid, moduleid, questionId, answer } = req.body;
+        
+        const userAssessmentReport = await UserModuleAssessmentReportModel.findOne({ user: userID, moduleAssessment: moduleAssessmentid })
+
+        if (!userAssessmentReport) {
+            return res.status(404).json({ success: false, message: 'Assessment report not found' });
+        }
+
+        // Find the module in the generatedModules array
+        const moduleReport = userAssessmentReport.generatedModules?.find(
+            report => report.module.modueleInfo.toString() === moduleid
+        );
+        
+        if (!moduleReport) {
+            return res.status(404).json({ success: false, message: 'Module report not found' });
+        }
+
+        // Update the answers for the specified question
+        const questionReport = moduleReport.module.generatedQustionSet.find(
+            question => question.question.toString() === questionId
+        );
+
+        if (!questionReport) {
+            return res.status(404).json({ success: false, message: 'Question not found' });
+        }
+
+        // Update the submitted answer
+        questionReport.submittedAnswer = answer;
+        questionReport.isSubmitted = true;
+
+        // Save the updated report
+        await userAssessmentReport.save();
+
+        return res.status(200).json({ success: true, message: 'Answer submitted successfully' });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
     }

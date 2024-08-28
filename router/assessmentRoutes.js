@@ -28,6 +28,7 @@ router.route('/submitassessmentanswer').put(Auth, AssessmentController.submitAns
 router.route('/submitassessment').put(Auth, AssessmentController.finishAssessment);
 router.route('/updateassessment').put(AdminAuth, AssessmentController.updateAssessment);
 router.route('/updatemoduleassessment/:moduleAssessmentid').put(AdminAuth, ModuleAssessmentController.editModuleAssessment);
+router.route('/submitanswerformoduleassessment').put(Auth, ModuleAssessmentController.submitAnswerForModuleAssessment);
 
 //DELETE ROUTES
 router.route('/deleteassessment').delete(AdminAuth, AssessmentController.deleteAssessment)
