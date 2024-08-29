@@ -797,7 +797,7 @@ body: {
 export async function finishModuleAssessment(req, res) {
     try {
         const { userID } = req.user;
-        const { moduleAssessmentid, isAssessmentCompleted, isSuspended, ProctoringScore, remarks } = req.body;
+        const { moduleAssessmentid, isSuspended, ProctoringScore, remarks } = req.body;
 
         // Validate moduleAssessmentid
         if (!moduleAssessmentid) {
@@ -805,7 +805,7 @@ export async function finishModuleAssessment(req, res) {
         }
         const userReport = await UserModuleAssessmentReportModel.findOneAndUpdate(
             { user: userID, moduleAssessment: moduleAssessmentid },
-            { $set: { isAssessmentCompleted, isSuspended, ProctoringScore, remarks } },
+            { $set: { isAssessmentCompleted: true, isSuspended, ProctoringScore, remarks } },
             { new: true }
         )
 
