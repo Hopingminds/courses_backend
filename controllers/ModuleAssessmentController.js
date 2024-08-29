@@ -775,7 +775,7 @@ export async function submitAnswerForModuleAssessment(req, res) {
     }
 }
 
-/** PUT: http://localhost:8080/api/submitanswerformoduleassessment
+/** PUT: http://localhost:8080/api/submitmoduleassessment
 * @param: {
     "header" : "User <token>"
 }
@@ -854,11 +854,44 @@ export async function getAllUsersResultByModuleAssessment(req, res) {
                 model: 'AssessmentModule',
                 select: '-questions'
             })
+            .populate({
+                path: 'generatedModules.module.generatedQustionSet.question',
+                model: 'Qna'
+            });
         
-        if(!userReports){
-            return res.status(404).send({ success: false, message: 'No User\'s Assessment Report Found' });
-        }
-        return res.status(200).send({ success: true, data: userReports });
+            if (!userReports || userReports.length === 0) {
+                return res.status(404).send({ success: false, message: 'No User\'s Assessment Report Found' });
+            }
+    
+            // Calculate totalMarks and maxMarks for each user
+            const userReportsWithMarks = userReports.map(userReport => {
+                let totalMarks = 0;
+                let maxMarks = 0;
+    
+                userReport.generatedModules.forEach(module => {
+                    module.module.generatedQustionSet.forEach(questionSet => {
+                        const question = questionSet.question;
+                        if (questionSet.isSubmitted && questionSet.submittedAnswer === question.answer) {
+                            totalMarks += question.maxMarks;
+                        }
+                        maxMarks += question.maxMarks;
+                    });
+    
+                    // Remove generatedQustionSet from the module
+                    module.module = {
+                        ...module.module.toObject(),
+                        generatedQustionSet: undefined
+                    };
+                });
+    
+                return {
+                    ...userReport.toObject(),
+                    totalMarks,
+                    maxMarks
+                };    
+            });
+    
+            return res.status(200).send({ success: true, data: userReportsWithMarks });    
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
     }
@@ -887,7 +920,28 @@ export async function getUsersResultByModuleAssessment(req, res) {
         if(!userReports){
             return res.status(200).send({ success: true, message: 'No User\'s Found' });
         }
-        return res.status(200).send({ success: true, data: userReports });
+        let totalMarks = 0;
+        let maxMarks = 0;
+
+        // Iterate through each module to calculate marks
+        userReports.generatedModules.forEach(module => {
+            module.module.generatedQustionSet.forEach(questionSet => {
+                const question = questionSet.question;
+                if (questionSet.isSubmitted && questionSet.submittedAnswer === question.answer) {
+                    totalMarks += question.maxMarks;
+                }
+                maxMarks += question.maxMarks;
+            });
+        });
+
+        // Add the calculated marks to the response data
+        const responseData = {
+            ...userReports.toObject(),
+            totalMarks,
+            maxMarks
+        };
+
+        return res.status(200).send({ success: true, data: responseData });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
     }
