@@ -526,8 +526,8 @@ export async function StartAssessment(req, res) {
 export async function getAssesmentQuestion(req, res) {
     try {
         const { userID } = req.user;
-        const { moduleAssessmentid, moduleid, index } = req.query;
-
+        let { moduleAssessmentid, index } = req.query;
+        index--;
         // Find the UserModuleAssessmentReport for this user and module assessment
         const userModuleAssessmentReport = await UserModuleAssessmentReportModel.findOne({
             user: userID,
@@ -542,18 +542,36 @@ export async function getAssesmentQuestion(req, res) {
             return res.status(404).json({ success: false, message: 'Question can\'t be provided as the assessment is already completed' });
         }
 
-        // Find the specific module in the generatedModules
-        const moduleReport = userModuleAssessmentReport.generatedModules.find(
-            module => module.module.modueleInfo.toString() === moduleid
-        );
+        // Calculate the total number of questions in the entire assessment
+        const totalQuestions = userModuleAssessmentReport.generatedModules.reduce((total, module) => {
+            return total + module.module.generatedQustionSet.length;
+        }, 0);
 
-        if (!moduleReport) {
-            return res.status(404).json({ success: false, message: 'Module not found in the user assessment' });
+        // Determine the current module based on the index and start tracking cumulative questions
+        let cumulativeIndex = 0;
+        let moduleReport = null;
+        let moduleIndex = 0;
+
+        for (let i = 0; i < userModuleAssessmentReport.generatedModules.length; i++) {
+            const module = userModuleAssessmentReport.generatedModules[i];
+            const questionSetLength = module.module.generatedQustionSet.length;
+
+            if (index < cumulativeIndex + questionSetLength) {
+                moduleReport = module;
+                moduleIndex = index - cumulativeIndex;
+                break;
+            }
+
+            cumulativeIndex += questionSetLength;
         }
 
-        // Get the specific question using the provided index
+        if (!moduleReport) {
+            return res.status(404).json({ success: false, message: 'Question not found in the user assessment' });
+        }
+
+        // Get the specific question using the calculated moduleIndex
         const questionSet = moduleReport.module.generatedQustionSet;
-        const questionEntry = questionSet[index];
+        const questionEntry = questionSet[moduleIndex];
 
         if (!questionEntry) {
             return res.status(404).json({ success: false, message: 'Question not found' });
@@ -576,7 +594,7 @@ export async function getAssesmentQuestion(req, res) {
                 options: question.options,
                 maxMarks: question.maxMarks
             },
-            totalQuestions: questionSet.length,
+            totalQuestions, // Correct total number of questions in the entire assessment
             isSubmitted: questionEntry.isSubmitted,
             submittedAnswer: questionEntry.submittedAnswer
         });
@@ -673,7 +691,7 @@ export async function getAllModuleAssessment(req, res) {
         });
 
         // Fetch all module assessments with populated Assessmentmodules and their related modules
-        const moduleAssessments = await ModuleAssessmentModel.find()
+        const moduleAssessments = await ModuleAssessmentModel.find({ isVisible: true })
             .populate({ path: 'Assessmentmodules.module' });
 
         if (!moduleAssessments || moduleAssessments.length === 0) {

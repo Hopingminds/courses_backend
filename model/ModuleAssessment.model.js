@@ -14,6 +14,7 @@ const ModuleAssessmentSchema = new mongoose.Schema({
     lastDate: { type: Date },
     timelimit: { type: Number, default: 60 },
     isProtected: { type: Boolean, default: false },
+    isVisible: { type: Boolean, default: true },
     ProctoringFor: {
         mic: ProctoringOptionSchema,
         webcam: ProctoringOptionSchema,
