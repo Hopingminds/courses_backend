@@ -283,10 +283,6 @@ export async function getModuleAssessment(req, res) {
         const moduleAssessment = await ModuleAssessmentModel.findById(moduleAssessmentid)
             .populate({
                 path: 'Assessmentmodules.module',
-                populate: {
-                    path: 'questions',
-                    model: 'Qna' // Replace with the actual model name for questions
-                }
             });
 
         if (!moduleAssessment) {
@@ -542,6 +538,10 @@ export async function getAssesmentQuestion(req, res) {
             return res.status(404).json({ success: false, message: 'User Assessment not found' });
         }
 
+        if(userModuleAssessmentReport.isAssessmentCompleted){
+            return res.status(404).json({ success: false, message: 'Question can\'t be provided as the assessment is already completed' });
+        }
+
         // Find the specific module in the generatedModules
         const moduleReport = userModuleAssessmentReport.generatedModules.find(
             module => module.module.modueleInfo.toString() === moduleid
@@ -555,7 +555,6 @@ export async function getAssesmentQuestion(req, res) {
         const questionSet = moduleReport.module.generatedQustionSet;
         const questionEntry = questionSet[index];
 
-        console.log("questionSet",questionEntry.question)
         if (!questionEntry) {
             return res.status(404).json({ success: false, message: 'Question not found' });
         }
@@ -577,6 +576,7 @@ export async function getAssesmentQuestion(req, res) {
                 options: question.options,
                 maxMarks: question.maxMarks
             },
+            totalQuestions: questionSet.length,
             isSubmitted: questionEntry.isSubmitted,
             submittedAnswer: questionEntry.submittedAnswer
         });
@@ -591,6 +591,7 @@ export async function getAssesmentQuestion(req, res) {
 }
 */
 export async function getUserModuleAssessment(req, res){
+    const { userID } = req.user;
     const { moduleAssessmentid } = req.params;
 
     if (!moduleAssessmentid) {
@@ -598,7 +599,13 @@ export async function getUserModuleAssessment(req, res){
     }
 
     try {
-        // Find the ModuleAssessment by ID
+        // Fetch the user's assessment report
+        const userTestReport = await UserModuleAssessmentReportModel.findOne({
+            user: userID,
+            moduleAssessment: moduleAssessmentid
+        });
+
+        // Find the ModuleAssessment by ID with populated modules
         const moduleAssessment = await ModuleAssessmentModel.findById(moduleAssessmentid)
             .populate({
                 path: 'Assessmentmodules.module'
@@ -608,7 +615,37 @@ export async function getUserModuleAssessment(req, res){
             return res.status(404).json({ success: false, message: 'ModuleAssessment not found' });
         }
 
-        return res.status(200).json({ success: true, data: moduleAssessment });
+        // Aggregate progress for each module
+        const modulesWithProgress = moduleAssessment.Assessmentmodules.map(({ module }) => {
+            // Find the corresponding report for this module
+            const userModuleReport = userTestReport?.generatedModules.find(
+                report => report.module.modueleInfo.toString() === module._id.toString()
+            );
+
+            // Calculate progress if module is found in user's report
+            return {
+                module,
+                progress: userModuleReport ? calculateProgress(userModuleReport.module) : 0
+            };
+        });
+
+        // Calculate overall progress for the entire ModuleAssessment
+        const totalProgress = modulesWithProgress.reduce((sum, mod) => sum + mod.progress, 0) / modulesWithProgress.length || 0;
+
+        // Extract additional fields from the user's report, if available
+        const isAssessmentCompleted = userTestReport ? userTestReport.isAssessmentCompleted : false;
+        const isSuspended = userTestReport ? userTestReport.isSuspended : false;
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                ...moduleAssessment.toObject(),
+                Assessmentmodules: modulesWithProgress,
+                totalProgress, // Add total progress for this assessment
+                isAssessmentCompleted, // Add completion status
+                isSuspended // Add suspension status
+            }
+        });
     } catch (error) {
         console.error('Error fetching ModuleAssessment:', error);
         return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
@@ -733,6 +770,124 @@ export async function submitAnswerForModuleAssessment(req, res) {
         await userAssessmentReport.save();
 
         return res.status(200).json({ success: true, message: 'Answer submitted successfully' });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    }
+}
+
+/** PUT: http://localhost:8080/api/submitanswerformoduleassessment
+* @param: {
+    "header" : "User <token>"
+}
+body: {
+    "moduleAssessmentid": "66cda03e48671d0f30160493",
+    "isAssessmentCompleted":true,
+    "isSuspended": false,
+    "ProctoringScore":{
+        "mic":"345",
+        "webcam":"643",
+        "TabSwitch":"3456",
+        "multiplePersonInFrame":"2342",
+        "PhoneinFrame":"3456",
+        "SoundCaptured":"5432"
+    },
+    "remarks":"ye kya kar diya"
+}
+*/
+export async function finishModuleAssessment(req, res) {
+    try {
+        const { userID } = req.user;
+        const { moduleAssessmentid, isAssessmentCompleted, isSuspended, ProctoringScore, remarks } = req.body;
+
+        // Validate moduleAssessmentid
+        if (!moduleAssessmentid) {
+            return res.status(400).send({ success: false, message: 'Invalid moduleAssessmentid provided.' });
+        }
+        const userReport = await UserModuleAssessmentReportModel.findOneAndUpdate(
+            { user: userID, moduleAssessment: moduleAssessmentid },
+            { $set: { isAssessmentCompleted, isSuspended, ProctoringScore, remarks } },
+            { new: true }
+        )
+
+        if (!userReport) {
+            return res.status(404).send({ success: false, message: 'User Assessment not found or already completed.' });
+        }
+
+        return res.status(200).send({ success: true, message: "Assessment submitted successfully." });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    }
+}
+
+/** GET: http://localhost:8080/api/getallmoduleassessment
+* @param: {
+    "header" : "Admin <token>"
+}
+*/
+export async function getAllModuleAssessmentForAdmin(req, res) {
+    try {
+        const moduleAssessments = await ModuleAssessmentModel.find().populate({ path: 'Assessmentmodules.module' });
+
+        if(!moduleAssessments){
+            return res.status(200).send({ success: true, message: 'No Assessment\'s Found' });
+        }
+        return res.status(200).send({ success: true, data: moduleAssessments });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    }
+}
+
+/** GET: http://localhost:8080/api/getallusersresultbymoduleassessment/:moduleAssessmentid
+* @param: {
+    "header" : "Admin <token>"
+}
+*/
+export async function getAllUsersResultByModuleAssessment(req, res) {
+    try {
+        const { moduleAssessmentid } = req.params;
+        if(!moduleAssessmentid){
+            return res.status(404).send({ success: false, message: 'moduleAssessmentid is Required' });
+        }
+        const userReports = await UserModuleAssessmentReportModel.find({ moduleAssessment: moduleAssessmentid})
+            .populate({
+                path: 'generatedModules.module.modueleInfo',
+                model: 'AssessmentModule',
+                select: '-questions'
+            })
+        
+        if(!userReports){
+            return res.status(404).send({ success: false, message: 'No User\'s Assessment Report Found' });
+        }
+        return res.status(200).send({ success: true, data: userReports });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    }
+}
+
+/** GET: http://localhost:8080/api/getuserresultbymoduleassessment?userID=66acc4dfbba451ebd918670b&moduleAssessmentid=66cda03e48671d0f30160493
+* @param: {
+    "header" : "Admin <token>"
+}
+*/
+export async function getUsersResultByModuleAssessment(req, res) {
+    try {
+        const { userID, moduleAssessmentid } = req.query;
+
+        const userReports = await UserModuleAssessmentReportModel.findOne({ user: userID, moduleAssessment: moduleAssessmentid})
+            .populate({
+                path: 'generatedModules.module.modueleInfo',
+                model: 'AssessmentModule',
+                select: '-questions'
+            })
+            .populate({
+                path: 'generatedModules.module.generatedQustionSet.question',
+                model: 'Qna'
+            });
+
+        if(!userReports){
+            return res.status(200).send({ success: true, message: 'No User\'s Found' });
+        }
+        return res.status(200).send({ success: true, data: userReports });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
     }

@@ -12,12 +12,15 @@ router.route('/createcourseassessment').post(AdminAuth, upload.single('questions
 router.route('/submitassessment').post(Auth, AssessmentController.submitAssessment);
 router.route('/resetassessment').post(Auth, AssessmentController.requestForReassessment);
 router.route('/createmoduleassessment').post(AdminAuth, ModuleAssessmentController.createModuleAssessment);
-router.route('/addquestionstoassessmentmodule').post( ModuleAssessmentController.addQuestionsToModuleAssessment);
+router.route('/addquestionstoassessmentmodule').post(AdminAuth, ModuleAssessmentController.addQuestionsToModuleAssessment);
 router.route('/startmoduleassessment').post(Auth, ModuleAssessmentController.StartAssessment);
 
 // GET ROUTES
 router.route('/courseassessments/:coursename').get(Auth, AssessmentController.getCourseAllAssessment);
 router.route('/getassessment').get(Auth, AssessmentController.getAssesment);
+router.route('/getallmoduleassessment').get(AdminAuth, ModuleAssessmentController.getAllModuleAssessmentForAdmin);
+router.route('/getallusersresultbymoduleassessment/:moduleAssessmentid').get(AdminAuth, ModuleAssessmentController.getAllUsersResultByModuleAssessment);
+router.route('/getuserresultbymoduleassessment').get(AdminAuth, ModuleAssessmentController.getUsersResultByModuleAssessment);
 router.route('/getmoduleassessment/:moduleAssessmentid').get(AdminAuth, ModuleAssessmentController.getModuleAssessment);
 router.route('/getassesmentquestion').get(Auth, ModuleAssessmentController.getAssesmentQuestion);
 router.route('/getallusermoduleassessment').get(Auth, ModuleAssessmentController.getAllModuleAssessment);
@@ -29,6 +32,7 @@ router.route('/submitassessment').put(Auth, AssessmentController.finishAssessmen
 router.route('/updateassessment').put(AdminAuth, AssessmentController.updateAssessment);
 router.route('/updatemoduleassessment/:moduleAssessmentid').put(AdminAuth, ModuleAssessmentController.editModuleAssessment);
 router.route('/submitanswerformoduleassessment').put(Auth, ModuleAssessmentController.submitAnswerForModuleAssessment);
+router.route('/submitmoduleassessment').put(Auth, ModuleAssessmentController.finishModuleAssessment);
 
 //DELETE ROUTES
 router.route('/deleteassessment').delete(AdminAuth, AssessmentController.deleteAssessment)
