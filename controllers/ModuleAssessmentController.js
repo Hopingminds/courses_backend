@@ -879,6 +879,11 @@ export async function getAllUsersResultByModuleAssessment(req, res) {
                 select: '-questions'
             })
             .populate({
+                path: 'user',
+                model: 'User',
+                select: '-password -token -purchased_courses'
+            })
+            .populate({
                 path: 'generatedModules.module.generatedQustionSet.question',
                 model: 'Qna'
             });
