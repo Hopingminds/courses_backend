@@ -754,27 +754,33 @@ body: {
 export async function submitAnswerForModuleAssessment(req, res) {
     try {
         const { userID } = req.user;
-        const { moduleAssessmentid, moduleid, questionId, answer } = req.body;
-        
-        const userAssessmentReport = await UserModuleAssessmentReportModel.findOne({ user: userID, moduleAssessment: moduleAssessmentid })
+        let { moduleAssessmentid, index, answer } = req.body;
+        index--;
+        const userAssessmentReport = await UserModuleAssessmentReportModel.findOne({
+            user: userID,
+            moduleAssessment: moduleAssessmentid
+        });
 
         if (!userAssessmentReport) {
             return res.status(404).json({ success: false, message: 'Assessment report not found' });
         }
 
-        // Find the module in the generatedModules array
-        const moduleReport = userAssessmentReport.generatedModules?.find(
-            report => report.module.modueleInfo.toString() === moduleid
-        );
-        
-        if (!moduleReport) {
-            return res.status(404).json({ success: false, message: 'Module report not found' });
-        }
+        // Iterate through each module to find the question by index
+        let questionReport;
+        let questionModule;
+        let totalQuestions = 0;
 
-        // Update the answers for the specified question
-        const questionReport = moduleReport.module.generatedQustionSet.find(
-            question => question.question.toString() === questionId
-        );
+        for (const module of userAssessmentReport.generatedModules) {
+            const questionSet = module.module.generatedQustionSet;
+
+            if (totalQuestions + questionSet.length > index) {
+                questionReport = questionSet[index - totalQuestions];
+                questionModule = module;
+                break;
+            }
+
+            totalQuestions += questionSet.length;
+        }
 
         if (!questionReport) {
             return res.status(404).json({ success: false, message: 'Question not found' });
