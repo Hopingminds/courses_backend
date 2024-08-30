@@ -686,7 +686,7 @@ export async function getAllModuleAssessment(req, res) {
         const { userID } = req.user;
 
         // Fetch the user's assessment report
-        const userTestReport = await UserModuleAssessmentReportModel.findOne({
+        const userTestReports = await UserModuleAssessmentReportModel.find({
             user: userID
         });
 
@@ -703,34 +703,45 @@ export async function getAllModuleAssessment(req, res) {
             // Aggregate progress for each module
             const modulesWithProgress = moduleAssessment.Assessmentmodules.map(({ module }) => {
                 // Find the corresponding report for this module
-                const userModuleReport = userTestReport?.generatedModules.find(
-                    report => report.module.modueleInfo.toString() === module._id.toString()
+                const userModuleReport = userTestReports.find(report =>
+                    report.generatedModules.some(
+                        genMod => genMod.module.modueleInfo.toString() === module._id.toString()
+                    )
                 );
 
                 // Calculate progress if module is found in user's report
                 return {
                     module,
-                    progress: userModuleReport ? calculateProgress(userModuleReport.module) : 0
+                    progress: userModuleReport ? calculateProgress(userModuleReport.generatedModules.find(
+                        genMod => genMod.module.modueleInfo.toString() === module._id.toString()
+                    ).module) : 0
                 };
             });
 
             // Calculate overall progress for all modules in this assessment
             const totalProgress = modulesWithProgress.reduce((sum, mod) => sum + mod.progress, 0) / modulesWithProgress.length || 0;
 
-            // Extract additional fields from the user's report, if available
-            const assessmentReport = userTestReport?.generatedModules.find(
-                report => report.module.modueleInfo.toString() === moduleAssessment._id.toString()
-            );
-            const isAssessmentCompleted = assessmentReport ? assessmentReport.isAssessmentCompleted : false;
-            const isSuspended = assessmentReport ? assessmentReport.isSuspended : false;
-
-            return {
+            // Initialize the response object with common fields
+            const response = {
                 ...moduleAssessment.toObject(),
                 Assessmentmodules: modulesWithProgress,
                 totalProgress, // Add total progress for this assessment
-                isAssessmentCompleted, // Add completion status
-                isSuspended // Add suspension status
+                isSuspended: false, // Default to false if not found
+                isAssessmentCompleted: false // Default to false if not found
             };
+
+            // Find the specific assessment report for the current moduleAssessment
+            const assessmentReport = userTestReports.find(
+                report => report.moduleAssessment.toString() === moduleAssessment._id.toString()
+            );
+
+            // Update isSuspended and isAssessmentCompleted if the specific assessment report exists
+            if (assessmentReport) {
+                response.isSuspended = assessmentReport.isSuspended;
+                response.isAssessmentCompleted = assessmentReport.isAssessmentCompleted;
+            }
+
+            return response;
         });
 
         return res.status(200).json({ success: true, data: moduleAssessmentsWithProgress });
