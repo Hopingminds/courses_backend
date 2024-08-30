@@ -389,6 +389,30 @@ export async function editModuleAssessment(req, res) {
 
 }
 
+/** PUT: http://localhost:8080/api/changeassessmentvisiblity/:moduleAssessmentid
+* @param: {
+    "header" : "Admin <token>"
+}
+*/
+export async function ChangeAssessmentVisiblity(req, res) {
+    try {
+        const { moduleAssessmentid } = req.params;
+
+        const ModuleAssessment = await ModuleAssessmentModel.findById(moduleAssessmentid);
+
+        if (!ModuleAssessment) {
+            return res.status(404).json({ success: false, message: 'Module Assessment not found' });
+        }
+
+        ModuleAssessment.isVisible = !ModuleAssessment.isVisible;
+
+        await ModuleAssessment.save();
+        return res.status(200).json({ success: true, message: 'Visibility Changed successfully', ModuleAssessment });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    }
+}
+
 /** DELETE: http://localhost:8080/api/deletemodulefromassessment
 * @param: {
     "header" : "Admin <token>"

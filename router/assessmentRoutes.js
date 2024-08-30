@@ -33,6 +33,7 @@ router.route('/updateassessment').put(AdminAuth, AssessmentController.updateAsse
 router.route('/updatemoduleassessment/:moduleAssessmentid').put(AdminAuth, ModuleAssessmentController.editModuleAssessment);
 router.route('/submitanswerformoduleassessment').put(Auth, ModuleAssessmentController.submitAnswerForModuleAssessment);
 router.route('/submitmoduleassessment').put(Auth, ModuleAssessmentController.finishModuleAssessment);
+router.route('/changeassessmentvisiblity/:moduleAssessmentid').put(AdminAuth, ModuleAssessmentController.ChangeAssessmentVisiblity);
 
 //DELETE ROUTES
 router.route('/deleteassessment').delete(AdminAuth, AssessmentController.deleteAssessment)
