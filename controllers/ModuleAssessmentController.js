@@ -534,6 +534,8 @@ export async function getAssesmentQuestion(req, res) {
             moduleAssessment: moduleAssessmentid
         });
 
+        const ModuleAssessment = await ModuleAssessmentModel.findById(moduleAssessmentid)
+
         if (!userModuleAssessmentReport) {
             return res.status(404).json({ success: false, message: 'User Assessment not found' });
         }
@@ -588,6 +590,7 @@ export async function getAssesmentQuestion(req, res) {
         return res.status(200).json({
             success: true,
             message: 'Question retrieved successfully',
+            ModuleAssessment,
             question: {
                 _id: question._id,
                 question: question.question,
