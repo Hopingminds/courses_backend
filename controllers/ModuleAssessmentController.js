@@ -987,7 +987,8 @@ export async function getUsersResultByModuleAssessment(req, res) {
             .populate({
                 path: 'generatedModules.module.generatedQustionSet.question',
                 model: 'Qna'
-            });
+            })
+            .lean();  // Use lean() to return plain JavaScript objects
 
         if(!userReports){
             return res.status(200).send({ success: true, message: 'No User\'s Found' });
@@ -997,18 +998,29 @@ export async function getUsersResultByModuleAssessment(req, res) {
 
         // Iterate through each module to calculate marks
         userReports.generatedModules.forEach(module => {
+            let moduleTotalMarks = 0;
+            let moduleMaxMarks = 0;
+
             module.module.generatedQustionSet.forEach(questionSet => {
                 const question = questionSet.question;
                 if (questionSet.isSubmitted && questionSet.submittedAnswer === question.answer) {
-                    totalMarks += question.maxMarks;
+                    moduleTotalMarks += question.maxMarks;
                 }
-                maxMarks += question.maxMarks;
+                moduleMaxMarks += question.maxMarks;
             });
+
+            // Add the marks directly to the module object
+            module.module.modueleInfo.moduleTotalMarks = moduleTotalMarks;
+            module.module.modueleInfo.moduleMaxMarks = moduleMaxMarks;
+
+            // Accumulate total and max marks
+            totalMarks += moduleTotalMarks;
+            maxMarks += moduleMaxMarks;
         });
 
         // Add the calculated marks to the response data
         const responseData = {
-            ...userReports.toObject(),
+            ...userReports,
             totalMarks,
             maxMarks
         };
