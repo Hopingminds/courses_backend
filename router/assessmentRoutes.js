@@ -38,5 +38,6 @@ router.route('/changeassessmentvisiblity/:moduleAssessmentid').put(AdminAuth, Mo
 //DELETE ROUTES
 router.route('/deleteassessment').delete(AdminAuth, AssessmentController.deleteAssessment)
 router.route('/deletemodulefromassessment').delete(AdminAuth, ModuleAssessmentController.deleteModuleFromAssessment)
+router.route('/deleteModuleAssessment').delete(AdminAuth, ModuleAssessmentController.deleteModuleAssessment)
 
 export default router;

@@ -988,7 +988,7 @@ export async function getUsersResultByModuleAssessment(req, res) {
                 path: 'generatedModules.module.generatedQustionSet.question',
                 model: 'Qna'
             })
-            .lean();  // Use lean() to return plain JavaScript objects
+            .lean();
 
         if(!userReports){
             return res.status(200).send({ success: true, message: 'No User\'s Found' });
@@ -1026,6 +1026,30 @@ export async function getUsersResultByModuleAssessment(req, res) {
         };
 
         return res.status(200).send({ success: true, data: responseData });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    }
+}
+
+/** DELETE: http://localhost:8080/api/deletemoduleassessment
+* @param: {
+    "header" : "Admin <token>"
+}
+body: {
+    "moduleAssessmentid":"66cda03e48671d0f30160343"
+}
+*/
+export async function deleteModuleAssessment(req, res) {
+    try {
+        const { moduleAssessmentid } = req.body;
+
+        const ModuleAssessment = await ModuleAssessmentModel.findByIdAndDelete(moduleAssessmentid);
+
+        if(!ModuleAssessment){
+            return res.status(404).send({ success: true, message: 'Module Assessment Not Found'});
+        }
+
+        return res.status(200).json({ success: true, message: 'Module Assessment Deleted Successfully.' });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
     }
