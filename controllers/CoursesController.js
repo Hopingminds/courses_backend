@@ -534,6 +534,14 @@ export async function addToCart(req, res) {
 		if (!cart) {
 			cart = new cartModel({ _id: userID, courses: [] })
 		}
+		else {
+			// Filter out any invalid or missing courses (null courses)
+			const validCourses = cart.courses.filter((item) => item.course !== null);
+			if (validCourses.length !== cart.courses.length) {
+				cart.courses = validCourses;
+				await cart.save();  // Save the cleaned cart to the database
+			}
+		}
 
 		const existingCartIndex = cart.courses.findIndex((p) =>
 			p.course.equals(course._id)
