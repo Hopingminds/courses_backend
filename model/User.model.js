@@ -31,6 +31,11 @@ export const UserSchema = new mongoose.Schema({
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'Courses'
             },
+            BatchId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Batch',
+                default: null
+            },
             courseStartDate: { type: Date },
             allotedByCollege: {type: Boolean, default: false},
             completed_lessons: [{type: mongoose.Schema.Types.ObjectId, default: null}],
