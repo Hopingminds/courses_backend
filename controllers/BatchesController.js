@@ -410,3 +410,18 @@ export async function removeUserFromBatch(req, res) {
         return res.status(500).send({ success: false, message: 'Internal server error' + error.message });
     }
 }
+
+
+/** GET: http://localhost:8080/api/getBatch/:batchId */
+export async function getBatch(req, res) {
+    try {
+        const { batchId } = req.params;
+        const batch = await BatchModel.findById(batchId).populate({ path:'course', select: '-curriculum' });
+        if (!batch) {
+            return res.status(404).send({ success: false, message: 'Batch not found'});
+        }
+        return res.status(200).send({ success: true, batch });
+    } catch (error) {
+        return res.status(500).send({ success: false, message: 'Internal server error' + error.message });
+    }
+}

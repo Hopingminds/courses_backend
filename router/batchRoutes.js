@@ -11,6 +11,7 @@ router.route('/setBatchForStudent').post(Auth, BatchesController.setBatchForStud
 router.route('/addUserToBatch').post(AdminAuth, BatchesController.addUserToBatch);
 
 // GET ROUTES
+router.route('/getBatch/:batchId').get(AdminAuth, BatchesController.getBatch);
 router.route('/getUpcomingBatchesForCourse/:courseId').get(BatchesController.getUpcomingBatchesForCourse);
 router.route('/getAllBatchesForCourse/:courseId').get(BatchesController.getAllBatchesForCourse);
 // DELETE ROUTES
