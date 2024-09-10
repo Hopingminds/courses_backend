@@ -4,9 +4,11 @@ const router = Router();
 import * as BatchesController from "../controllers/BatchesController.js"
 import instAuth from '../middleware/instAuth.js'
 import Auth from '../middleware/auth.js';
+import AdminAuth from '../middleware/adminauth.js';
 
 // POST ROUTES
 router.route('/setBatchForStudent').post(Auth, BatchesController.setBatchForStudent);
+router.route('/addUserToBatch').post(AdminAuth, BatchesController.addUserToBatch);
 
 // GET ROUTES
 router.route('/getUpcomingBatchesForCourse/:courseId').get(BatchesController.getUpcomingBatchesForCourse);
@@ -14,5 +16,8 @@ router.route('/getAllBatchesForCourse/:courseId').get(BatchesController.getAllBa
 // DELETE ROUTES
 
 // PUT ROUTES
+router.route('/editBatchDetails').put(AdminAuth, BatchesController.editBatchDetails);
+router.route('/editBatchCurriculum/:batchId').put(AdminAuth, BatchesController.editBatchCurriculum);
+router.route('/removeUserFromBatch').put(AdminAuth, BatchesController.removeUserFromBatch);
 
 export default router;
