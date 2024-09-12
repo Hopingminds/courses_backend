@@ -425,3 +425,23 @@ export async function getBatch(req, res) {
         return res.status(500).send({ success: false, message: 'Internal server error' + error.message });
     }
 }
+
+/** GET: http://localhost:8080/api/getAllCourseUsers/:courseId */
+export async function getAllCourseUsers(req, res) {
+	const { courseId } = req.params;  // Get courseId from the request parameters
+
+    try {
+        // Find users who have purchased the course with the given courseId
+        const users = await UserModel.find({
+            'purchased_courses.course': courseId  // Filter users by courseId in purchased_courses
+        });
+
+        if (!users || users.length === 0) {
+            return res.status(404).json({ success: false, message: 'No users found for this course' });
+        }
+
+        res.status(200).json({ success: true, users });
+	} catch (error) {
+		res.status(500).json({ success: false, message: 'Internal server error' + error.message });
+	}
+}
