@@ -18,6 +18,6 @@ export const EnquirySchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-});
+}, { timestamps: true });
 
 export default mongoose.model.Enquirys || mongoose.model('Enquiry', EnquirySchema);
