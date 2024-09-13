@@ -6,6 +6,9 @@ import UserModel from '../model/User.model.js'
 import OrdersModel from '../model/Orders.model.js'
 import { populate } from 'dotenv'
 import mongoose from "mongoose";
+import BatchModel from '../model/Batch.model.js';
+import { scheduleAddtoCartMail } from './HelpersController.js'
+
 // helper function
 function getRandomSubset(arr, size) {
 	const shuffled = arr.sort(() => 0.5 - Math.random())
@@ -192,59 +195,63 @@ export async function getCourseBySlug(req, res) {
 }
 
 export async function getUserCourseBySlug(req, res) {
-	function getCourseDataBySlug(data, slug) {
-		// Loop through the purchased_courses array
-		for (let course of data.purchased_courses) {
-			// Check if course and course.slug are defined
-			if (course && course.course && course.course.slug) {
-				// Check if the course slug matches the one we're looking for
-				if (course.course.slug === slug) {
-					// Return the matching course data
-					return {
-						course: course.course,
-						completed_lessons: course.completed_lessons,
-						completed_assignments: course.completed_assignments,
-					};
-				}
-			}
-		}
-		// If no course matches, return null or an appropriate message
-		return null
-	}
+    
+    try {function getCourseDataBySlug(data, slug) {
+        for (let course of data.purchased_courses) {
+            if (course && course.course && course.course.slug) {
+                if (course.course.slug === slug) {
+                    return {
+                        course: course.course,
+                        completed_lessons: course.completed_lessons,
+                        completed_assignments: course.completed_assignments,
+                        batchId: course.BatchId  // Add BatchId for batch retrieval
+                    };
+                }
+            }
+        }
+        return null;
+    }
 
-	try {
-		const { email } = req.params
-		const { coursename } = req.params
-		const user = await UserModel.findOne({ email }).populate({
-			path: 'purchased_courses.course',
-			populate: { path: 'instructor', select: '-token -password' }
-		})
+        const { email, coursename } = req.params;
 
-		if (!user) {
-			return res
-				.status(404)
-				.json({ success: false, message: 'User not found' })
-		}
+        const user = await UserModel.findOne({ email }).populate({
+            path: 'purchased_courses.course',
+            populate: { path: 'instructor', select: '-token -password' }
+        });
 
-		const courseData = getCourseDataBySlug(user, coursename)
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
 
-		if (!courseData) {
-			// If courseData is null, return a 404 error or a similar response
-			return res.status(404).json({ success: false, message: 'Course not found' });
-		}
-		
-		const totalLessons = courseData.course.curriculum.reduce((total, chapter) => {
-			return total + chapter.lessons.length;
-		}, 0);
+        const courseData = getCourseDataBySlug(user, coursename);
 
-		res.status(200).json({ success: true, data: courseData, totalLessons })
-	} catch (error) {
-		console.error(error)
-		res.status(500).json({
-			success: false,
-			message: 'Internal server error',
-		})
-	}
+        if (!courseData) {
+            return res.status(404).json({ success: false, message: 'Course not found' });
+        }
+
+        // Fetch the batch based on the BatchId from the purchased course
+        const batch = await BatchModel.findById(courseData.batchId).populate('curriculum');
+
+        if (!batch) {
+            return res.status(404).json({ success: false, message: 'Batch not found' });
+        }
+
+        // Replace the course curriculum with the batch curriculum
+        courseData.course.curriculum = batch.curriculum;
+
+        // Calculate total lessons based on the batch curriculum
+        const totalLessons = batch.curriculum.reduce((total, chapter) => {
+            return total + chapter.lessons.length;
+        }, 0);
+
+        res.status(200).json({ success: true, data: courseData, totalLessons });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+        });
+    }
 }
 
 /** PUT: https://localhost:8080/api/updatecourse */
@@ -556,6 +563,11 @@ export async function addToCart(req, res) {
 		cart.courses.push({ course: courseid });
 
 		await cart.save()
+
+		const user = await UserModel.findById(userID)
+		let subject = "Congratulations! You're One Step Closer to Assured Placement with Hoping Minds";
+		let text = "Your course is waiting"
+		 ( user.name, user.email, 20, subject, text, userID, courseid);
 
 		res.status(201).json({
 			success: true,

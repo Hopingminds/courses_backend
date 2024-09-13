@@ -32,87 +32,88 @@ export async function verifyUser(req, res, next) {
 */
 export async function register(req, res) {
 	try {
-		const {password, name, profile, email, college, stream , yearofpass, phone, degree } = req.body
+		const { password, name, profile, email, college, stream, yearofpass, phone, degree } = req.body;
+
+		if (!email) {
+			return res.status(400).json({ success: false, message: 'Email is required' });
+		}
+
+		if (!password) {
+			return res.status(400).json({ success: false, message: 'Password is required' });
+		}
 
 		// check for existing email
-		const existEmail = new Promise((resolve, reject) => {
-			UserModel.findOne({ email })
-				.exec()
-				.then((email) => {
-					if (email) {
-						reject({ error: 'Email already exsists!' })
+		const existingUser = await UserModel.findOne({ email });
+		if (existingUser) {
+			return res.status(400).json({ success: false, message: 'Email already exists!' });
+		}
+
+		const hashedPassword = await bcrypt.hash(password, 10);
+		const user = new UserModel({
+			password: hashedPassword,
+			profile: profile || '',
+			email,
+			phone,
+			college,
+			stream,
+			degree,
+			name,
+			yearofpass
+		});
+
+		// Send registration email
+		let mailSent = false;
+		await registerMail({
+            body: {
+                username: name,
+                userEmail: email,
+                subject: `Congratulations! You're One Step Closer to Assured Placement with Hoping Minds`,
+                text: `Dear ${name},</br></br>
+					You are Registered with Hoping Minds
+					Best regards,</br></br>
+					Hoping Minds</br>
+					support@hopingminds.com</br>
+					9193700050, 9193100050`,
+            },
+			}, {
+				status(status) {
+					if (status === 200) {
+						mailSent = true;
 					} else {
-						resolve()
+						mailSent = false;
 					}
-				})
-				.catch((err) => {
-					reject(new Error(err))
-				})
-		})
+				},
+			});
 
-		Promise.all([existEmail])
-			.then(() => {
-				if (password) {
-					bcrypt
-						.hash(password, 10)
-						.then((hashedPassword) => {
-							const user = new UserModel({
-								// username,
-								password: hashedPassword,
-								profile: profile || '',
-								email,
-								phone,
-								college, 
-								stream , 
-								degree,
-								name,
-								yearofpass
-							})
+		if (mailSent) {
+			// Save user to the database
+			const savedUser = await user.save();
 
-							// return save result as a response
-							user.save()
-								.then((user) =>{
-									const token = jwt.sign(
-										{
-											userID: user._id,
-											email: user.email,
-											role: user.role,
-										},
-										process.env.JWT_SECRET,
-										{ expiresIn: '7d' }
-									)
-									
-									UserModel.updateOne({ email:user.email }, { token })
-									.exec()
-									.then(()=>{
-										return res.status(201).send({
-											msg: 'User Register Successfully',
-											email: user.email,
-											role: user.role,
-											token,
-										})
-									})
-									.catch((error)=>{
-										return res.status(200).json({ success: false, message: 'Internal Server Error - Error Saving Token', error});
-									})
-								}
-								)
-								.catch((error) =>
-									res.status(500).send({ error })
-								)
-						})
-						.catch((error) => {
-							return res.status(500).send({
-								error: 'Enable to hashed password',
-							})
-						})
-				}
-			})
-			.catch((error) => {
-				return res.status(500).send({ error })
-			})
+			// Generate token
+			const token = jwt.sign(
+				{
+					userID: savedUser._id,
+					email: savedUser.email,
+					role: savedUser.role,
+				},
+				process.env.JWT_SECRET,
+				{ expiresIn: '7d' }
+			);
+
+			// Update user with token
+			await UserModel.updateOne({ email: savedUser.email }, { token });
+
+			return res.status(201).json({
+				msg: 'User Registered Successfully',
+				email: savedUser.email,
+				role: savedUser.role,
+				token,
+			});
+		} else {
+			return res.status(500).json({ success: false, message: 'Failed to send registration email' });
+		}
 	} catch (error) {
-		return res.status(500).json({ success: false, message: 'Internal server error' });
+		res.status(500).json({ success: false, message: 'Internal server error' + error.message });
 	}
 }
 

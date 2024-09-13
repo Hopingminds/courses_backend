@@ -1,5 +1,9 @@
 import CollegesModel from '../model/CollegesData.model.js'
+import EnquiryModel from '../model/Enquiry.model.js';
 import GroupsModel from '../model/Groups.model.js';
+import UserModel from '../model/User.model.js';
+import { registerMail } from './mailer.js';
+import cron from 'node-cron';
 
 export async function getColleges(req, res) {
     try {
@@ -66,6 +70,113 @@ export async function isTeacherChatAvailable(req, res) {
         }
 
         res.json({ success: true, message: "Teacher chat is available" });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message || 'Internal server error' });
+    }
+}
+
+export async function scheduleAddtoCartMail(name, email, totalMinutes, subject, text, userID, courseId) {
+    if (totalMinutes < 1) {
+        throw new Error('Minutes must be greater than 0.');
+    }
+
+    // Calculate hours and remaining minutes
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    // Create cron expression based on the calculated hours and minutes
+    let cronExpression;
+    if (hours > 0) {
+        cronExpression = `${minutes} ${hours} * * *`;
+    } else {
+        cronExpression = `*/${minutes} * * * *`;
+    }
+
+    // Schedule the task to run after the specified time
+    cron.schedule(cronExpression, async () => {
+        try {
+            // Find the user by their ID
+            const user = await UserModel.findById(userID).populate('purchased_courses.course');
+
+            if (!user) {
+                console.log('User not found');
+                return;
+            }
+
+            // Check if the user has already purchased the course
+            const hasPurchasedCourse = user.purchased_courses.some(
+                (purchasedCourse) => purchasedCourse.course._id.equals(courseId)
+            );
+
+            if (hasPurchasedCourse) {
+                console.log('User has already purchased the course, not sending mail.');
+                return; // Don't send the email if the user has already purchased the course
+            }
+
+            await registerMail({
+                body: {
+                    username: name,
+                    userEmail: email,
+                    subject: subject,
+                    text: text,
+                },
+            }, {
+                status(status) {
+                    if (status === 200) {
+                        console.log('Mail sent successfully');
+                    } else {
+                        console.log('Failed to send mail');
+                    }
+                },
+            });
+        } catch (error) {
+            console.error('Error sending mail:', error);
+        }
+    }, {
+        scheduled: true,
+        timezone: "Asia/Kolkata" // Set your appropriate timezone
+    });
+}
+
+/** POST: http://localhost:8080/api/sendEnquiry
+body: {
+    "email": "karyasdfanshul@gmail.com",
+    "name": "anshul",
+    "number": "7654345672",
+    "message": "message to be sent"
+}
+*/
+export async function sendEnquiry(req, res) {
+    try {
+        const { name, email, number, message } = req.body;
+
+        const enquiry = await EnquiryModel.findOne({ email });
+        if(enquiry){
+            res.status(201).json({ success: false, message: 'Enquiry already exists' });
+        }
+
+        const newEnquiry = new EnquiryModel({
+            name: name,
+            email: email,
+            number: number,
+            message: message
+        });
+
+        newEnquiry.save();
+        res.status(201).json({ success: true, message: 'Enquiry sent successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message || 'Internal server error' });
+    }
+}
+
+/** GET: http://localhost:8080/api/getAllEnquiry */
+export async function getAllEnquiry(req, res) {
+    try {
+        const enquiries = await EnquiryModel.find();
+        if(!enquiries){
+            res.status(404).json({ success: false, message: 'No enquiries found' });
+        }
+        res.status(200).json( { success: true, enquiries });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message || 'Internal server error' });
     }
