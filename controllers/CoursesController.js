@@ -567,7 +567,7 @@ export async function addToCart(req, res) {
 		const user = await UserModel.findById(userID)
 		let subject = "Congratulations! You're One Step Closer to Assured Placement with Hoping Minds";
 		let text = "Your course is waiting"
-		 ( user.name, user.email, 20, subject, text, userID, courseid);
+		scheduleAddtoCartMail( user.name, user.email, 20, subject, text, userID, courseid);
 
 		res.status(201).json({
 			success: true,
