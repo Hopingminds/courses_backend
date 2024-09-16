@@ -30,6 +30,7 @@ router.route('/generateOTP').get(controller.verifyUser, localVariables, controll
 router.route('/verifyOTP').get(controller.verifyOTP)
 router.route('/createResetSession').get(controller.createResetSession)
 
+router.route('/getAllfilesfromAws').get(awsController.getAllfilesfromAws)
 router.route('/getfilesfromaws').get(awsController.getfilesfromaws)
 router.route('/getfilefromaws/:filename').get(awsController.getfilefromaws)
 router.route('/getcoursemedia/:slug').get(AdminAuth, awsController.getCourseFilesFromAws)

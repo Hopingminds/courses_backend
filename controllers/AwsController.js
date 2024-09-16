@@ -277,3 +277,17 @@ export async function getCourseFilesFromAws(req, res) {
         return res.status(500).json({ success: false, message: "Failed to retrieve instructor media." });
     }
 }
+
+/** GET: http://localhost:8080/api/getAllfilesfromAws */
+export async function getAllfilesfromAws(req, res) {
+    let r = await s3.listObjectsV2({ Bucket: BUCKET }).promise();
+    let data = []
+    r.Contents.map(item => {
+        data.push({
+            title: item.Key.replace(/^assets\/\d+-/, ''),
+            key: item.Key,
+            url:  `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${item.Key.replace(/ /g, "%20")}`
+        })
+    })
+    return res.status(200).json({success: true, data})
+}
