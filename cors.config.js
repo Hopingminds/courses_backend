@@ -4,6 +4,7 @@ const CorsConfig = [
     "https://hopingminds.com",
     "https://courses-admin-gules.vercel.app",
     "https://hmcodelab.com",
+    "https://www.hopingminds.com",
     "https://teacher-panel-nu.vercel.app",
     "https://website-hm.vercel.app"
 ]
