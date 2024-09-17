@@ -30,6 +30,4 @@ jobs:
     - run: |
         touch .env
         echo "${{ secrets.PROD_ENV_FILE }}" > .env
-    - run: |
-        PM2_HOME='/root/.pm2'
-        pm2 restart api-hm-backend
+    - run: pm2 restart api-hm-backend
