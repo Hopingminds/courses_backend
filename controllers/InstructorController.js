@@ -7,6 +7,7 @@ import aws from 'aws-sdk'
 import multer from 'multer'
 import multerS3 from 'multer-s3'
 import { v4 as uuidv4 } from 'uuid';
+import slugify from 'slugify'
 
 aws.config.update({
 	secretAccessKey: process.env.AWS_ACCESS_SECRET,
