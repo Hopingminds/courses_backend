@@ -281,13 +281,61 @@ export async function getCourseFilesFromAws(req, res) {
 /** GET: http://localhost:8080/api/getAllfilesfromAws */
 export async function getAllfilesfromAws(req, res) {
     let r = await s3.listObjectsV2({ Bucket: BUCKET }).promise();
-    let data = []
+    let folderData = {};
+
+    // Helper function to categorize files based on their extension
+    const categorizeFile = (fileName) => {
+        const extension = fileName.split('.').pop().toLowerCase();
+        const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'];
+        const videoExtensions = ['mp4', 'mov', 'avi', 'mkv', 'flv', 'wmv'];
+        const documentExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'];
+
+        if (imageExtensions.includes(extension)) return 'photos';
+        if (videoExtensions.includes(extension)) return 'videos';
+        if (documentExtensions.includes(extension)) return 'documents';
+        return 'other'; // In case you want to handle other types
+    };
+
     r.Contents.map(item => {
-        data.push({
-            title: item.Key.replace(/^assets\/\d+-/, ''),
+        // Split the key into folder parts
+        const pathParts = item.Key.split('/');
+        const fileName = pathParts.pop(); // Extract the file name from the key (last part)
+
+        const fileData = {
+            title: fileName.replace(/^\d+-/, ''),  // Strips the number prefix from file name
             key: item.Key,
-            url:  `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${item.Key.replace(/ /g, "%20")}`
-        })
-    })
-    return res.status(200).json({success: true, data})
+            url: `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${item.Key.replace(/ /g, "%20")}`
+        };
+
+        // Traverse and create nested folder structure
+        let currentFolder = folderData;
+
+        pathParts.forEach((part, index) => {
+            // If we are at the last folder level, categorize the file
+            if (index === pathParts.length - 1) {
+                const category = categorizeFile(fileName);
+
+                if (!currentFolder[part]) {
+                    currentFolder[part] = {
+                        photos: [],
+                        videos: [],
+                        documents: [],
+                        other: [] // For uncategorized or miscellaneous files
+                    };
+                }
+
+                // Push file data into the appropriate category
+                currentFolder[part][category].push(fileData);
+            } else {
+                // If folder doesn't exist, create an empty object to hold files or subfolders
+                if (!currentFolder[part]) {
+                    currentFolder[part] = {};
+                }
+                // Move deeper into the folder structure
+                currentFolder = currentFolder[part];
+            }
+        });
+    });
+
+    return res.status(200).json({ success: true, data: folderData });
 }
