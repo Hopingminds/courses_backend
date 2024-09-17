@@ -570,3 +570,24 @@ export async function createLiveStream(req, res){
 	}
 }
 
+
+/** POST: http://localhost:8080/api/addCourseByInstructor
+* @body : {
+    dummy.json
+}
+*/
+export async function addCourseByInstructor(req, res) {
+	try {
+		let courseData = req.body;
+		courseData.slug = slugify(courseData.title);
+		courseData.display = false; // Adding display field set to false
+		let course = new CoursesModel(courseData);
+		await course.save();
+		res.status(201).json({
+			success: true,
+			msg: 'Course added successfully',
+		});
+	} catch (error) {
+		res.status(500).json({ success: false, message: 'Internal server error' + error.message });
+	}
+}
