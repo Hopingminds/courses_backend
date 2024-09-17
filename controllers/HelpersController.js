@@ -93,13 +93,14 @@ export async function scheduleAddtoCartMail(name, email, totalMinutes, subject, 
     }
 
     // Schedule the task to run after the specified time
-    cron.schedule(cronExpression, async () => {
+    const job = cron.schedule(cronExpression, async () => {
         try {
             // Find the user by their ID
             const user = await UserModel.findById(userID).populate('purchased_courses.course');
 
             if (!user) {
                 console.log('User not found');
+                job.stop();  // Stop the job to ensure it doesn't run again
                 return;
             }
 
@@ -110,7 +111,8 @@ export async function scheduleAddtoCartMail(name, email, totalMinutes, subject, 
 
             if (hasPurchasedCourse) {
                 console.log('User has already purchased the course, not sending mail.');
-                return; // Don't send the email if the user has already purchased the course
+                job.stop();  // Stop the job if the user has already purchased the course
+                return;
             }
 
             await registerMail({
@@ -129,8 +131,12 @@ export async function scheduleAddtoCartMail(name, email, totalMinutes, subject, 
                     }
                 },
             });
+
+            // Stop the job after sending the email
+            job.stop();
         } catch (error) {
             console.error('Error sending mail:', error);
+            job.stop();  // Stop the job in case of an error
         }
     }, {
         scheduled: true,
