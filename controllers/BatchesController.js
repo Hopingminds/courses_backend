@@ -15,7 +15,7 @@ export async function getUpcomingBatchesForCourse(req, res) {
         if (!course) {
             return res.status(404).json({ message: "Course not found" });
         }
-        console.log(course)
+        // console.log(course)
         const today = new Date();
         const batchDays = [1, 7, 16, 28];  // Batch start dates
         let upcomingDates = [];
@@ -55,45 +55,40 @@ export async function getUpcomingBatchesForCourse(req, res) {
         let createdBatches = [];
 
         for (let date of upcomingDates) {
-            // Step 1: Check if a batch already exists for this course on this date
-            const existingBatch = await BatchModel.findOne({
-                course: courseId,
-                startDate: {
-                    $gte: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0),
-                    $lt: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59),
-                }
-            });
+            const batchId = `${course.slug}-${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 
-            if (existingBatch) {
-                let batchData = existingBatch.toObject();
+            try {
+                const existingBatch = await BatchModel.findOne({ batchId });
+
+                if (existingBatch) {
+                    console.log(`Batch already exists for ${date}`);
+                    createdBatches.push(existingBatch.toObject());
+                    continue;
+                }
+
+                const newBatch = new BatchModel({
+                    batchId,
+                    course: courseId,
+                    batchName: `Batch for ${course.title} starting on ${date.toISOString().split('T')[0]}`,
+                    startDate: date,
+                    endDate: new Date(date.getTime() + 30 * 24 * 60 * 60 * 1000),
+                    batchlimit: 50,
+                    users: [],
+                    curriculum: course.curriculum
+                });
+
+                const savedBatch = await newBatch.save();
+                let batchData = savedBatch.toObject();
                 delete batchData.users;
                 delete batchData.curriculum;
-
                 createdBatches.push(batchData);
-                console.log(`Batch already exists for ${date}`);
-                continue;  // Skip creating a new batch if one exists for the same date
+            } catch (error) {
+                if (error.code === 11000 && error.keyPattern && error.keyPattern.batchId) {
+                    console.log(`Skipping duplicate batchId: ${batchId}`);
+                    continue;
+                }
+                console.error(`Error creating batch for ${date}:`, error);
             }
-
-            // Step 2: If no existing batch, create a new one
-            const newBatch = new BatchModel({
-                batchId: `${course.slug}-${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,  // Unique batchId based on courseId and date
-                course: courseId,  // Reference the course
-                batchName: `Batch for ${course.title} starting on ${date.toISOString().split('T')[0]}`,  // Batch name based on course and date
-                startDate: date,
-                endDate: new Date(date.getTime() + 30 * 24 * 60 * 60 * 1000),  // Assuming the batch lasts 30 days
-                batchlimit: 50,  // Example batch limit, you can modify this
-                users: [],  // Initialize with an empty users array
-                curriculum: course.curriculum  // Initialize with an empty curriculum, to be filled later
-            });
-
-            const savedBatch = await newBatch.save();
-
-            // Remove empty users and curriculum from the saved batch
-            let batchData = savedBatch.toObject();
-            delete batchData.users;
-            delete batchData.curriculum;
-
-            createdBatches.push(batchData);  // Store each created batch
         }
 
         // Return the created batches in response
