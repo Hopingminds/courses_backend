@@ -249,11 +249,28 @@ export const uploadCoursemedia = multer({
     }
 **/
 export async function uploadCourseMediatoAws(req, res) {
-    return res.status(200).json({ 
-        success: true, 
-        message: 'Successfully Uploaded', 
-        url: req.file.location 
-    });
+    try {
+        // Check if the file was uploaded
+        if (!req.file) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'No file uploaded' 
+            });
+        }
+
+        return res.status(200).json({ 
+            success: true, 
+            message: 'Successfully Uploaded', 
+            url: req.file.location 
+        });
+    } catch (error) {
+        console.error('Upload error:', error);
+        return res.status(500).json({ 
+            success: false, 
+            message: 'Error uploading file', 
+            error: error.message || 'Unknown error' 
+        });
+    }
 }
 
 /** GET: http://localhost:8080/api/getcoursemedia/:slug */
