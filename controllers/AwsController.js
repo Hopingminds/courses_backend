@@ -295,6 +295,30 @@ export async function getCourseFilesFromAws(req, res) {
     }
 }
 
+// Custom sorting function to handle numeric prefixes in titles
+const customSort = (a, b) => {
+    const getNumberPrefix = (title) => {
+        const match = title.match(/^(\d+(\.\d+)?)/); // Match numbers like 22.3 or 3.2
+        return match ? parseFloat(match[0]) : null;
+    };
+
+    const numA = getNumberPrefix(a.title);
+    const numB = getNumberPrefix(b.title);
+
+    // If both have number prefixes, compare them numerically
+    if (numA !== null && numB !== null) {
+        return numA - numB;
+    }
+
+    // If only one has a number prefix, it comes first
+    if (numA !== null) return -1;
+    if (numB !== null) return 1;
+
+    // Otherwise, compare alphabetically
+    return a.title.localeCompare(b.title);
+};
+
+
 /** GET: http://localhost:8080/api/getAllfilesfromAws */
 export async function getAllfilesfromAws(req, res) {
     let r = await s3.listObjectsV2({ Bucket: BUCKET }).promise();
@@ -313,7 +337,7 @@ export async function getAllfilesfromAws(req, res) {
         return 'other'; // In case you want to handle other types
     };
 
-    r.Contents.map(item => {
+    r.Contents.forEach(item => {
         // Split the key into folder parts
         const pathParts = item.Key.split('/');
         const fileName = pathParts.pop(); // Extract the file name from the key (last part)
@@ -321,7 +345,7 @@ export async function getAllfilesfromAws(req, res) {
         const fileData = {
             title: fileName.replace(/^\d+-/, ''),  // Strips the number prefix from file name
             key: item.Key,
-            url: `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${item.Key.replace(/ /g, "%20")}`
+            url: `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${encodeURIComponent(item.Key)}`
         };
 
         // Traverse and create nested folder structure
@@ -343,6 +367,10 @@ export async function getAllfilesfromAws(req, res) {
 
                 // Push file data into the appropriate category
                 currentFolder[part][category].push(fileData);
+
+                // Sort files within each category by title
+                currentFolder[part][category].sort(customSort);
+
             } else {
                 // If folder doesn't exist, create an empty object to hold files or subfolders
                 if (!currentFolder[part]) {
