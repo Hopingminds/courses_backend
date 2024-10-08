@@ -42,6 +42,7 @@ router.route('/getAllEnquiry').get(AdminAuth, helperController.getAllEnquiry)
 
 // PUT ROUTES
 router.route('/get-bot-response').post(getBotResponse)
+router.route('/renameFileFromAws').put(AdminAuth, awsController.renameFileInAws)
 
 // DELETE ROUTES 
 router.route('/deletefilefromaws').delete(awsController.deleteFileFromAWS)

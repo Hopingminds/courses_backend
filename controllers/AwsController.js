@@ -384,3 +384,39 @@ export async function getAllfilesfromAws(req, res) {
 
     return res.status(200).json({ success: true, data: folderData });
 }
+
+/** PUT: http://localhost:8080/api/renameFileInAws 
+body: {
+    "oldKey": "course/React-Js/1728366839358-desktoppc21.jpg",
+    "newKey": "course/React-Js/1728366839358-desktoppc214.jpg"
+}
+*/
+export async function renameFileInAws(req, res) {
+    try {
+        const { oldKey, newKey } = req.body; // Expecting old and new file keys (file names) in the request body
+
+        if (!oldKey || !newKey) {
+            return res.status(400).json({ success: false, message: 'Both oldKey and newKey are required' });
+        }
+
+        // Step 1: Copy the object to the new key
+        await s3.copyObject({
+            Bucket: BUCKET,
+            CopySource: `${BUCKET}/${oldKey}`, // Source: bucket/oldKey
+            Key: newKey,  // Destination: newKey
+            ACL: "public-read",
+        }).promise();
+
+        // Step 2: Delete the old object
+        await s3.deleteObject({
+            Bucket: BUCKET,
+            Key: oldKey,  // Old key (file name) to delete
+        }).promise();
+
+        const newFileUrl = `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${newKey.replace(/ /g, "%20")}`;
+
+        return res.status(200).json({ success: true, message: 'File renamed successfully', newFileUrl });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Error renaming file', error: error.message });
+    }
+}
