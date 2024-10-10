@@ -565,9 +565,9 @@ export async function addToCart(req, res) {
 		await cart.save()
 
 		const user = await UserModel.findById(userID)
-		let subject = "Congratulations! You're One Step Closer to Assured Placement with Hoping Minds";
-		let text = "Your course is waiting"
-		scheduleAddtoCartMail( user.name, user.email, 20, subject, text, userID, courseid);
+		let subject = `Don’t Miss Out! Your Course, ${course.title}, is Waiting in Your Cart!`;
+		let text = `<a href='https://hopingminds.com/cart'><img src='https://hoping-minds-courses.s3.ap-south-1.amazonaws.com/assets/1728557884982-course_cart.jpg'/></a>`
+		scheduleAddtoCartMail( user.name, user.email, 2, subject, text, userID, courseid);
 
 		res.status(201).json({
 			success: true,

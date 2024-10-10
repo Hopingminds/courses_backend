@@ -21,6 +21,8 @@ let MailGenerator = new Mailgen({
     theme: 'default',
     product: {
         name: 'Hoping Minds',
+        logo: 'https://hoping-minds-courses.s3.ap-south-1.amazonaws.com/assets/1728557604986-hmlogo.png',
+        logoHeight: '50px',
         link: 'https://hopingminds.com/',
     },
 });
@@ -39,9 +41,14 @@ export const registerMail = async (req, res) => {
     // body of the email
     var email = {
         body: {
+            signature: false,
+            greeting: false,
             name: username,
             intro: text || "Welcome. We're very excited to have you on board.",
-            outro: "Need help, or have questions? Just reply to this email, we'd love to help.",
+            outro: ` <p style="font-family: 'Google Sans', Roboto, RobotoDraft, Helvetica, Arial, sans-serif; text-align: center; font-size: 14px; color: #000">
+                    Need help, or have questions?</br>
+                    Just reply to <a href="mailto:support@hopingminds.com">support@hopingminds.com</a> , we'd love to help.
+                </p>`,
         },
     };
 
