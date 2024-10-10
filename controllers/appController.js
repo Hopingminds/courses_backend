@@ -67,13 +67,8 @@ export async function register(req, res) {
             body: {
                 username: name,
                 userEmail: email,
-                subject: `Congratulations! You're One Step Closer to Assured Placement with Hoping Minds`,
-                text: `Dear ${name},</br></br>
-					You are Registered with Hoping Minds
-					Best regards,</br></br>
-					Hoping Minds</br>
-					support@hopingminds.com</br>
-					9193700050, 9193100050`,
+                subject: `Success! You’re Registered with Hoping Minds – Here’s What Comes Next`,
+                text: `<a href='https://hopingminds.com'><img src='https://hoping-minds-courses.s3.ap-south-1.amazonaws.com/assets/1728557884988-visit_website.jpg'/></a>`,
             },
 			}, {
 				status(status) {
