@@ -16,7 +16,7 @@ export async function createFreelancerOpening(req, res) {
         return res.status(201).json({ success: true, message: "Freelance opening created successfully", freelanceOpening });
     } catch (error) {
         console.error(error); // Log the error
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
     }
 }
 
@@ -40,8 +40,7 @@ export async function updateFreelancerOpening(req, res) {
         return res.status(200).json({ success: true, message: 'Freelance opening updated successfully', updatedFreelanceOpening });
 
     } catch (error) {
-        console.error(error); // Log the error
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
     }
 }
 
@@ -52,8 +51,7 @@ export async function getAllFreelanceOpenings(req, res) {
 
         return res.status(200).json({ success: true, freelanceOpenings });
     } catch (error) {
-        console.error(error); // Log the error
-        return res.status(500).json({ success: false, message: "Internal server error" });
+        return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
     }
 }
 
@@ -69,8 +67,7 @@ export async function getFreelanceOpening(req, res) {
 
         return res.status(200).json({ success: true, freelanceOpening });
     } catch (error) {
-        console.error(error); // Log the error
-        return res.status(500).json({ success: false, message: "Internal server error" });
+        return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
     }
 }
 
@@ -91,7 +88,6 @@ export async function changeFreelanceOpeningStatus(req, res) {
 
         return res.status(200).json({ success: true, message: 'Job opening publish status updated', updatedJobOpening });
     } catch (error) {
-        console.error(error); // Log the error
-        return res.status(500).json({ success: false, message: "Internal server error" });
+        return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
     }
 }
