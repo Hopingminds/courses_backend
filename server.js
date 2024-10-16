@@ -19,6 +19,7 @@ import jobopeningsRoute from './router/jobopeningsRoute.js'
 import collegeUserRoute from './router/collegeuserRoute.js'
 import assessmentRoutes from './router/assessmentRoutes.js'
 import batchRoutes from './router/batchRoutes.js'
+import chatBotRoutes from './router/chatBotRoutes.js'
 import freelanceRoutes from './router/freelanceRoutes.js'
 import * as ServerStatus from './middleware/helper.js'
 const app = express()
@@ -91,6 +92,7 @@ app.use('/api', jobopeningsRoute)
 app.use('/api', assessmentRoutes)
 app.use('/api', batchRoutes)
 app.use('/api', freelanceRoutes)
+app.use('/api', chatBotRoutes)
 app.use('/auth', authRouter)
 
 // Error handling middleware

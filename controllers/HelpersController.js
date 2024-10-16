@@ -157,10 +157,16 @@ export async function sendEnquiry(req, res) {
         const { name, email, number, message } = req.body;
 
         const enquiry = await EnquiryModel.findOne({ email });
-        if(enquiry){
-            res.status(201).json({ success: false, message: 'Enquiry already exists' });
+        
+        if (enquiry) {
+            enquiry.name = name;
+            enquiry.number = number;
+            enquiry.message = message;
+            await enquiry.save();
+            return res.status(200).json({ success: true, message: 'Enquiry sent successfully' });
         }
 
+        // If no enquiry exists, create a new one
         const newEnquiry = new EnquiryModel({
             name: name,
             email: email,
@@ -168,7 +174,7 @@ export async function sendEnquiry(req, res) {
             message: message
         });
 
-        newEnquiry.save();
+        await newEnquiry.save();
         res.status(201).json({ success: true, message: 'Enquiry sent successfully' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message || 'Internal server error' });
