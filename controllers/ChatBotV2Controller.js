@@ -1,5 +1,10 @@
 import ChatBotModel from "../model/ChatBot.model.js";
 
+/** POST: http://localhost:8080/api/createChatQuestion 
+* @body : {
+    "chatData"
+}
+*/
 export async function createChatQuestion(req, res) {
     try {
         const chatData = req.body;
@@ -13,6 +18,11 @@ export async function createChatQuestion(req, res) {
     }
 }
 
+/** PUT: http://localhost:8080/api/updateaccess?chatId=670e46a245b4616f734534cf9e
+body: { 
+    "updatedChatData"
+}
+*/
 export async function editChatQuestion(req, res) {
     try {
         const { chatId } = req.query; // Get chat question ID from URL params
@@ -35,13 +45,25 @@ export async function editChatQuestion(req, res) {
     }
 }
 
+/** GET: http://localhost:8080/api/getChatBotResponse
+@query {
+    dropOffQuestion = "Greeting"
+}
+ */
 export async function getChatBotResponse(req, res) {
     try {
         const { dropOffQuestion } = req.query;
         if(!dropOffQuestion){
             return res.status(400).json({ success: false, message: "dropOffQuestion is required" });
         }
-        const chatBotResponse = await ChatBotModel.findOne({ question: dropOffQuestion });
+        let chatBotResponse;
+
+        // Check if dropOffQuestion is "Greeting"
+        if (dropOffQuestion === "Greeting") {
+            chatBotResponse = await ChatBotModel.findOne({ dropByQuestion: dropOffQuestion });
+        } else {
+            chatBotResponse = await ChatBotModel.findOne({ question: dropOffQuestion });
+        }
 
         if(!chatBotResponse){
             return res.status(404).json({ success: false, message: "ChatBot response not found" });
