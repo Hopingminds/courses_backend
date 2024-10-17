@@ -65,7 +65,6 @@ export async function getChatBotResponse(req, res) {
             const selectedOptionObj = chatBotcurrentQuestion.options.find(
                 option => option.optTitle === selectedOption
             );
-            console.log(selectedOptionObj)
 
             if (selectedOptionObj) {
                 // Get the optTitle from the selected option
@@ -77,7 +76,7 @@ export async function getChatBotResponse(req, res) {
         }
 
         if(!chatBotResponse){
-            return res.status(404).json({ success: false, message: "ChatBot response not found" });
+            chatBotResponse = await ChatBotModel.findOne({ dropByQuestion: 'Error' });
         }
         
         return res.status(200).json({ success: true, chatBotResponse });
