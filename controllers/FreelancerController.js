@@ -20,7 +20,7 @@ export async function createFreelancerOpening(req, res) {
     }
 }
 
-/** PUT: http://localhost:8080/api/updateaccess 
+/** PUT: http://localhost:8080/api/updateFreelancerOpening 
 body: { 
     "freelanceOpeningData"
 }

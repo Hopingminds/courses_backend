@@ -52,17 +52,28 @@ export async function editChatQuestion(req, res) {
  */
 export async function getChatBotResponse(req, res) {
     try {
-        const { dropOffQuestion } = req.query;
-        if(!dropOffQuestion){
-            return res.status(400).json({ success: false, message: "dropOffQuestion is required" });
-        }
+        const { quesionId, selectedOption } = req.query;
+
         let chatBotResponse;
 
         // Check if dropOffQuestion is "Greeting"
-        if (dropOffQuestion === "Greeting") {
-            chatBotResponse = await ChatBotModel.findOne({ dropByQuestion: dropOffQuestion });
-        } else {
-            chatBotResponse = await ChatBotModel.findOne({ question: dropOffQuestion });
+        if (selectedOption === "Greeting" && !quesionId) {
+            chatBotResponse = await ChatBotModel.findOne({ dropByQuestion: selectedOption });
+        } 
+        else if( quesionId && selectedOption) {
+            const chatBotcurrentQuestion = await ChatBotModel.findById(quesionId);
+            const selectedOptionObj = chatBotcurrentQuestion.options.find(
+                option => option.optTitle === selectedOption
+            );
+            console.log(selectedOptionObj)
+
+            if (selectedOptionObj) {
+                // Get the optTitle from the selected option
+                chatBotResponse = await ChatBotModel.findOne({ question: selectedOptionObj.dropOffQuestion });
+            }
+        }
+        else if(!quesionId || !selectedOption) {
+            return res.status(400).json({ success: false, message: "quesionId and selectedOption are required for chat, except for Greeting" });
         }
 
         if(!chatBotResponse){
