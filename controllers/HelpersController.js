@@ -1,3 +1,4 @@
+import axios from 'axios';
 import CollegesModel from '../model/CollegesData.model.js'
 import EnquiryModel from '../model/Enquiry.model.js';
 import GroupsModel from '../model/Groups.model.js';
@@ -191,5 +192,86 @@ export async function getAllEnquiry(req, res) {
         res.status(200).json( { success: true, enquiries });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message || 'Internal server error' });
+    }
+}
+
+function convertToWebVTT(transcriptionData) {
+    const lines = ['WEBVTT\n']; // WebVTT header
+    let currentSecond = null;
+    let subtitleText = '';
+
+    transcriptionData.words.forEach((word) => {
+        // Convert the word's start time to seconds
+        const wordStartSecond = Math.floor(word.start / 1000); // Convert ms to seconds
+        const wordEndSecond = Math.floor(word.end / 1000);
+
+        // If we're still in the same second, append the word
+        if (wordStartSecond === currentSecond) {
+            subtitleText += ` ${word.text}`;
+        } else {
+            // If the second has changed, write the previous subtitle
+            if (currentSecond !== null && subtitleText.trim() !== '') {
+                const startTime = new Date(currentSecond * 1000).toISOString().slice(11, -1);
+                const endTime = new Date((currentSecond + 1) * 1000).toISOString().slice(11, -1);
+                lines.push(`${startTime} --> ${endTime}`);
+                lines.push(`${subtitleText.trim()}\n`);
+            }
+
+            // Reset for the new second
+            currentSecond = wordStartSecond;
+            subtitleText = word.text;
+        }
+    });
+
+    // Handle the last second's subtitle
+    if (subtitleText.trim() !== '') {
+        const startTime = new Date(currentSecond * 1000).toISOString().slice(11, -1);
+        const endTime = new Date((currentSecond + 1) * 1000).toISOString().slice(11, -1);
+        lines.push(`${startTime} --> ${endTime}`);
+        lines.push(`${subtitleText.trim()}\n`);
+    }
+
+    return lines.join('\n');
+}
+
+
+export async function getVideoSubtitles(req, res) {
+    try {
+        const videoUrl = req.body.videoUrl; // Get video URL from the request body
+
+        if (!videoUrl) {
+            return res.status(400).json({ error: 'Video URL is required' });
+        }
+
+        // Request transcription directly using the provided video URL
+        const transcriptRequest = await axios.post(process.env.ASSEMBLYAI_API, {
+            audio_url: videoUrl,
+        }, {
+            headers: {
+                'authorization': process.env.ASSEMBLYAI_API_KEY,
+            },
+        });
+
+        // Wait for the transcription to complete
+        let transcriptionResponse;
+        do {
+            transcriptionResponse = await axios.get(`${process.env.ASSEMBLYAI_API}/${transcriptRequest.data.id}`, {
+                headers: {
+                    'authorization': process.env.ASSEMBLYAI_API_KEY,
+                },
+            });
+            if (transcriptionResponse.data.status !== 'completed') {
+                await new Promise(resolve => setTimeout(resolve, 2500)); // Wait before checking again
+            }
+        } while (transcriptionResponse.data.status !== 'completed');
+
+        // Convert to WebVTT format
+        const webVttData = convertToWebVTT(transcriptionResponse.data);
+
+        console.log(webVttData)
+        // Send the transcribed text (subtitles) back to the client
+        res.json({ subtitles: webVttData });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message || 'Internal server error' });
     }
 }

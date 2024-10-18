@@ -71,7 +71,7 @@ export async function getFreelanceOpening(req, res) {
     }
 }
 
-/** PUT: http://localhost:8080/api/updateaccess 
+/** PUT: http://localhost:8080/api/changeFreelanceOpeningStatus 
 body: { 
     "_id": "FreelanceId",
     "status": "closed" OR "active"
