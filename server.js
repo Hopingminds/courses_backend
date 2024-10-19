@@ -12,6 +12,7 @@ import adminRouter from './router/adminRoutes.js'
 import cartWishlistRouter from './router/cartWishlistRoutes.js'
 import helpersRouter from './router/helpersRoutes.js'
 import coursesRouter from './router/coursesRoutes.js'
+import internshipRouter from './router/internshipRoutes.js'
 import pagesRouter from './router/pagesRoute.js'
 import authRouter from './router/authRoutes.js'
 import qnaRouter from './router/qnaRoutes.js'
@@ -82,6 +83,7 @@ app.get('/', ServerStatus.getServerLoadInfo , (req, res) => {
 app.use('/api', adminRouter)
 app.use('/api', cartWishlistRouter)
 app.use('/api', coursesRouter)
+app.use('/api', internshipRouter)
 app.use('/api', helpersRouter)
 app.use('/api', insRouter)
 app.use('/api', userRouter)
