@@ -98,7 +98,7 @@ export async function getInternships(req, res) {
     }
 }
 
-/** POST: http://localhost:8080/api/updateInternship
+/** PUT: http://localhost:8080/api/updateInternship
 * @body : {
     dummy.json
 }

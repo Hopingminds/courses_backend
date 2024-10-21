@@ -22,32 +22,37 @@ export const InternshipSchema = new mongoose.Schema({
     display: { type: Boolean, default: true },
     curriculum: [
         {
-            chapter_name: { type: String },
-            lessons: [
+            unitName: { type: String },
+            chapters: [
                 {
-                    lesson_name: { type: String },
-                    duration: { type: String },
-                    video: { type: String },
-                    notes: { type: String },
-                    notesName: { type: String },
-                    assignment: { type: String },
-                    assignmentName: { type: String },
-                    isLiveClass: { type: Boolean, default: false },
-                    liveClass: {
-                        streamKey: { type: String },
-                        isCompleted: { type: Boolean, default: false },
-                        startDate: { type: Date, default: Date.now },
-                        endDate: { type: Date, default: Date.now },
-                    }
-                }
-            ],
-            project: [
-                {
-                    title: { type: String },
-                    startDate: { type: Date },
-                    endDate: { type: Date },
-                    projectInfoPdf: { type: String },
-                    duration: { type: Number }
+                    chapter_name: { type: String },
+                    lessons: [
+                        {
+                            lesson_name: { type: String },
+                            duration: { type: String },
+                            video: { type: String },
+                            notes: { type: String },
+                            notesName: { type: String },
+                            assignment: { type: String },
+                            assignmentName: { type: String },
+                            isLiveClass: { type: Boolean, default: false },
+                            liveClass: {
+                                streamKey: { type: String },
+                                isCompleted: { type: Boolean, default: false },
+                                startDate: { type: Date, default: Date.now },
+                                endDate: { type: Date, default: Date.now },
+                            }
+                        }
+                    ],
+                    project: [
+                        {
+                            title: { type: String },
+                            startDate: { type: Date },
+                            endDate: { type: Date },
+                            projectInfoPdf: { type: String },
+                            duration: { type: Number }
+                        }
+                    ]
                 }
             ]
         }
