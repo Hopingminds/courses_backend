@@ -29,7 +29,7 @@ export const InternshipSchema = new mongoose.Schema({
                     lessons: [
                         {
                             lesson_name: { type: String },
-                            duration: { type: String },
+                            duration: { type: Number },
                             video: { type: String },
                             notes: { type: String },
                             notesName: { type: String },
