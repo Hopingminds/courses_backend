@@ -43,16 +43,16 @@ export const InternshipSchema = new mongoose.Schema({
                                 endDate: { type: Date, default: Date.now },
                             }
                         }
-                    ],
-                    project: [
-                        {
-                            title: { type: String },
-                            startDate: { type: Date },
-                            endDate: { type: Date },
-                            projectInfoPdf: { type: String },
-                            duration: { type: Number }
-                        }
                     ]
+                }
+            ],
+            project: [
+                {
+                    title: { type: String },
+                    startDate: { type: Date },
+                    endDate: { type: Date },
+                    projectInfoPdf: { type: String },
+                    duration: { type: Number }
                 }
             ]
         }
