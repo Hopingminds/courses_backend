@@ -90,7 +90,7 @@ export const InternshipSchema = new mongoose.Schema({
     },
     internshipCategory: {
         type: String,
-        enum: ["internship", "liveInternship"],
+        enum: ["internship", "liveInternship", "hybrid"],
         default: "internship"
     },
     companies_hiring: [

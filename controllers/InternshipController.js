@@ -137,3 +137,20 @@ export async function deleteInternship(req, res) {
         return res.status(500).json({ success: false, message: 'Internal server error' + error.message });
     }
 }
+
+/** GET: http://localhost:8080/api/getInternshipBySlug/:internshipName */
+export async function getInternshipBySlug(req, res){
+    try {
+        const { internshipName } = req.params;
+        const internship = await InternshipModel.findOne({ slug: internshipName })
+
+        if (!internship) {
+			return res.status(404).json({ success: false, message: 'Internship not found' })
+		}
+
+        return res.status(200).json({ success: true, internship });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Internal server error' + error.message });
+    }
+}
+

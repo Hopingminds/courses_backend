@@ -10,6 +10,7 @@ router.route('/addInternship').post(AdminAuth, InternshipController.addInternshi
 // GET ROUTES
 router.route('/getAllInternships').get(AdminAuth, InternshipController.getAllInternships);
 router.route('/getInternships').get(InternshipController.getInternships);
+router.route('/getInternshipBySlug/:internshipName').get(InternshipController.getInternshipBySlug);
 
 // PUT ROUTES
 router.route('/updateInternship').put(InternshipController.updateInternship);
