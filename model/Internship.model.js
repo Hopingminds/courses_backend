@@ -8,6 +8,7 @@ export const InternshipSchema = new mongoose.Schema({
     base_price: { type: Number },
     discount_percentage: { type: Number },
     category: { type: String },
+    subcategory: { type: String },
     duration: { type: Number, default: 0 },
     total_lessons: { type: Number },
     level: { type: String, default: "Beginner" },
