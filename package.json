@@ -5,8 +5,8 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon server.js",
-    "start": "node server.js"
+    "dev": "cross-env TZ=Asia/Kolkata nodemon server.js",
+    "start": "cross-env TZ=Asia/Kolkata node server.js"
   },
   "keywords": [],
   "author": "",
@@ -48,5 +48,8 @@
     "validator": "^13.12.0",
     "winston": "^3.13.1",
     "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
   }
 }
