@@ -12,6 +12,14 @@ export const WishlistSchema = new mongoose.Schema({
                 ref: CoursesModel,
             }
         }
+    ],
+    internships:[
+        {
+            internship:{
+                type: mongoose.Schema.Types.ObjectId,
+                ref:'Internship'
+            }
+        }
     ]
 }, { _id: false });
 

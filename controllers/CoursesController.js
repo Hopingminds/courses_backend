@@ -8,6 +8,7 @@ import { populate } from 'dotenv'
 import mongoose from "mongoose";
 import BatchModel from '../model/Batch.model.js';
 import { scheduleAddtoCartMail } from './HelpersController.js'
+import InternshipModel from '../model/Internship.model.js'
 
 // helper function
 function getRandomSubset(arr, size) {
@@ -518,65 +519,93 @@ export async function blockCourses(req, res) {
 body: {
     "email": "example@gmail.com",
     "courseid": "65c4ba60866d0d5a6fc4a82b",
-    "quantity":1,
+    "internshipid": "65c4ba60866d0d5a6fc4a82b"
 }
 */
 export async function addToCart(req, res) {
 	let userID = req.userID
 	try {
-		const { courseid } = req.body
-
-		const course = await CoursesModel.findById(courseid)
-		if (!course) {
-			return res
-				.status(404)
-				.json({ success: false, message: 'course not found' })
+		const { courseid, internshipid } = req.body
+		let course;
+		let internship;
+		if (courseid) {
+			course = await CoursesModel.findById(courseid)
+			if (!course) {
+				return res
+					.status(404)
+					.json({ success: false, message: 'course not found' })
+			}
+		}
+		else if (internshipid) {
+			internship = await InternshipModel.findById(internshipid)
+			if (!internship) {
+				return res.status(404).json({ success: false, message: 'internship not found' })
+			}
 		}
 		// Find the cart for the user
-		let cart = await cartModel
-			.findOne({ _id: userID })
-			.populate('courses.course')
+		let cart = await cartModel.findOne({ _id: userID })
 
 		// If the user has no cart, create a new one
 		if (!cart) {
-			cart = new cartModel({ _id: userID, courses: [] })
+			cart = new cartModel({ _id: userID, courses: [], internships: [] })
 		}
 		else {
-			// Filter out any invalid or missing courses (null courses)
-			const validCourses = cart.courses.filter((item) => item.course !== null);
-			if (validCourses.length !== cart.courses.length) {
-				cart.courses = validCourses;
-				await cart.save();  // Save the cleaned cart to the database
+			if (course) {
+				// Filter out any invalid or missing courses (null courses)
+				const validCourses = cart.courses.filter((item) => item.course !== null);
+				if (validCourses.length !== cart.courses.length) {
+					cart.courses = validCourses;
+					await cart.save();  // Save the cleaned cart to the database
+				}
+			}
+			else if (internship) {
+				// Filter out any invalid or missing courses (null courses)
+				const validInternships = cart.internships.filter((item) => item.internship !== null);
+				if (validInternships.length !== cart.internships.length) {
+					cart.internships = validInternships;
+					await cart.save();  // Save the cleaned cart to the database
+				}
 			}
 		}
 
-		const existingCartIndex = cart.courses.findIndex((p) =>
-			p.course.equals(course._id)
-		)
-		if (existingCartIndex !== -1) {
-			return res.status(400).json({
-				success: false,
-				msg: 'Course already exists in cart',
-			});
+		if (course) {
+			const existingCartIndex = cart.courses.findIndex((p) =>
+				p.course.equals(course._id)
+			)
+			if (existingCartIndex !== -1) {
+				return res.status(400).json({
+					success: false,
+					msg: 'Course already exists in cart',
+				});
+			}
+			cart.courses.push({ course: courseid });
+
+			await cart.save()
+
+			const user = await UserModel.findById(userID)
+			let subject = `Don’t Miss Out! Your Course, ${course.title}, is Waiting in Your Cart!`;
+			let text = `<a href='https://hopingminds.com/cart'><img src='https://hoping-minds-courses.s3.ap-south-1.amazonaws.com/assets/1728557884982-course_cart.jpg'/></a>`
+			scheduleAddtoCartMail(user.name, user.email, 20, subject, text, userID, courseid);
+		}
+		else if (internship) {
+			const existingCartIndex = cart.internships.findIndex((p) =>
+				p.internship.equals(internship._id)
+			)
+			if (existingCartIndex !== -1) {
+				return res.status(400).json({
+					success: false,
+					msg: 'Internship already exists in cart',
+				});
+			}
+			cart.internships.push({ internship: internshipid });
+
+			await cart.save()
 		}
 
-		cart.courses.push({ course: courseid });
-
-		await cart.save()
-
-		const user = await UserModel.findById(userID)
-		let subject = `Don’t Miss Out! Your Course, ${course.title}, is Waiting in Your Cart!`;
-		let text = `<a href='https://hopingminds.com/cart'><img src='https://hoping-minds-courses.s3.ap-south-1.amazonaws.com/assets/1728557884982-course_cart.jpg'/></a>`
-		scheduleAddtoCartMail( user.name, user.email, 20, subject, text, userID, courseid);
-
-		res.status(201).json({
-			success: true,
-			msg: 'Course added to cart successfully',
-			data: cart.courses,
-		})
+		return res.status(201).json({ success: true, msg: 'Course added to cart successfully', data: cart })
 	} catch (error) {
 		console.error(error)
-		res.status(500).json({ success: false, msg: 'Internal server error' })
+		return res.status(500).json({ success: false, msg: 'Internal server error' + error.message })
 	}
 }
 
@@ -584,64 +613,71 @@ export async function addToCart(req, res) {
 body: {
     "email": "example@gmail.com",
     "courseid": "65c4ba60866d0d5a6fc4a82b",
+    "internshipid": "65c4ba60866d0d5a6fc4a82b",
 }
 */
 export async function removeFromCart(req, res) {
 	let userID = req.userID
 	try {
-		const { courseid } = req.body
-
-		const course = await CoursesModel.findById(courseid)
-		if (!course) {
-			return res
-				.status(404)
-				.json({ success: false, message: 'course not found' })
+		const { courseid, internshipid } = req.body
+		let course;
+		let internship;
+		if (courseid) {
+			course = await CoursesModel.findById(courseid)
+			if (!course) {
+				return res.status(404).json({ success: false, message: 'course not found' })
+			}
+		}
+		else if (internshipid) {
+			internship = await InternshipModel.findById(internshipid)
+			if (!internship) {
+				return res.status(404).json({ success: false, message: 'internship not found' })
+			}
 		}
 
 		// Find the cart for the user
-		let cart = await cartModel
-			.findOne({ _id: userID })
-			.populate('courses.course')
+		let cart = await cartModel.findOne({ _id: userID }).populate('courses.course').populate('internships.internship')
 
 		// If the user has no cart, return with a message
 		if (!cart) {
-			return res
-				.status(404)
-				.json({
-					success: false,
-					message: 'Cart not found for the user',
-				})
+			return res.status(404).json({ success: false, message: 'Cart not found for the user' })
 		}
 
-		const existingCartIndex = cart.courses.findIndex((p) =>
-			p.course.equals(courseid)
-		)
+		if(course){
+			const existingCartIndex = cart.courses.findIndex((p) =>
+				p.course.equals(courseid)
+			)
+	
+			// If the course is not found in the cart, return with a message
+			if (existingCartIndex === -1) {
+				return res.status(404).json({ success: false, message: 'course not found in the cart' });
+			}
+	
+			cart.courses.splice(existingCartIndex, 1)
+	
+			await cart.save()
 
-		// If the course is not found in the cart, return with a message
-		if (existingCartIndex === -1) {
-			return res
-				.status(404)
-				.json({
-					success: false,
-					message: 'course not found in the cart',
-				})
+			res.status(200).json({ success: true, message: 'Course removed from the cart' })
 		}
+		else if(internship){
+			const existingCartIndex = cart.internships.findIndex((p) =>
+				p.internship.equals(internshipid)
+			)
+	
+			// If the course is not found in the cart, return with a message
+			if (existingCartIndex === -1) {
+				return res.status(404).json({ success: false, message: 'Internship not found in the cart' })
+			}
+	
+			cart.internships.splice(existingCartIndex, 1)
+	
+			await cart.save()
 
-		cart.courses.splice(existingCartIndex, 1)
-
-		await cart.save()
-
-		res.status(200).json({
-			success: true,
-			message: 'Course removed from cart successfully',
-			data: cart.courses,
-		})
+			res.status(200).json({ success: true, message: 'Internship removed from the cart' })
+		}
 	} catch (error) {
 		console.error(error)
-		res.status(500).json({
-			success: false,
-			message: 'Internal server error',
-		})
+		return res.status(500).json({ success: false, message: 'Internal server error' + error.message })
 	}
 }
 
@@ -662,13 +698,14 @@ export async function deleteCart(req, res) {
 
         // Empty the cart by setting the courses array to an empty array
         cart.courses = [];
+        cart.internshipid = [];
 
         await cart.save();
 
         res.status(200).json({
             success: true,
             message: 'Cart emptied successfully',
-            data: cart.courses,
+            data: cart,
         });
     } catch (error) {
         console.error(error);
@@ -691,6 +728,7 @@ export async function getcart(req, res) {
 		const cart = await cartModel
 			.findOne({ _id: userID })
 			.populate('courses.course')
+			.populate('internships.internship')
 
 		if (!cart) {
 			return res
@@ -698,7 +736,7 @@ export async function getcart(req, res) {
 				.json({ success: false, message: 'Cart not found' })
 		}
 
-		res.status(200).json({ success: true, cart: cart.courses })
+		res.status(200).json({ success: true, cart: cart })
 	} catch (error) {
 		console.error(error)
 		res.status(500).json({
@@ -717,14 +755,22 @@ body: {
 export async function addtowishlist(req, res) {
 	let userID = req.userID
 	try {
-		const { courseid } = req.body
-
-		// Fetch the course data
-		const course = await CoursesModel.findById(courseid)
-		if (!course) {
-			return res
-				.status(404)
-				.json({ success: false, message: 'course not found' })
+		const { courseid, internshipid } = req.body
+		let course;
+		let internship;
+		if (courseid) {
+			course = await CoursesModel.findById(courseid)
+			if (!course) {
+				return res
+					.status(404)
+					.json({ success: false, message: 'course not found' })
+			}
+		}
+		else if (internshipid) {
+			internship = await InternshipModel.findById(internshipid)
+			if (!internship) {
+				return res.status(404).json({ success: false, message: 'internship not found' })
+			}
 		}
 
 		// Find the wishlist for the user
@@ -734,6 +780,24 @@ export async function addtowishlist(req, res) {
 		if (!wishlist) {
 			wishlist = new wishlistModel({ _id: userID, courses: [] })
 		}
+		else {
+			if (course) {
+				// Filter out any invalid or missing courses (null courses)
+				const validCourses = wishlist.courses.filter((item) => item.course !== null);
+				if (validCourses.length !== wishlist.courses.length) {
+					wishlist.courses = validCourses;
+					await wishlist.save();  // Save the cleaned wishlist to the database
+				}
+			}
+			else if (internship) {
+				// Filter out any invalid or missing courses (null courses)
+				const validInternships = wishlist.internships.filter((item) => item.internship !== null);
+				if (validInternships.length !== wishlist.internships.length) {
+					wishlist.internships = validInternships;
+					await wishlist.save();  // Save the cleaned wishlist to the database
+				}
+			}
+		}
 
 		const existingCartIndex = wishlist.courses.findIndex((p) =>
 			p.course.equals(course._id)
@@ -741,6 +805,32 @@ export async function addtowishlist(req, res) {
 
 		if (existingCartIndex == -1) {
 			wishlist.courses.push({ course: course._id })
+		}
+
+		if (course) {
+			const existingCartIndex = wishlist.courses.findIndex((p) =>
+				p.course.equals(course._id)
+			)
+			if (existingCartIndex !== -1) {
+				return res.status(400).json({ success: false, msg: 'Course already exists in wishlist' });
+			}
+			wishlist.courses.push({ course: courseid });
+
+			await wishlist.save()
+		}
+		else if (internship) {
+			const existingCartIndex = wishlist.internships.findIndex((p) =>
+				p.internship.equals(internship._id)
+			)
+			if (existingCartIndex !== -1) {
+				return res.status(400).json({
+					success: false,
+					msg: 'Internship already exists in wishlist',
+				});
+			}
+			wishlist.internships.push({ internship: internshipid });
+
+			await wishlist.save()
 		}
 
 		await wishlist.save()
@@ -763,21 +853,28 @@ body: {
 export async function removeFromWishlist(req, res) {
 	let userID = req.userID
 	try {
-		const { courseid } = req.body
+		const { courseid, internshipid } = req.body
+		let course;
+		let internship;
+		if (courseid) {
+			course = await CoursesModel.findById(courseid)
+			if (!course) {
+				return res.status(404).json({ success: false, message: 'course not found' })
+			}
+		}
+		else if (internshipid) {
+			internship = await InternshipModel.findById(internshipid)
+			if (!internship) {
+				return res.status(404).json({ success: false, message: 'internship not found' })
+			}
+		}
 
 		// Find the wishlist for the user
-		let wishlist = await wishlistModel
-			.findOne({ _id: userID })
-			.populate('courses.course')
+		let wishlist = await wishlistModel.findOne({ _id: userID }).populate('courses.course').populate('internships.internship')
 
 		// If the user has no wishlist, return with a message
 		if (!wishlist) {
-			return res
-				.status(404)
-				.json({
-					success: false,
-					message: 'Wishlist not found for the user',
-				})
+			return res.status(404).json({ success: false, message: 'Wishlist not found for the user' })
 		}
 
 		const existingCartIndex = wishlist.courses.findIndex((p) =>
@@ -803,6 +900,45 @@ export async function removeFromWishlist(req, res) {
 			message: 'course removed from wishlist successfully',
 			data: wishlist.courses,
 		})
+
+		if(course){
+			const existingCartIndex = wishlist.courses.findIndex((p) =>
+				p.course.equals(courseid)
+			)
+	
+			// If the course is not found in the wishlist, return with a message
+			if (existingCartIndex === -1) {
+				return res
+					.status(404)
+					.json({
+						success: false,
+						message: 'course not found in the wishlist',
+					})
+			}
+	
+			// Remove the course from the wishlist
+			wishlist.courses.splice(existingCartIndex, 1)
+	
+			await wishlist.save()
+
+			res.status(200).json({ success: true, message: 'Course removed from the wishlist' })
+		}
+		else if(internship){
+			const existingCartIndex = wishlist.internships.findIndex((p) =>
+				p.internship.equals(internshipid)
+			)
+	
+			// If the course is not found in the cart, return with a message
+			if (existingCartIndex === -1) {
+				return res.status(404).json({ success: false, message: 'Internship not found in the cart' })
+			}
+	
+			wishlist.internships.splice(existingCartIndex, 1)
+	
+			await wishlist.save()
+
+			res.status(200).json({ success: true, message: 'Internship removed from the cart' })
+		}
 	} catch (error) {
 		console.error(error)
 		res.status(500).json({
@@ -829,6 +965,7 @@ export async function getwishlist(req, res) {
 					path: 'instructor'
 				}
 			})
+			.populate('internships.internship')
 
 		if (!wishlist) {
 			return res
@@ -836,7 +973,7 @@ export async function getwishlist(req, res) {
 				.json({ success: false, message: 'wishlist not found' })
 		}
 
-		res.status(200).json({ success: true, wishlist: wishlist.courses })
+		res.status(200).json({ success: true, wishlist })
 	} catch (error) {
 		console.error(error)
 		res.status(500).json({

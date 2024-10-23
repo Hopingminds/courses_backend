@@ -30,6 +30,9 @@ export const ChatBotSchema = new mongoose.Schema({
             type:Boolean,
             default: false
         },
+        OptionUrl: {
+            type: String
+        },
         openInNewWindow:{
             type: Boolean,
             default: false
