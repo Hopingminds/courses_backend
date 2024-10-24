@@ -1,6 +1,36 @@
 import BatchModel from "../model/Batch.model.js";
+import BatchInternshipModel from "../model/BatchInternship.model.js";
 import CoursesModel from '../model/Courses.model.js'
+import InternshipModel from "../model/Internship.model.js";
 import UserModel from '../model/User.model.js'
+
+function getNextBatchDates(startingDate) {
+    let nextDates = [];
+    let currentMonth = startingDate.getMonth();
+    let currentYear = startingDate.getFullYear();
+    let batchDays = [1, 7, 16, 28]; 
+    // Loop to get next three upcoming batch dates
+    while (nextDates.length < 3) {
+        for (let day of batchDays) {
+            let potentialDate = new Date(currentYear, currentMonth, day);
+
+            // Only push future dates
+            if (potentialDate > startingDate) {
+                nextDates.push(potentialDate);
+                if (nextDates.length === 3) break;
+            }
+        }
+
+        // Move to the next month if not enough dates found
+        currentMonth++;
+        if (currentMonth > 11) {
+            currentMonth = 0;
+            currentYear++;
+        }
+    }
+
+    return nextDates;
+}
 
 /** GET: http://localhost:8080/api/getUpcomingBatchesForCourse/:courseId */
 export async function getUpcomingBatchesForCourse(req, res) {
@@ -17,36 +47,7 @@ export async function getUpcomingBatchesForCourse(req, res) {
         }
         // console.log(course)
         const today = new Date();
-        const batchDays = [1, 7, 16, 28];  // Batch start dates
         let upcomingDates = [];
-
-        function getNextBatchDates(startingDate) {
-            let nextDates = [];
-            let currentMonth = startingDate.getMonth();
-            let currentYear = startingDate.getFullYear();
-
-            // Loop to get next three upcoming batch dates
-            while (nextDates.length < 3) {
-                for (let day of batchDays) {
-                    let potentialDate = new Date(currentYear, currentMonth, day);
-
-                    // Only push future dates
-                    if (potentialDate > startingDate) {
-                        nextDates.push(potentialDate);
-                        if (nextDates.length === 3) break;
-                    }
-                }
-
-                // Move to the next month if not enough dates found
-                currentMonth++;
-                if (currentMonth > 11) {
-                    currentMonth = 0;
-                    currentYear++;
-                }
-            }
-
-            return nextDates;
-        }
 
         // Get the next 3 available batch dates
         upcomingDates = getNextBatchDates(today);
@@ -61,8 +62,10 @@ export async function getUpcomingBatchesForCourse(req, res) {
                 const existingBatch = await BatchModel.findOne({ batchId });
 
                 if (existingBatch) {
-                    console.log(`Batch already exists for ${date}`);
-                    createdBatches.push(existingBatch.toObject());
+                    let existingBatchData = existingBatch.toObject();
+                    delete existingBatchData.users;
+                    delete existingBatchData.curriculum;
+                    createdBatches.push(existingBatchData);
                     continue;
                 }
 
@@ -439,4 +442,133 @@ export async function getAllCourseUsers(req, res) {
 	} catch (error) {
 		res.status(500).json({ success: false, message: 'Internal server error' + error.message });
 	}
+}
+
+
+/************************************************************ INTERNSHIP ****************************************************/
+
+/** GET: http://localhost:8080/api/getUpcomingBatchesForInternship/:internshipId */
+export async function getUpcomingBatchesForInternship(req, res) {
+    try {
+        const { internshipId } = req.params;
+
+        if(!internshipId){
+            return res.status(400).json({message: "Internship ID is required"})
+        }
+
+        const internship = await InternshipModel.findById(internshipId);
+        if (!internship) {
+            return res.status(404).json({ message: "Internship not found" });
+        }
+
+        const today = new Date();
+        let upcomingDates = [];
+
+        // Get the next 3 available batch dates
+        upcomingDates = getNextBatchDates(today);
+
+        // Create and save batches for each of the dates
+        let createdBatches = [];
+
+        for (let date of upcomingDates) {
+            const batchId = `${internship.slug}-${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+
+            try {
+                const existingBatch = await BatchInternshipModel.findOne({ batchId });
+
+                if (existingBatch) {
+                    let existingBatchData = existingBatch.toObject();
+                    delete existingBatchData.users;
+                    delete existingBatchData.curriculum;
+                    createdBatches.push(existingBatchData);
+                    continue;
+                }
+
+                const newBatch = new BatchInternshipModel({
+                    batchId,
+                    internship: internshipId,
+                    batchName: `Batch for ${internship.title} starting on ${date.toISOString().split('T')[0]}`,
+                    startDate: date,
+                    endDate: new Date(date.getTime() + 30 * 24 * 60 * 60 * 1000),
+                    batchlimit: 50,
+                    users: [],
+                    curriculum: internship.curriculum
+                });
+
+                const savedBatch = await newBatch.save();
+                let batchData = savedBatch.toObject();
+                console.log(batchData)
+                delete batchData.users;
+                delete batchData.curriculum;
+                createdBatches.push(batchData);
+            } catch (error) {
+                if (error.code === 11000 && error.keyPattern && error.keyPattern.batchId) {
+                    console.log(`Skipping duplicate batchId: ${batchId}`);
+                    continue;
+                }
+                console.error(`Error creating batch for ${date}:`, error);
+            }
+        }
+
+        // Return the created batches in response
+        return res.status(201).json({
+            success: true,
+            message: "Batches created successfully",
+            batches: createdBatches
+        });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Internal server error' + error.message });
+    }
+}
+
+/** POST: http://localhost:8080/api/setBatchForStudent
+body: {
+    "internshipId":"668d2683f21c44d7e409bb97",
+    "batchId":"66de9706d98ce77a98b08f7d"
+}
+*/
+export async function setInternshipBatchForStudent(req, res) {
+    try {
+        const { userID } = req.user;
+        const { batchId, internshipId } = req.body;
+
+        const student = await UserModel.findById(userID);
+        if (!student) {
+            return res.status(404).send({ success: false, message: 'User not found' });
+        }
+
+        // Step 2: Find the batch by the provided batchId
+        const batch = await BatchInternshipModel.findById(batchId);
+        if (!batch) {
+            return res.status(404).send({ success: false, message: 'Batch not found' });
+        }
+
+        // Step 3: Check if the student has the course in their purchased_courses
+        let internshipIndex = student.purchased_internships.findIndex(pi => pi.internship.toString() === internshipId);
+
+        if (internshipIndex !== -1) {
+            // Step 4: Check if the BatchId is already added for this course
+            if (!student.purchased_internships[internshipIndex].BatchId) {
+                // Add the BatchId and courseStartDate to the purchased course entry
+                student.purchased_internships[internshipIndex].BatchId = batchId;
+                student.purchased_internships[internshipIndex].internshipStartDate = batch.startDate;
+
+                await student.save();
+            } else {
+                return res.status(400).send({ success: false, message: 'Student is already enrolled in this batch for the course' });
+            }
+        } else {
+            return res.status(400).send({ success: false, message: 'Student has not purchased this course' });
+        }
+
+        // Step 5: Add the student to the batch's users array (if not already added)
+        if (!batch.users.includes(userID)) {
+            batch.users.push(userID);
+            await batch.save();
+        }
+
+        return res.status(200).send({ success: true, message: 'Student successfully enrolled in the batch' });
+    } catch (error) {
+        return res.status(500).send({ success: false, message: 'Internal server error' + error.message });
+    }
 }

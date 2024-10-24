@@ -42,6 +42,23 @@ export const UserSchema = new mongoose.Schema({
             completed_assignments: [{type: mongoose.Schema.Types.ObjectId, default: null}]
         }
     ],
+    purchased_internships:[
+        {
+            internship: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Internship'
+            },
+            BatchId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'BatchInternship',
+                default: null
+            },
+            internshipStartDate: { type: Date },
+            allotedByCollege: {type: Boolean, default: false},
+            completed_lessons: [{type: mongoose.Schema.Types.ObjectId, default: null}],
+            completed_assignments: [{type: mongoose.Schema.Types.ObjectId, default: null}]
+        }
+    ],
     blocked_courses:[
         {
             type: mongoose.Schema.Types.ObjectId,
