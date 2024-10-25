@@ -154,3 +154,50 @@ export async function getInternshipBySlug(req, res){
     }
 }
 
+/** GET: http://localhost:8080/api/iscourseincart/:courseId */
+export async function isInternshipInCart(req, res) {
+	try {
+		const { internshipId } = req.params;
+		const { userID } = req.user;
+
+		const cart = await cartModel.findOne({ _id: userID }).populate('courses.course').populate('internships.internship'); 
+		
+		if (!cart) {
+			return res.json({ success: false });
+		}
+
+		const internshipExists = cart.internships.some(item => item.internship._id.toString() === internshipId);
+
+		if (internshipExists) {
+			return res.json({ success: true, message: 'Internship exists in the cart' });
+		} else {
+			return res.json({ success: false, message: 'Internship does not exist in the cart' });
+		}
+	} catch (error) {
+		res.status(500).json({ success: false, message: 'Internal server error' + error.message });
+	}
+}
+
+/** GET: http://localhost:8080/api/iscourseinwishlist/:courseId */
+export async function isCourseInWishlist(req, res) {
+	try {
+		const { internshipId } = req.params;
+		const { userID } = req.user;
+
+		const wishlist = await wishlistModel.findOne({ _id: userID }).populate('courses.course'); 
+		
+		if (!wishlist) {
+			return res.json({ success: false });
+		}
+
+		const internshipExists = wishlist.internships.some(item => item.internships._id.toString() === internshipId);
+
+		if (internshipExists) {
+			return res.json({ success: true, message: 'Internship exists in the wishlist' });
+		} else {
+			return res.json({ success: false, message: 'Internship does not exist in the wishlist' });
+		}
+	} catch (error) {
+		res.status(500).json({ success: false, message: 'Internal server error' + error.message });
+	}
+}

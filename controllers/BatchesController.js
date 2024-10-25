@@ -521,7 +521,7 @@ export async function getUpcomingBatchesForInternship(req, res) {
     }
 }
 
-/** POST: http://localhost:8080/api/setBatchForStudent
+/** POST: http://localhost:8080/api/setInternshipBatchForStudent
 body: {
     "internshipId":"668d2683f21c44d7e409bb97",
     "batchId":"66de9706d98ce77a98b08f7d"
@@ -568,6 +568,72 @@ export async function setInternshipBatchForStudent(req, res) {
         }
 
         return res.status(200).send({ success: true, message: 'Student successfully enrolled in the batch' });
+    } catch (error) {
+        return res.status(500).send({ success: false, message: 'Internal server error' + error.message });
+    }
+}
+
+/** GET: http://localhost:8080/api/getAllBatchesForInternship/:internshipId */
+export async function getAllBatchesForInternship(req, res) {
+    try {
+        const { internshipId } = req.params;
+        const batch = await BatchInternshipModel.find({ internship: internshipId }).populate('users');
+        if(!batch){
+            return res.status(404).send({ success: false, message: 'No Batch exist for this course'})
+        }
+        return res.status(200).send(batch);
+    } catch (error) {
+        return res.status(500).send({ success: false, message: 'Internal server error' + error.message });
+    }
+}
+
+/** PUT: http://localhost:8080/api/editBatchDetails
+body: {
+    "BatchId": "66def60d79ba5258ad065c90",
+    "batchName": "668d2683f21c44d7e409bb97",
+    "startDate": "date",
+    "endDate": "date",
+    "batchlimit": "23",
+}
+*/
+export async function editBatchInternshipDetails(req, res) {
+    try {
+        const { batchId, batchName, startDate, endDate, batchlimit } = req.body; // Get new details from request body
+
+        // Check if batchId is provided
+        if (!batchId) {
+            return res.status(400).send({ success: false, message: 'Batch ID is required' });
+        }
+
+        // Find the batch by batchId
+        const batch = await BatchInternshipModel.findById(batchId);
+        if (!batch) {
+            return res.status(404).send({ success: false, message: 'Batch not found' });
+        }
+
+        // Update the batch details if provided
+        if (batchName) {
+            batch.batchName = batchName;
+        }
+
+        if (startDate) {
+            batch.startDate = new Date(startDate);
+        }
+
+        if (endDate) {
+            if (new Date(endDate) <= batch.startDate) {
+                return res.status(400).send({ success: false, message: 'End date must be after start date' });
+            }
+            batch.endDate = new Date(endDate);
+        }
+
+        if (batchlimit) {
+            batch.batchlimit = batchlimit;
+        }
+
+        await batch.save();
+
+        return res.status(200).send({ success: true, message: 'Batch details updated successfully', batch });
     } catch (error) {
         return res.status(500).send({ success: false, message: 'Internal server error' + error.message });
     }
