@@ -182,7 +182,7 @@ export async function getUser(req, res) {
         const user = await UserModel.findOne({ email }).populate({
             path: 'purchased_courses.course',
             populate: { path: 'instructor', select: '-token -password' }
-        }).exec();
+        }).populate({ path: 'purchased_internships.internship' }).exec();
 
         if (!user) {
             return res.status(404).send({ error: "Couldn't Find the User" });
