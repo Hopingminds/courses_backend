@@ -2,6 +2,8 @@ import slugify from "slugify";
 import cartModel from '../model/Cart.model.js'
 import WishlistModel from "../model/Wishlist.model.js";
 import InternshipModel from "../model/Internship.model.js"
+import BatchInternshipModel from "../model/BatchInternship.model.js";
+import UserModel from "../model/User.model.js";
 
 /** POST: http://localhost:8080/api/addInternship
 * @body : {
@@ -202,4 +204,64 @@ export async function isInternshipInWishlist(req, res) {
 	} catch (error) {
 		res.status(500).json({ success: false, message: 'Internal server error' + error.message });
 	}
+}
+
+/** GET: http://localhost:8080/api/getUserInternshipBySlug/:internshipName */
+export async function getUserInternshipBySlug(req, res) {
+    try {
+        function getInternshipDataBySlug(data, slug) {
+            for (let internship of data.purchased_internships) {
+                if (internship && internship.internship && internship.internship.slug) {
+                    if (internship.internship.slug === slug) {
+                        return {
+                            internship: internship.internship,
+                            completed_lessons: internship.completed_lessons,
+                            completed_assignments: internship.completed_assignments,
+                            batchId: internship.BatchId  // Add BatchId for batch retrieval
+                        };
+                    }
+                }
+            }
+            return null;
+        }
+        const { userID } = req.user;
+        const { internshipName } = req.params;
+
+        const user = await UserModel.findById(userID).populate({ path: 'purchased_internships.internship' });
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        const internshipData = getInternshipDataBySlug(user, internshipName);
+
+        if (!internshipData) {
+            return res.status(404).json({ success: false, message: 'internship not found' });
+        }
+
+        // Fetch the batch based on the BatchId from the purchased internship
+        const batch = await BatchInternshipModel.findById(internshipData.batchId).populate('curriculum');
+
+        if (!batch) {
+            return res.status(404).json({ success: false, message: 'Batch not found' });
+        }
+
+        // Replace the course curriculum with the batch curriculum
+        internshipData.internship.curriculum = batch.curriculum;
+
+        // Calculate total lessons based on the batch curriculum
+        const totalLessons = batch.curriculum.reduce((total, unit) => {
+            return total + unit.chapters.reduce((chapterTotal, chapter) => {
+                return chapterTotal + chapter.lessons.length;
+            }, 0);
+        }, 0);        
+
+        res.status(200).json({ success: true, data: internshipData, totalLessons });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+        });
+    }
 }

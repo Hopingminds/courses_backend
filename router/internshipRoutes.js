@@ -14,6 +14,7 @@ router.route('/getInternships').get(InternshipController.getInternships);
 router.route('/getInternshipBySlug/:internshipName').get(InternshipController.getInternshipBySlug);
 router.route('/isInternshipInCart/:internshipId').get(Auth, InternshipController.isInternshipInCart);
 router.route('/isInternshipInWishlist/:internshipId').get(Auth, InternshipController.isInternshipInWishlist);
+router.route('/getUserInternshipBySlug/:internshipName').get(Auth, InternshipController.getUserInternshipBySlug);
 
 // PUT ROUTES
 router.route('/updateInternship').put(InternshipController.updateInternship);
