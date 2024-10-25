@@ -3,6 +3,7 @@ const router = Router()
 
 import * as InternshipController from '../controllers/InternshipController.js'
 import AdminAuth from '../middleware/adminauth.js'
+import Auth from '../middleware/auth.js';
 
 // POST ROUTES
 router.route('/addInternship').post(AdminAuth, InternshipController.addInternship);
@@ -11,6 +12,8 @@ router.route('/addInternship').post(AdminAuth, InternshipController.addInternshi
 router.route('/getAllInternships').get(AdminAuth, InternshipController.getAllInternships);
 router.route('/getInternships').get(InternshipController.getInternships);
 router.route('/getInternshipBySlug/:internshipName').get(InternshipController.getInternshipBySlug);
+router.route('/isInternshipInCart/:internshipId').get(Auth, InternshipController.isInternshipInCart);
+router.route('/isInternshipInWishlist/:internshipId').get(Auth, InternshipController.isInternshipInWishlist);
 
 // PUT ROUTES
 router.route('/updateInternship').put(InternshipController.updateInternship);

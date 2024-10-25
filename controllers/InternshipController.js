@@ -1,4 +1,6 @@
 import slugify from "slugify";
+import cartModel from '../model/Cart.model.js'
+import WishlistModel from "../model/Wishlist.model.js";
 import InternshipModel from "../model/Internship.model.js"
 
 /** POST: http://localhost:8080/api/addInternship
@@ -154,7 +156,7 @@ export async function getInternshipBySlug(req, res){
     }
 }
 
-/** GET: http://localhost:8080/api/iscourseincart/:courseId */
+/** GET: http://localhost:8080/api/isInternshipInCart/:internshipId */
 export async function isInternshipInCart(req, res) {
 	try {
 		const { internshipId } = req.params;
@@ -178,13 +180,13 @@ export async function isInternshipInCart(req, res) {
 	}
 }
 
-/** GET: http://localhost:8080/api/iscourseinwishlist/:courseId */
-export async function isCourseInWishlist(req, res) {
+/** GET: http://localhost:8080/api/isInternshipInWishlist/:internshipId */
+export async function isInternshipInWishlist(req, res) {
 	try {
 		const { internshipId } = req.params;
 		const { userID } = req.user;
 
-		const wishlist = await wishlistModel.findOne({ _id: userID }).populate('courses.course'); 
+		const wishlist = await WishlistModel.findOne({ _id: userID }).populate('courses.course'); 
 		
 		if (!wishlist) {
 			return res.json({ success: false });
