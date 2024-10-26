@@ -19,6 +19,7 @@ router.route("/loginwithotp").post(OtpController.loginWithOtp)
 router.route('/validatevalues').post(controller.validateFields)
 router.route('/registeruserform').post(localVariables, RegisterUserController.registerUserforHm)
 router.route('/createcoursesbycategorie').post(AdminAuth, RegisterUserController.createCoursesByCategorie)
+router.route('/cancelAccountDeletion').post(Auth, controller.cancelAccountDeletion)
 
 // GET ROUTES
 router.route('/user/:email').get(controller.getUser)
@@ -39,5 +40,6 @@ router.route('/assignmentcompleted').put( Auth,CoursesController.assignmentCompl
 router.route('/editcoursecategory').put(AdminAuth, RegisterUserController.editCoursesByCategorie)
 
 // DELETE ROUTES
+router.route('/deleteAccount').delete(Auth, controller.deleteAccount)
 
 export default router

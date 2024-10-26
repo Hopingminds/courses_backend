@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken'
 import 'dotenv/config'
 import otpGenerator from 'otp-generator'
 import { registerMail } from './mailer.js'
+import AccDeleteReqModel from '../model/AccDeleteReq.model.js'
 
 // middleware for verify user
 export async function verifyUser(req, res, next) {
@@ -491,5 +492,93 @@ export async function verifyEmailOTP(req, res) {
             success: false,
             message: error.message || 'Internal server error',
         });
+	}
+}
+
+/** DELETE: http://localhost:8080/api/deleteAccount */
+export async function deleteAccount(req, res) {
+	try {
+		const { userID } = req.user;
+
+		// Create or find a deletion request
+		let usertodelete = await AccDeleteReqModel.findOne({ user: userID });
+
+		if (!usertodelete) {
+			usertodelete = new AccDeleteReqModel({ user: userID, requestCancelled: false });
+			await usertodelete.save();
+		}
+
+		// If the request is already canceled, return a response
+		if (usertodelete.requestCancelled) {
+			return res.status(400).json({ success: false, message: 'Request has already been canceled' });
+		}
+
+		// Fetch the user data before deletion
+		const user = await UserModel.findOne({ _id: userID });
+
+		if (!user) {
+			return res.status(404).json({ success: false, message: 'User not found' });
+		}
+
+
+		// Schedule the account deletion for 24 hours later
+		setTimeout(async () => {
+			try {
+				// Check if the deletion request was canceled before proceeding
+				const currentRequest = await AccDeleteReqModel.findOne({ user: userID });
+
+				if (currentRequest && currentRequest.requestCancelled) {
+					console.log('Request canceled before deletion');
+					
+					// Delete the cancellation request from the database
+					await AccDeleteReqModel.deleteOne({ user: userID });
+					return;
+				}
+
+				// Delete the user account
+				const result = await UserModel.deleteOne({ _id: userID });
+				if (result.deletedCount === 0) {
+					console.log('User not found');
+					return;
+				}
+
+				console.log(`Account for user ${user.name} deleted successfully.`);
+			} catch (error) {
+				console.error('Error deleting account:', error);
+			}
+		}, 24 * 60 * 60 * 1000); // 24 * 60 * 60 * 1000 hours in milliseconds
+
+		return res.status(200).json({ success: true, message: 'Account will be deleted in 24 hours' });
+	} catch (error) {
+		return res.status(500).json({ success: false, message: 'Internal server error' + error.message });
+	}
+}
+
+/** POST: http://localhost:8080/api/cancelAccountDeletion */
+export async function cancelAccountDeletion(req, res) {
+	try {
+		const { userID } = req.user;
+
+		// Find the account deletion request for the user
+		const deletionRequest = await AccDeleteReqModel.findOne({ user: userID });
+
+		// If no deletion request exists, respond with an error
+		if (!deletionRequest) {
+			return res.status(404).json({ success: false, message: 'No account deletion request found' });
+		}
+
+		// If the request was already canceled, respond accordingly
+		if (deletionRequest.requestCancelled) {
+			return res.status(400).json({ success: false, message: 'Deletion request has already been canceled' });
+		}
+
+		// Mark the deletion request as canceled
+		deletionRequest.requestCancelled = true;
+		await deletionRequest.save();
+
+		// Respond with success
+		return res.status(200).json({ success: true, message: 'Account deletion request successfully canceled' });
+	} catch (error) {
+		return res.status(500).json({ success: false, message: 'Internal server error' + error.message });
 	}
 }
