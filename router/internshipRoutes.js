@@ -7,7 +7,6 @@ import Auth from '../middleware/auth.js';
 
 // POST ROUTES
 router.route('/addInternship').post(AdminAuth, InternshipController.addInternship);
-router.route('/internshipLessonCompleted').post(Auth, InternshipController.internshipLessonCompleted);
 
 // GET ROUTES
 router.route('/getAllInternships').get(AdminAuth, InternshipController.getAllInternships);
@@ -19,6 +18,7 @@ router.route('/getUserInternshipBySlug/:internshipName').get(Auth, InternshipCon
 
 // PUT ROUTES
 router.route('/updateInternship').put(InternshipController.updateInternship);
+router.route('/internshipLessonCompleted').put(Auth, InternshipController.internshipLessonCompleted);
 
 // DELETE ROUTES
 router.route('/deleteInternship').delete(AdminAuth, InternshipController.deleteInternship);
