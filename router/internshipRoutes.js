@@ -7,6 +7,7 @@ import Auth from '../middleware/auth.js';
 
 // POST ROUTES
 router.route('/addInternship').post(AdminAuth, InternshipController.addInternship);
+router.route('/internshipLessonCompleted').post(Auth, InternshipController.internshipLessonCompleted);
 
 // GET ROUTES
 router.route('/getAllInternships').get(AdminAuth, InternshipController.getAllInternships);

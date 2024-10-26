@@ -265,3 +265,77 @@ export async function getUserInternshipBySlug(req, res) {
         });
     }
 }
+
+/** PUT: http://localhost:8080/api/internshipLessonCompleted 
+ * @param: {
+    "header" : "Bearer <token>"
+}
+@body: {
+    "lessonId": "65eee9fa38d32c2479937d44"
+    "internshipId": "65eee9fa38d32c2479937d44"
+}
+*/
+export async function internshipLessonCompleted(req, res) {
+    try {
+        function getInternshipDataBySlug(data, internshipId) {
+            // Loop through the purchased_internships array
+            for (let internship of data.purchased_internships) {
+                // Check if the internship ID matches the one we're looking for
+                if (internship.internship._id.toString() === internshipId) {
+                    // Return the matching internship data
+                    return {
+                        internship: internship.internship,
+                        completed_lessons: internship.completed_lessons,
+                    };
+                }
+            }
+            // If no internship matches, return null or an appropriate message
+            return null;
+        }
+        
+        const { userID } = req.user;
+        const { lessonId, internshipId } = req.body;
+
+        if (!userID || !lessonId || !internshipId) {
+            return res.status(400).json({
+                message: 'User ID, lesson ID, and internship ID are required',
+            });
+        }
+
+        const user = await UserModel.findById(userID).populate('purchased_internships.internship');
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        let data = getInternshipDataBySlug(user, internshipId);
+        if (!data) {
+            return res.status(404).json({ message: 'Internship not found for the user' });
+        }
+
+        let completed = false;
+        for (const internship of user.purchased_internships) {
+            if (internship.internship._id.toString() === internshipId && internship.completed_lessons.includes(lessonId)) {
+                completed = true;
+                break;
+            }
+        }
+
+        if (completed) {
+            return res.status(400).json({ message: 'Lesson already completed for this internship', data });
+        }
+
+        for (const internship of user.purchased_internships) {
+            if (internship.internship._id.toString() === internshipId && !internship.completed_lessons.includes(lessonId)) {
+                internship.completed_lessons.push(lessonId);
+                break;
+            }
+        }
+
+        await user.save();
+        return res.status(200).json({ message: 'Lesson completed successfully for the specified internship', data });
+	} catch (error) {
+		console.error(error)
+		res.status(500).json({ success: false, message: 'Internal server error: ' + error.message });
+	}
+}
