@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import BatchModel from "../model/Batch.model.js";
 import BatchInternshipModel from "../model/BatchInternship.model.js";
 import CoursesModel from '../model/Courses.model.js'
