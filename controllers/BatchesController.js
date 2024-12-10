@@ -247,54 +247,44 @@ export async function editBatchCurriculum(req, res) {
             return res.status(404).send({ success: false, message: 'Batch not found' });
         }
 
-        // Object to store update operations
-        let updateOps = {};
+        // Update the curriculum
+        const updatedCurriculum = curriculum.map((chapter) => {
+            const updatedChapter = { ...chapter };
 
-        // Loop through curriculum and update lessons, projects, and liveClasses with unique _id if missing
-        curriculum.forEach((chapter, chapterIndex) => {
-            for (const [key, value] of Object.entries(chapter)) {
-                if (key === 'lessons' && Array.isArray(value)) {
-                    value.forEach((lesson, lessonIndex) => {
-                        // Ensure each lesson has a unique _id
-                        if (!lesson._id) lesson._id = new mongoose.Types.ObjectId();
-                        // Add each lesson key and value to updateOps
-                        for (const [lessonKey, lessonValue] of Object.entries(lesson)) {
-                            updateOps[`curriculum.${chapterIndex}.lessons.${lessonIndex}.${lessonKey}`] = lessonValue;
-                        }
-                    });
-                } else if (key === 'project' && Array.isArray(value)) {
-                    value.forEach((project, projectIndex) => {
-                        // Ensure each project has a unique _id
-                        if (!project._id) project._id = new mongoose.Types.ObjectId();
-                        // Add each project key and value to updateOps
-                        for (const [projectKey, projectValue] of Object.entries(project)) {
-                            updateOps[`curriculum.${chapterIndex}.project.${projectIndex}.${projectKey}`] = projectValue;
-                        }
-                    });
-                } else if (key === 'liveClasses' && Array.isArray(value)) {
-                    value.forEach((liveClass, liveClassIndex) => {
-                        // Ensure each live class has a unique _id
-                        if (!liveClass._id) liveClass._id = new mongoose.Types.ObjectId();
-                        // Add each live class key and value to updateOps
-                        for (const [liveClassKey, liveClassValue] of Object.entries(liveClass)) {
-                            updateOps[`curriculum.${chapterIndex}.liveClasses.${liveClassIndex}.${liveClassKey}`] = liveClassValue;
-                        }
-                    });
-                } else {
-                    // For other chapter fields (e.g., chapter_name)
-                    updateOps[`curriculum.${chapterIndex}.${key}`] = value;
-                }
+            // Ensure lessons, project, and liveClasses have unique IDs
+            if (Array.isArray(chapter.lessons)) {
+                updatedChapter.lessons = chapter.lessons.map((lesson) => ({
+                    ...lesson,
+                    _id: lesson._id || new mongoose.Types.ObjectId(),
+                }));
             }
+
+            if (Array.isArray(chapter.project)) {
+                updatedChapter.project = chapter.project.map((project) => ({
+                    ...project,
+                    _id: project._id || new mongoose.Types.ObjectId(),
+                }));
+            }
+
+            if (Array.isArray(chapter.liveClasses)) {
+                updatedChapter.liveClasses = chapter.liveClasses.map((liveClass) => ({
+                    ...liveClass,
+                    _id: liveClass._id || new mongoose.Types.ObjectId(),
+                }));
+            }
+
+            return updatedChapter;
         });
 
-        // Update the curriculum in the batch using the updateOps
-        await BatchModel.updateOne({ _id: batchId }, { $set: updateOps });
+        // Update the batch document
+        await BatchModel.updateOne({ _id: batchId }, { $set: { curriculum: updatedCurriculum } }).exec();
 
         return res.status(200).send({ success: true, message: 'Curriculum updated successfully' });
     } catch (error) {
         return res.status(500).send({ success: false, message: 'Internal server error: ' + error.message });
     }
 }
+
 
 /** POST: http://localhost:8080/api/addUserToBatch
 body: {
