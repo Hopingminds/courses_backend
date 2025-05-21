@@ -19,7 +19,7 @@ export const RegisterUserSchema = new mongoose.Schema({
     },
 
 
-    // sawayam fields
+    // sawayam  all fields
   
     gender: { type: String },                // Swayam
     age_group: { type: String },             // Swayam
