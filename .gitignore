@@ -1,0 +1,5 @@
+node_modules
+dummy.json
+.env
+.github
+logs
