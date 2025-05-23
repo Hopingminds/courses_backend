@@ -1,0 +1,24 @@
+name: Main CI/CD
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: |
+          touch .env
+          echo "${{ secrets.PROD_ENV_FILE }}" > .env
+      - run: npm run build
+      - run: pm2 restart courses-backend
