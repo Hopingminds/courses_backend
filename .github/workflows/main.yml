@@ -9,11 +9,6 @@ on:
 jobs:
   build:
     runs-on: self-hosted
-
-    strategy:
-      matrix:
-        node-version: [18.x]
-
     steps:
       - uses: actions/checkout@v4
       - run: npm ci
