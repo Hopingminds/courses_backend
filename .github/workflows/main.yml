@@ -15,5 +15,4 @@ jobs:
       - run: |
           touch .env
           echo "${{ secrets.PROD_ENV_FILE }}" > .env
-      - run: npm run build
       - run: pm2 restart courses-backend
