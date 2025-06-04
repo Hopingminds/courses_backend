@@ -16,6 +16,7 @@ const CorsConfig = [
     'https://hm-ignite-frontend-git-main-tahopings-projects.vercel.app',
     'https://hm-ignite-frontend-git-main-tahopings-projects.vercel.app',
     'https://college-student-panel.vercel.app',
+    'https://college-student-panel.vercel.app',
 ]
 
 export default CorsConfig
