@@ -33,6 +33,7 @@ export const CoursesSchema = new mongoose.Schema({
                     video: {type: String},
                     notes: {type:  String},
                     notesName: {type:  String},
+                    transcript: {type:  String},
                     assignment: {type:  String},
                     assignmentName: {type:  String},
                     isLiveClass: {type:Boolean, default:false},
