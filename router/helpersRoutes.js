@@ -18,13 +18,7 @@ router.route('/registerMail').post(registerMail)
 
 router.route('/uploadfiletoaws').post(AdminAuth, upload.array('file',10), awsController.uploadFile)
 router.route('/uploadCompanyLogo').post(RecAuth, uploadCompanyLogo.single('file'), awsController.uploadCompanyLogoFun)
-router.route('/uploaduserprofiletoaws').post(Auth,(req, res, next) => {
-  uploadUserProfile.single('file')(req, res, (err) => {
-    if (err) {
-      console.error('Multer Error:', err); // 🔍 This will show the real error
-      return res.status(400).json({ error: err.message || 'Upload failed' });
-    }
-    res.send('File uploaded!'), awsController.uploaduserprofiletoaws)
+router.route('/uploaduserprofiletoaws').post(Auth,uploadUserProfile.single('file'), awsController.uploaduserprofiletoaws)
 router.route('/uploadinsprofiletoaws').post(AdminAuth,uploadInstructorProfile.single('file'), awsController.uploadinsprofiletoaws)
 router.route('/uploadassignmenttoaws/:assignmentID').post(Auth, uploadassignment.single('file'), awsController.uploadassignmenttoaws)
 router.route('/uploadcoursefiletoaws/:slug').post(AdminAuth, awsController.uploadCoursemedia.single('file'), awsController.uploadCourseMediatoAws)
