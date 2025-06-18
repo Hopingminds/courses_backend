@@ -15,6 +15,8 @@ aws.config.update({
 const BUCKET = process.env.AWS_BUCKET
 const s3 = new aws.S3();
 
+console.log( process.env.AWS_ACCESS_SECRET, process.env.AWS_ACCESS_KEY, process.env.AWS_REGION,process.env.AWS_BUCKET)
+
 // middleware
 export const upload = multer({
     storage: multerS3({
