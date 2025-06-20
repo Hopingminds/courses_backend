@@ -4,14 +4,10 @@ import 'dotenv/config';
 
 // Configuration for G Suite Gmail
 let nodeConfig = {
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
+    service: "gmail",
     auth: {
-        type: 'OAuth2',
         user: process.env.EMAIL_USERNAME,
-        serviceClient: process.env.OAUTH_CLIENTID,
-        privateKey: process.env.OAUTH_PRIVATE_KEY.replace(/\\n/g, '\n'),
+        pass: process.env.OAUTH_CLIENTID,
     },
 };
 
