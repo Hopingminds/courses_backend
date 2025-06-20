@@ -64,7 +64,7 @@ export async function register(req, res) {
 
 		// Send registration email
 		let mailSent = false;
-		await registerMail({
+		registerMail({
             body: {
                 username: name,
                 userEmail: email,
