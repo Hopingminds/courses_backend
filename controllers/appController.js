@@ -753,7 +753,14 @@ export async function cancelAccountDeletion(req, res) {
 
 export async function addCourse(req, res) {
   try {
-    const { email, courseId } = req.body;
+    const { email, courseId, auth } = req.body;
+
+    if (!auth || auth !== "aGFpIHRoaXMgaXMgZm9yIHN3YXlhbQ==") {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized access",
+      });
+    }
 
     if (!email) {
       return res
