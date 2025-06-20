@@ -768,8 +768,8 @@ export async function addCourse(req, res) {
     }
 
     // check for existing email
-    const existingUser = await UserModel.findOne({ email });
-    if (!existingUser) {
+    const user = await UserModel.findOne({ email });
+    if (!user) {
       return res
         .status(400)
         .json({ success: false, message: "User with email dones't exsist" });
