@@ -110,7 +110,7 @@ export async function registerUserforHm(req, res){
 
         let mailSent = false;
         // Assuming registerMail function sends the email asynchronously
-        registerMail({
+        await registerMail({
             body: {
                 username: name,
                 userEmail: email,
