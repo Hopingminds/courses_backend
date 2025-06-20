@@ -791,6 +791,8 @@ export async function addCourse(req, res) {
       user.purchased_courses.push({ course: courseId });
     }
 
+    await user.save();
+
     // Send email
     let mailSent = false;
     await registerMail(
