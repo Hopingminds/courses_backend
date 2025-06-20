@@ -789,14 +789,6 @@ export async function addCourse(req, res) {
       )
     ) {
       user.purchased_courses.push({ course: courseId });
-
-      // Track the instructors to update
-      const course = await CoursesModel.findById(courseId).populate(
-        "instructor"
-      );
-      if (course && course.instructor) {
-        instructorsToUpdate.add(course.instructor._id);
-      }
     }
 
     // Send email
